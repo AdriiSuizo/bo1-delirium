@@ -140,8 +140,7 @@ impl Motions {
         // source idle as reference; applying the bind-to-idle bend twice folded
         // the spine and knees even at the end of a successful muscle recovery.
         let mut c = Cursor::new(
-            std::fs::read(path.with_file_name("original-locomotion.motion"))
-                .map_err(|e| e.to_string())?,
+            std::fs::read(path.with_file_name("locomotion.motion")).map_err(|e| e.to_string())?,
         );
         let mut header = [0; 352];
         c.read_exact(&mut header).map_err(|e| e.to_string())?;

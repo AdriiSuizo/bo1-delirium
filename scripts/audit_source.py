@@ -4,7 +4,7 @@ import re, subprocess, sys
 root=Path(__file__).resolve().parent.parent
 files=subprocess.check_output(['git','diff','--cached','--name-only','-z'],cwd=root).decode().split('\0')
 allowed_roots={'host','worker','tests','scripts','overlay'}
-allowed_top={'.gitignore','Cargo.toml','Cargo.lock','README.md','LICENSE','NOTICE'}
+allowed_top={'.gitignore','Cargo.toml','Cargo.lock','README.md','LICENSE','NOTICE','Play-SinglePlayer.cmd'}
 extensions={'.h','.hpp','.cpp','.rs','.toml','.ps1','.psm1','.py','.cmake'}
 for name in filter(None,files):
  p=Path(name)

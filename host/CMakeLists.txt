@@ -15,3 +15,8 @@ target_compile_features(protocol_tests PRIVATE cxx_std_17)
 target_compile_definitions(protocol_tests PRIVATE _CRT_SECURE_NO_WARNINGS NOMINMAX)
 target_compile_options(protocol_tests PRIVATE /UNDEBUG)
 add_test(NAME host_protocol COMMAND protocol_tests)
+
+add_executable(crowd_sdk ../tests/crowd_sdk.cpp)
+target_compile_features(crowd_sdk PRIVATE cxx_std_17)
+target_compile_definitions(crowd_sdk PRIVATE _CRT_SECURE_NO_WARNINGS NOMINMAX)
+target_compile_options(crowd_sdk PRIVATE /O2)

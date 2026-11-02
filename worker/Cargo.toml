@@ -8,6 +8,11 @@ publish = false
 name = "delirium_worker"
 path = "src/main.rs"
 [dependencies]
+rayon = "=1.11.0"
 delirium-sdk = { git = "https://github.com/PVCPC/delirium-physics", rev = "b0138418f2b51d38038ff7c773df10f252b599d2" }
 delirium = { git = "https://github.com/PVCPC/delirium-physics", rev = "b0138418f2b51d38038ff7c773df10f252b599d2" }
 delirium-data = { git = "https://github.com/PVCPC/delirium-physics", rev = "b0138418f2b51d38038ff7c773df10f252b599d2" }
+
+[[bin]]
+name = "sdk_import360"
+path = "src/sdk_import360.rs"

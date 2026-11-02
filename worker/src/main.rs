@@ -29,6 +29,12 @@ fn run() -> Result<(), String> {
     if args.get(1).map(String::as_str) == Some("--verify") {
         return runtime::verify();
     }
+    if args.get(1).map(String::as_str) == Some("--recover") {
+        return runtime::recover_verify();
+    }
+    if args.get(1).map(String::as_str) == Some("--lifecycle") {
+        return runtime::lifecycle_verify();
+    }
     let name = args.get(1).ok_or("missing IPC name")?;
     let cname = CString::new(name.as_str()).map_err(|e| e.to_string())?;
     unsafe {

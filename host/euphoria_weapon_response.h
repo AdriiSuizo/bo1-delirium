@@ -9,12 +9,14 @@
 namespace euphoria {
 enum WeaponResponseKind { LegacyPush=0, PistolPush, HeavyPistolPush, SmgPush, RiflePush, SniperPush, ShotgunPush, AutoShotgunPush, WeaponResponseCount };
 struct WeaponResponse { float impulse, duration, bulletSpeed; };
-// Use this user's approved PC copy only. No proprietary file is copied into
-// the build. weaponinfo's force is momentum (N*s), independently of damage.
+// Read only the local Xbox 360 export. No proprietary values are embedded.
+// weaponinfo force is momentum (N*s), independently of BO1 damage.
 struct LocalWeaponResponses {
     WeaponResponse values[WeaponResponseCount] = {};
     LocalWeaponResponses() {
-        std::ifstream input("C:\\Program Files (x86)\\Steam\\steamapps\\content\\app_12210\\depot_12211\\GTAIV\\common\\data\\WeaponInfo.xml");
+        const char* data=std::getenv("BO1_SDK_DATA");
+        if(!data)return;
+        std::ifstream input(std::string(data)+"/weaponinfo.xml");
         if(!input) return;
         std::string xml((std::istreambuf_iterator<char>(input)),std::istreambuf_iterator<char>());
         const char* names[WeaponResponseCount]={nullptr,"PISTOL","DEAGLE","MICRO_UZI","AK47","SNIPERRIFLE","SHOTGUN","BARETTA"};

@@ -1,7 +1,7 @@
 #include "nm108_hit_batch.h"
 // Numeric C ABI adapter for BO1's existing 16-body render bridge. All 21 Fred
-// physical parts, constraints, controllers and collisions stay in the original
-// isolated runtime. This adapter supplies host coordinate/bone conversions.
+// physical parts, constraints, controllers and collisions stay in the official
+// SDK worker. This adapter supplies host coordinate/bone conversions.
 // Original PointArm reach and interruptible original-animation recovery are
 // scheduled in the owned runtime; numeric status is exported to the game.
 #include <windows.h>
@@ -290,11 +290,13 @@ bool Hull(const std::vector<V>& points,std::vector<std::array<unsigned,3>>& tria
 }
 V Anchor(const RdWorld* w,unsigned slot,unsigned part){if(!part)return Position(w->Pose(slot,0));return Position(w->Pose(slot,part))+Rot(MatrixQ(w->Pose(slot,part)),w->restAnchor[part]);}
 }
+static const euphoria::LocalWeaponResponses& WeaponProfiles(){static const euphoria::LocalWeaponResponses profiles;return profiles;}
 API RdWorld* rd_world_create_ex(const RdWorldDesc* desc){
     if(!desc || desc->axes!=RD_AXES_Z_UP || !std::isfinite(desc->units_per_meter) || desc->units_per_meter<=0) return nullptr;
     char directory[MAX_PATH]={};HMODULE module=nullptr;
     if(!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCSTR>(&rd_world_create_ex),&module))return nullptr;
     if(!GetModuleFileNameA(module,directory,MAX_PATH))return nullptr;char* slash=strrchr(directory,'\\');if(!slash)return nullptr;*slash=0;
+    (void)WeaponProfiles(); // Parse local weapon data during world load, before combat.
     auto* w=new RdWorld;w->units=desc->units_per_meter;
     std::string worker=std::string(directory)+"\\delirium_worker.exe";
     std::string log=std::string(directory)+"\\delirium-worker-"+std::to_string(GetCurrentProcessId())+".log";
@@ -327,8 +329,10 @@ API int32_t rd_world_set_async(RdWorld* w,uint32_t enabled){
 }
 API int32_t rd_world_set_params_ron(RdWorld* w,const char*){return w?RD_ERR_ARG:RD_ERR_NOT_FOUND;}
 API int32_t rd_load_art(RdWorld* w,const char* path,uint32_t* model){
-    const char* approved="C:\\Program Files (x86)\\Steam\\steamapps\\content\\app_12210\\depot_12211\\GTAIV\\pc\\data\\naturalmotion\\Fred.art";
-    if(!w || !path || !model || _stricmp(path,approved))return RD_ERR_ARG;*model=0;return RD_OK;
+    if(!w || !path || !model || GetFileAttributesA(path)==INVALID_FILE_ATTRIBUTES)return RD_ERR_ARG;
+    // The SDK worker owns character loading. This ABI argument names the local
+    // Xbox-derived export; no PC ART or original binary is read by the host.
+    *model=0;return RD_OK;
 }
 // BO1 pairs its bones with these bodies through anatomical frames built from
 // fixed axes (forward, left), so the rest it receives must face GTA's +Y like
@@ -528,7 +532,7 @@ API int32_t rd_actor_get_bounds(const RdWorld* w,uint32_t actor,RdVec3* mins,RdV
 }
 API int32_t rd_weapon_response(uint32_t profile,float* impulse,float* duration,float* speed){
     if(!impulse||!duration||!speed)return RD_ERR_ARG;
-    static const euphoria::LocalWeaponResponses profiles;
+    const auto& profiles=WeaponProfiles();
     euphoria::WeaponResponse response={};if(!profiles.get(profile,response))return RD_ERR_ARG;
     *impulse=response.impulse;*duration=response.duration;*speed=response.bulletSpeed;return RD_OK;
 }

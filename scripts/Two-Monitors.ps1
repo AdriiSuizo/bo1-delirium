@@ -65,8 +65,8 @@ function Start-LocalCoop {
     foreach($index in @($Monitor1,$Monitor2)){if($screens[$index].DeviceName -notin $connectedScreens){throw 'Se ha desconectado uno de los monitores. Vuelve a preparar la sala.'}}
     foreach($pad in @($Pad1,$Pad2)){if(![BO1LocalPads]::Present($pad)){throw 'Se ha desconectado un mando Xbox. Vuelve a prepararlo.'}}
     foreach($required in @('BO1Zombies.exe','delirium_worker.exe','nm108_native_bridge.dll')){if(!(Test-Path -LiteralPath (Join-Path $base $required))){throw "Falta $required; compila el proyecto primero."}}
-    $gta='C:/Program Files (x86)/Steam/steamapps/content/app_12210/depot_12211/GTAIV'
-    foreach($required in @('GTAIV.exe','pc/data/naturalmotion/Fred.art')){if(!(Test-Path -LiteralPath (Join-Path $gta $required))){throw "Falta $required en la copia GTA IV de depot_12211."}}
+    $env:BO1_SDK_GAME=Join-Path $repo 'local/game360'
+    if(!(Test-Path (Join-Path $env:BO1_SDK_GAME 'default.xex'))){throw 'Missing local Xbox 360 copy; run Initialize-360.ps1'}
     $env:NM108_GETUP='1'
     $env:BO1_PHYSICS_BACKEND='delirium'
     $env:BO1_DELIRIUM_CONTINUOUS='0'
@@ -91,6 +91,8 @@ function Start-LocalCoop {
     for($i=0;$i -lt 2;$i++){
         $role=$i+1;$pad=@($Pad1,$Pad2)[$i];$monitor=$screens[@($Monitor1,$Monitor2)[$i]];$b=$monitor.Bounds
         $cfg=Get-CoopPlayerConfig -Role $role -Pad $pad -X ($b.X+8) -Y ($b.Y+8) -Map $Map -Port $serverPort
+        $sdkCfg='exec euphoria_play.cfg'+[Environment]::NewLine+'set bo1_mod_euphoria_rd_dll nm108_native_bridge.dll'+[Environment]::NewLine+'set bo1_mod_euphoria_rd_art "'+(Join-Path $env:BO1_SDK_DATA 'character.xrt')+'"'
+        $cfg=$cfg.Replace('exec euphoria_play.cfg',$sdkCfg)
         [System.IO.File]::WriteAllText((Join-Path $dirs[$i] 'main/local_coop.cfg'),$cfg,(New-Object System.Text.UTF8Encoding($false)))
         $port=$serverPort+$i
         $arguments="+set bo1_zombies 1 +set fs_b `"$base`" +set fs_h . +set fs_game mods/euphoria +set fs_mods euphoria +set net_ip 127.0.0.1 +set net_port $port +set logfile 1 +set bo1_localcoop_role $role +set bo1_localcoop_session $session +set gpad_port $pad +set gpad_background 1 +set r_fullscreen 0 +set r_borderless 1 +set vid_xpos $($b.X+8) +set vid_ypos $($b.Y+8) +exec local_coop.cfg"

@@ -8,6 +8,7 @@ use crate::{
 use delirium::{prelude::*, ragdoll::Build};
 use delirium_data::rng::Rand;
 use delirium_physics::*;
+use rayon::prelude::*;
 use std::{ffi::CString, path::PathBuf, ptr, time::Instant};
 pub const DT: f32 = 1.0 / 60.0;
 fn c(s: &str) -> CString {
@@ -88,6 +89,24 @@ pub struct Body {
     pub ptr: *mut NmAgent,
     masses: Vec<f32>,
     moments: Vec<Vec3>,
+    wake: u8,
+}
+// Every Body uniquely owns its SDK allocation. NmAgent is !Send solely for its optional Tackle raw target. This bridge never calls nm_agent_task_tackle; message sending cannot create it. These compile-time bounds
+// verify upstream's agent/world internals permit this ownership split.
+fn assert_sdk_thread_traits() {
+    fn send<T: Send>() {}
+    fn sync<T: Sync>() {}
+    send::<delirium::nm::Agent>();
+    sync::<NmWorld>();
+}
+unsafe impl Send for Body {}
+#[derive(Clone, Copy)]
+struct SharedWorld(*const NmWorld);
+unsafe impl Sync for SharedWorld {}
+impl SharedWorld {
+    fn ptr(&self) -> *const NmWorld {
+        self.0
+    }
 }
 impl Drop for Body {
     fn drop(&mut self) {
@@ -99,9 +118,42 @@ impl Body {
         let a = required(unsafe { nm_agent_create(build, [0.; 3].as_ptr(), 0., 0.31) })?;
         Ok(Self {
             ptr: a,
+            wake: 0,
             masses: meta.parts.iter().map(|p| p.mass).collect(),
             moments: meta.parts.iter().map(|p| p.inertia).collect(),
         })
+    }
+    fn impulse(&mut self, k: usize, at: Vec3, impulse: Vec3) -> Result<(), String> {
+        check(unsafe {
+            nm_agent_apply_impulse(
+                self.ptr,
+                k as i32,
+                at.to_array().as_ptr(),
+                impulse.to_array().as_ptr(),
+            )
+        })?;
+        self.wake = 8;
+        Ok(())
+    }
+    fn step(&mut self, world: *const NmWorld) -> Result<(), String> {
+        // SDK v0.5.0's resting shortcut does not itself clear on applyImpulse.
+        // Temporarily bypass only that dead-body shortcut while externally woken.
+        let dead = unsafe { nm_agent_is_dead(self.ptr) };
+        if self.wake > 0 && dead != 0 {
+            unsafe {
+                nm_agent_set_dead(self.ptr, 0);
+            }
+        }
+        check(unsafe { nm_agent_step(self.ptr, world, DT) })?;
+        if self.wake > 0 {
+            self.wake -= 1;
+            if dead != 0 {
+                unsafe {
+                    nm_agent_set_dead(self.ptr, dead);
+                }
+            }
+        }
+        Ok(())
     }
     pub fn frames(&self) -> std::vec::IntoIter<Transform> {
         let n = unsafe { nm_agent_part_count(self.ptr) } as usize;
@@ -237,6 +289,13 @@ impl Body {
         Ok(())
     }
 }
+struct Push {
+    actor: usize,
+    part: usize,
+    local: Vec3,
+    impulse: Vec3,
+    remaining: f32,
+}
 struct Actor {
     body: Body,
     active: bool,
@@ -258,6 +317,8 @@ pub struct Runtime {
     rand: Rand,
     frame: u32,
     stats: (f64, f64, u32),
+    pushes: Vec<Push>,
+    pool: rayon::ThreadPool,
 }
 impl Drop for Runtime {
     fn drop(&mut self) {
@@ -274,10 +335,12 @@ impl Runtime {
         let root = std::env::var_os("BO1_SDK_DATA")
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../local/data"));
-        // Deliberately no search/fallback to another GTA IV installation.
-        let gta =
-            r"C:\Program Files (x86)\Steam\steamapps\content\app_12210\depot_12211\GTAIV\GTAIV.exe";
-        check(unsafe { nm_unlock(c(gta).as_ptr()) })?;
+        let game = std::env::var_os("BO1_SDK_GAME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| root.parent().unwrap().join("game360"));
+        let executable = game.join("default.xex");
+        check(unsafe { nm_unlock(c(executable.to_str().ok_or("game path encoding")?).as_ptr()) })?;
+        delirium_data::LE.store(false, std::sync::atomic::Ordering::Relaxed);
         check(unsafe {
             nm_init(
                 c(root
@@ -322,13 +385,26 @@ impl Runtime {
             rand: Rand::new(41277),
             frame: 0,
             stats: (0., 0., 0),
+            pushes: Vec::new(),
+            pool: {
+                assert_sdk_thread_traits();
+                rayon::ThreadPoolBuilder::new()
+                    .num_threads(
+                        std::thread::available_parallelism()
+                            .map_or(4, |n| n.get())
+                            .min(8),
+                    )
+                    .thread_name(|i| format!("bo1-sdk-{i}"))
+                    .build()
+                    .map_err(|e| e.to_string())?
+            },
         };
         if floor {
             check(unsafe { nm_world_add_floor(world, 0., 0., 0., 100.) })?;
         }
         r.create(0, None)?;
         println!(
-            "SDK v0.5.0 b0138418f2b51d38038ff7c773df10f252b599d2 initialized from approved GTA IV PC 1.0.8; 60 Hz fixed solver"
+            "SDK v0.5.0 b0138418f2b51d38038ff7c773df10f252b599d2 initialized from local Xbox 360 game files; 60 Hz fixed solver"
         );
         Ok(r)
     }
@@ -579,21 +655,24 @@ impl Runtime {
         if !at.is_finite() || !impulse.is_finite() {
             return Err("nonfinite hit".into());
         }
-        a.quiet = 0.;
-        a.wound += impulse.length() / 15.;
-        a.recovery.interrupt();
-        if a.active {
-            if h.normal[3] as u32 == 8 {
-                check(unsafe {
-                    nm_agent_apply_impulse(
-                        a.body.ptr,
-                        part as i32,
-                        at.to_array().as_ptr(),
-                        impulse.to_array().as_ptr(),
-                    )
-                })?;
+        let kind = h.normal[3] as u32;
+        let meaningful = kind != 8 || impulse.length() > 12.;
+        let first = a.quiet > 0.2;
+        if meaningful {
+            a.quiet = 0.;
+            a.wound += impulse.length() / 15.;
+            a.recovery.interrupt();
+        }
+        if a.active && kind != 8 {
+            if kind == 9 || kind == 10 {
+                if first {
+                    check(unsafe { nm_agent_task_stop(a.body.ptr) })?;
+                    a.body.message(self.world, "stopAllBehaviours", &[])?;
+                    check(unsafe { nm_agent_task_catch_fall(a.body.ptr, c("*").as_ptr()) })?;
+                }
             } else {
                 let dir = impulse.normalize_or(Vec3::Y);
+                // SDK task force is projectile speed, separate from physical N*s.
                 check(unsafe {
                     nm_agent_task_shot_force(
                         a.body.ptr,
@@ -603,24 +682,59 @@ impl Runtime {
                         at.to_array().as_ptr(),
                         dir.to_array().as_ptr(),
                         100.,
-                        impulse.length().max(0.1),
+                        v(h.bullet_velocity).length().max(1.),
                     )
                 })?;
             }
+        }
+        let duration = h.impulse[3].clamp(0., 0.3);
+        if duration > DT {
+            self.pushes.push(Push {
+                actor: h.actor as usize,
+                part,
+                local: t.rotation.inverse() * (at - t.translation),
+                impulse,
+                remaining: duration,
+            });
         } else {
-            check(unsafe {
-                nm_agent_apply_impulse(
-                    a.body.ptr,
-                    part as i32,
-                    at.to_array().as_ptr(),
-                    impulse.to_array().as_ptr(),
-                )
-            })?;
+            a.body.impulse(part, at, impulse)?;
         }
         Ok(())
     }
     fn step(&mut self) -> Result<(), String> {
         let timer = Instant::now();
+        for push in &mut self.pushes {
+            if let Some(a) = self.actors[push.actor].as_mut() {
+                let k = push.part;
+                let t = a.body.frames().nth(k).unwrap();
+                let fraction = (DT / push.remaining).min(1.);
+                let impulse = push.impulse * fraction;
+                a.body
+                    .impulse(k, t.translation + t.rotation * push.local, impulse)?;
+                push.impulse -= impulse;
+                push.remaining -= DT;
+            } else {
+                push.remaining = 0.;
+            }
+        }
+        self.pushes.retain(|p| p.remaining > 1e-6);
+        let moving: Vec<Vec3> = self
+            .actors
+            .iter()
+            .flatten()
+            .filter(|a| a.active && a.body.com().1.length_squared() > 0.01)
+            .map(|a| a.body.com().0)
+            .collect();
+        for a in self.actors.iter_mut().flatten() {
+            if !a.active
+                && moving
+                    .iter()
+                    .any(|p| p.distance_squared(a.body.com().0) < 4.)
+            {
+                a.body.wake = 8;
+            }
+        }
+
         for a in self.actors.iter_mut().flatten() {
             a.quiet += DT;
             a.wound *= (-DT / 2.).exp();
@@ -651,12 +765,51 @@ impl Runtime {
                     }
                 }
             }
-            check(unsafe { nm_agent_step(a.body.ptr, self.world, DT) })?;
         }
-        for b in self.fragments.iter_mut().flatten() {
-            check(unsafe { nm_agent_step(b.ptr, self.world, DT) })?;
-        }
+        // Geometry and lifecycle are frozen throughout this barrier. Each task
+        // owns a distinct NmAgent; the official world's capsule cache is locked
+        // internally. No simulation frequency or solver quality is reduced.
+        let world = SharedWorld(self.world);
+        self.pool.install(|| {
+            self.actors
+                .par_iter_mut()
+                .flatten()
+                .try_for_each(|a| a.body.step(world.ptr()))
+        })?;
+        self.pool.install(|| {
+            self.fragments
+                .par_iter_mut()
+                .flatten()
+                .try_for_each(|b| b.step(world.ptr()))
+        })?;
         self.frame += 1;
+        if self.frame % 60 == 0 && std::env::var_os("BO1_SDK_TRACE").is_some() {
+            for (id, a) in self
+                .actors
+                .iter()
+                .enumerate()
+                .filter_map(|(i, a)| a.as_ref().map(|a| (i, a)))
+            {
+                if a.active {
+                    let f: Vec<_> = a.body.frames().collect();
+                    println!(
+                        "TRACE id={id} q={:.1} height={:.3} upright={:.3} support={} v={:.2} rise={} age={:.2} completed={} interrupted={}",
+                        a.quiet,
+                        f[12].translation.z - f[3].translation.z.min(f[6].translation.z),
+                        (f[10].translation - f[0].translation)
+                            .normalize_or(Vec3::Z)
+                            .z,
+                        a.body.supported(),
+                        a.body.com().1.length(),
+                        a.recovery.rise.is_some(),
+                        a.recovery.time(),
+                        a.recovery.completed,
+                        a.recovery.interrupted
+                    );
+                }
+            }
+        }
+
         let ms = timer.elapsed().as_secs_f64() * 1000.;
         self.stats.0 += ms;
         self.stats.1 = self.stats.1.max(ms);
@@ -708,6 +861,7 @@ impl Runtime {
                 s.recovery_interrupted = a.recovery.interrupted;
                 s.recovery_time = a.recovery.time();
                 s.detached_mask = a.detached;
+                s.feedback[5] = unsafe { nm_agent_is_resting(a.body.ptr, self.world) } as u32;
                 for (k, t) in a.body.frames().enumerate() {
                     s.poses[k] = matrix(t);
                     let contact = nm_agent_get_part_contact(a.body.ptr, k as i32);
@@ -755,20 +909,166 @@ impl Runtime {
 }
 pub fn verify() -> Result<(), String> {
     let mut r = Runtime::load(true)?;
-    let mut worst = 0f64;
     for _ in 0..180 {
-        let t = Instant::now();
         r.step()?;
-        worst = worst.max(t.elapsed().as_secs_f64() * 1000.);
     }
     let b = &r.actors[0].as_ref().unwrap().body;
     println!(
-        "SDK_VERIFY standing={} com={:?} worst_ms={worst:.3}",
+        "SDK_VERIFY standing={} com={:?}",
         unsafe { nm_agent_is_balancing(b.ptr) },
         b.com().0
     );
     if unsafe { nm_agent_is_balancing(b.ptr) } == 0 {
-        return Err("not balanced".into());
+        return Err("neutral body not balanced".into());
     }
     Ok(())
+}
+pub fn recover_verify() -> Result<(), String> {
+    let mut r = Runtime::load(true)?;
+    let side = std::env::var("BO1_RECOVERY_SIDE").unwrap_or_else(|_| "x+".into());
+    let angle = if side.ends_with("-") {
+        -std::f32::consts::FRAC_PI_2
+    } else {
+        std::f32::consts::FRAC_PI_2
+    };
+    let turn = if side.starts_with("y") {
+        Quat::from_rotation_y(angle)
+    } else {
+        Quat::from_rotation_x(angle)
+    };
+    let mut initial: Initial = unsafe { std::mem::zeroed() };
+    let poses: Vec<_> = r
+        .rest
+        .iter()
+        .map(|t| {
+            Transform::from_translation(
+                turn * (t.translation - r.rest[0].translation) + Vec3::new(0., 0., 0.32),
+            )
+            .with_rotation(turn * t.rotation)
+        })
+        .collect();
+    for (k, t) in poses.iter().enumerate() {
+        initial.pose[k] = matrix(*t);
+    }
+    {
+        let a = r.actors[0].as_mut().unwrap();
+        a.body.initial(&initial)?;
+        a.body.message(r.world, "stopAllBehaviours", &[])?;
+        check(unsafe { nm_agent_task_catch_fall(a.body.ptr, c("*").as_ptr()) })?;
+    }
+    let mut low = false;
+    let mut knee = 0f32;
+    let mut before = r.actors[0]
+        .as_ref()
+        .unwrap()
+        .body
+        .frames()
+        .nth(2)
+        .unwrap()
+        .rotation;
+    for i in 0..1500 {
+        r.step()?;
+        let a = r.actors[0].as_ref().unwrap();
+        let f: Vec<_> = a.body.frames().collect();
+        let feet = f[3].translation.z.min(f[6].translation.z);
+        let height = f[12].translation.z - feet;
+        low |= height < 0.65;
+        knee = knee.max(before.angle_between(f[2].rotation));
+        before = f[2].rotation;
+        if i % 60 == 0 {
+            println!(
+                "RECOVER t={:.1} low={} height={height:.3} com={:?} vel={:.3} support={} rise={} completed={} interrupted={}",
+                i as f32 / 60.,
+                low,
+                a.body.com().0,
+                a.body.com().1.length(),
+                a.body.supported(),
+                a.recovery.rise.is_some(),
+                a.recovery.completed,
+                a.recovery.interrupted
+            );
+        }
+        if f.iter()
+            .any(|t| !t.translation.is_finite() || !t.rotation.is_finite())
+        {
+            return Err("nonfinite recovery".into());
+        }
+        if low && a.recovery.completed > 0 && height > 1.1 {
+            println!(
+                "PASS genuine ground recovery completed={} knee_frame_motion={knee:.3}",
+                a.recovery.completed
+            );
+            return Ok(());
+        }
+    }
+    Err("ground recovery did not complete".into())
+}
+
+pub fn lifecycle_verify() -> Result<(), String> {
+    let mut r = Runtime::load(true)?;
+    let mut req: Request = unsafe { std::mem::zeroed() };
+    req.command = 9;
+    req.data.active = 0;
+    check_status(r.command(&req)?)?;
+    for _ in 0..600 {
+        r.step()?;
+    }
+    let body = &r.actors[0].as_ref().unwrap().body;
+    let was_resting = unsafe { nm_agent_is_resting(body.ptr, r.world) } != 0;
+    let before = body.com().0;
+    let h = Hit {
+        part: 0,
+        actor: 0,
+        point: [before.x, before.y, before.z, 0.],
+        impulse: [50., 0., 20., 0.],
+        normal: [0., 0., 1., 8.],
+        ..Default::default()
+    };
+    r.hit(&h)?;
+    let mut moved = 0f32;
+    for _ in 0..60 {
+        r.step()?;
+        moved = moved.max(r.actors[0].as_ref().unwrap().body.com().0.distance(before));
+    }
+    println!("LIFECYCLE corpse_resting={was_resting} externally_woken_displacement={moved:.3}");
+    if !was_resting || moved < 0.03 {
+        return Err("corpse sleep/wake regression".into());
+    }
+    let pos = r.actors[0].as_ref().unwrap().body.centre(14);
+    let mut req: Request = unsafe { std::mem::zeroed() };
+    req.command = 10;
+    req.data.active = 1 << 14;
+    check_status(r.command(&req)?)?;
+    if unsafe { nm_agent_is_severed(r.actors[0].as_ref().unwrap().body.ptr, 14) } != 1 {
+        return Err("sever did not detach arm".into());
+    }
+    let mut req: Request = unsafe { std::mem::zeroed() };
+    req.command = 11;
+    req.actor = 0;
+    req.data.fragment = Fragment {
+        pose: matrix(Transform::from_translation(pos + Vec3::Z)),
+        dimensions: [0.15, 0.2, 0.3, 0.],
+        linear: [1., 0., 1., 0.],
+        angular: [0., 2., 0., 0.],
+        mass: 2.,
+    };
+    check_status(r.command(&req)?)?;
+    for _ in 0..120 {
+        r.step()?;
+    }
+    let p = r.fragments[0].as_ref().unwrap().centre(0);
+    if !p.is_finite() {
+        return Err("fragment nonfinite".into());
+    }
+    println!(
+        "PASS corpse sleep/wake, death state, SDK arm sever, fragment lifetime; fragment={p:?}"
+    );
+    Ok(())
+}
+fn check_status(n: u32) -> Result<(), String> {
+    if n != 2 {
+        Err(format!("unexpected command status {n}"))
+    } else {
+        Ok(())
+    }
 }

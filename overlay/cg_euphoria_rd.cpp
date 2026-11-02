@@ -472,7 +472,7 @@ void CG_EuphoriaRd_RegisterDvars()
 {
     bo1_mod_euphoria_rd = _Dvar_RegisterBool("bo1_mod_euphoria_rd", false, 0, "mod: euphoria - a fallen zombie's body is the Rust engine's (ragdoll_ffi.dll): it falls against the map, gets up by itself and hands back to the animation (0 = BO1's ragdoll)");
     bo1_mod_euphoria_rd_dll = _Dvar_RegisterString("bo1_mod_euphoria_rd_dll", "ragdoll_ffi.dll", 0, "mod: euphoria - path of the Rust engine's 32-bit DLL");
-    bo1_mod_euphoria_rd_art = _Dvar_RegisterString("bo1_mod_euphoria_rd_art", "C:\\Program Files (x86)\\Steam\\steamapps\\content\\app_12210\\depot_12211\\GTAIV\\pc\\data\\naturalmotion\\Fred.art", 0, "mod: euphoria - the body proportions the Rust engine reads (your GTA IV's Fred.art)");
+    bo1_mod_euphoria_rd_art = _Dvar_RegisterString("bo1_mod_euphoria_rd_art", "character.xrt", 0, "mod: euphoria - the body proportions the Rust engine reads (your local Xbox 360 SDK export)");
     bo1_mod_euphoria_rd_params = _Dvar_RegisterString("bo1_mod_euphoria_rd_params", "ragdoll_params.ron", 0, "mod: euphoria - the Rust engine's tuning file (the testbed's params.ron), if present");
     bo1_mod_euphoria_rd_debug = _Dvar_RegisterBool("bo1_mod_euphoria_rd_debug", false, 0, "mod: euphoria - print the Rust bodies' hand-overs and states");
 }
