@@ -1,0 +1,13 @@
+[package]
+name = "bo1-delirium-sdk-worker"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+publish = false
+[[bin]]
+name = "delirium_worker"
+path = "src/main.rs"
+[dependencies]
+delirium-sdk = { git = "https://github.com/PVCPC/delirium-physics", rev = "b0138418f2b51d38038ff7c773df10f252b599d2" }
+delirium = { git = "https://github.com/PVCPC/delirium-physics", rev = "b0138418f2b51d38038ff7c773df10f252b599d2" }
+delirium-data = { git = "https://github.com/PVCPC/delirium-physics", rev = "b0138418f2b51d38038ff7c773df10f252b599d2" }

@@ -1,0 +1,14 @@
+Delirium Physics SDK: PVCPC and upstream contributors.
+https://github.com/PVCPC/delirium-physics
+Pinned official v0.5.0 revision b0138418f2b51d38038ff7c773df10f252b599d2.
+SDK source is obtained directly from upstream by Cargo and retains GPL-3.0-only.
+
+BO1 host adapters, wound policy, IPC, get-up-reference orchestration and local
+co-op launcher originate in the user's separate BO1 physics mod reference.
+Existing source comments and attribution markers are preserved. This project
+adapts that authored mod integration to the official SDK. The integration is
+provided under GPL-3.0-only; see LICENSE. No license is asserted over the
+excluded decompiled BO1 engine or proprietary game resources.
+
+Call of Duty / Black Ops and Grand Theft Auto / Euphoria are properties of
+their respective owners. This source-only integration includes no game data.

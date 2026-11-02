@@ -1,0 +1,16 @@
+/local/
+/target/
+*.log
+*.dll
+*.exe
+*.pdb
+*.obj
+*.lib
+*.xrt
+*.art
+*.motion
+*.iwd
+*.ff
+*.png
+*.jpg
+*.mp4
