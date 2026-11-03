@@ -1,0 +1,25 @@
+Corresponding source: BO1 Delirium Steam 0.2.2-bo1-only-beta3
+Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
+Native game adapter and bridge:
+  cmake -S native -B native-build -A Win32
+  cmake --build native-build --config Release
+Read-only BO1 resource capture:
+  cmake -S capture -B capture-build -A Win32
+  cmake --build capture-build --config Release
+Physics worker (x64; install the matching Rust MSVC target):
+  set RUSTFLAGS=-C target-feature=+crt-static
+  cargo build --locked --release -p bo1-delirium-worker
+Preparation tool (uses only Python standard library):
+  python -m PyInstaller --onefile --console --name PrepareBO1 tools/prepare_bo1.py
+Own control script archive (standard ZIP/IWD; no original game scripts):
+  python -c "import zipfile; z=zipfile.ZipFile('bo1delirium_controls.iwd','w',zipfile.ZIP_DEFLATED); z.write('scripts/maps/delirium/controls.gsc','maps/delirium/controls.gsc'); z.close()"
+Binary layout is described in manifest.json in the installation archive.
+Rename bo1-delirium-worker.exe to runtime/delirium_worker.exe.
+Copy CaptureBO1.exe, BO1CharacterCapture.dll, PrepareBO1.exe and FetchLoader.ps1 to tools/.
+Copy bo1delirium_controls.iwd to BO1Delirium/scripts/. The launcher installs this own script into its private profile.
+Keep the original native BO1 executable, assets and private generated cache out of redistribution.
+No GTA game files are necessary at runtime or for preparing the host character.
+Runtime base: PVCPC/delirium-physics revision 23ea7cfa2a1000d64870d2549834006d21b3e05c,
+with the retained BO1 gameplay adaptations; this is not a wholesale SDK 0.5.0 upgrade.
+Custom character interface and public configuration references: SuperSloppers/large-steal-car-4
+revision 0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36.
