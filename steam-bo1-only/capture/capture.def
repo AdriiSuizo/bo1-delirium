@@ -1,0 +1,3 @@
+LIBRARY BO1CharacterCapture
+EXPORTS
+ DeliriumAttach=_DeliriumAttach@4

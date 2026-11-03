@@ -1,0 +1,7 @@
+/target/
+/native-build/
+/capture-build/
+/dist/
+/build/
+/__pycache__/
+*.spec

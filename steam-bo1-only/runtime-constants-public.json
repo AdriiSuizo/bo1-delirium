@@ -1,0 +1,3102 @@
+{
+  "source_commit": "0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36",
+  "slots": [
+    {
+      "slot": 0,
+      "bits64": "4197d78400000000",
+      "bits32": "4cbebc20",
+      "file": "gta4-data/src/carfit.rs",
+      "line": 217,
+      "literal": "100_000_000.0f32"
+    },
+    {
+      "slot": 1,
+      "bits64": "3ee4f8b588e368f1",
+      "bits32": "3727c5ac",
+      "file": "gta4-data/src/addprojectile.rs",
+      "line": 581,
+      "literal": "1e-5"
+    },
+    {
+      "slot": 2,
+      "bits64": "4008000000000000",
+      "bits32": "40400000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 27,
+      "literal": "3"
+    },
+    {
+      "slot": 3,
+      "bits64": "3fe4cccccccccccd",
+      "bits32": "3f266666",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 52,
+      "literal": "0.65"
+    },
+    {
+      "slot": 4,
+      "bits64": "3fc3333333333333",
+      "bits32": "3e19999a",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 53,
+      "literal": "0.15"
+    },
+    {
+      "slot": 5,
+      "bits64": "3fdccccccccccccd",
+      "bits32": "3ee66666",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 83,
+      "literal": "-0.45"
+    },
+    {
+      "slot": 6,
+      "bits64": "4044000000000000",
+      "bits32": "42200000",
+      "file": "gta4-data/examples/camcine_cases.rs",
+      "line": 20,
+      "literal": "40"
+    },
+    {
+      "slot": 7,
+      "bits64": "3ff8000000000000",
+      "bits32": "3fc00000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 77,
+      "literal": "1.5"
+    },
+    {
+      "slot": 8,
+      "bits64": "3ffc000000000000",
+      "bits32": "3fe00000",
+      "file": "gta4-data/src/carlamps.rs",
+      "line": 256,
+      "literal": "1.75"
+    },
+    {
+      "slot": 9,
+      "bits64": "4089000000000000",
+      "bits32": "44480000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 233,
+      "literal": "800"
+    },
+    {
+      "slot": 10,
+      "bits64": "4069000000000000",
+      "bits32": "43480000",
+      "file": "gta4-data/examples/contact_cases.rs",
+      "line": 15,
+      "literal": "200.0"
+    },
+    {
+      "slot": 11,
+      "bits64": "4085e00000000000",
+      "bits32": "442f0000",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 424,
+      "literal": "700"
+    },
+    {
+      "slot": 12,
+      "bits64": "3fd0000000000000",
+      "bits32": "3e800000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 247,
+      "literal": "0.25"
+    },
+    {
+      "slot": 13,
+      "bits64": "3fe8000000000000",
+      "bits32": "3f400000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 217,
+      "literal": ".75"
+    },
+    {
+      "slot": 14,
+      "bits64": "3fee666666666666",
+      "bits32": "3f733333",
+      "file": "gta4-data/examples/port_cases.rs",
+      "line": 159,
+      "literal": "0.95"
+    },
+    {
+      "slot": 15,
+      "bits64": "3fe999999999999a",
+      "bits32": "3f4ccccd",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 56,
+      "literal": "0.8"
+    },
+    {
+      "slot": 16,
+      "bits64": "4028000000000000",
+      "bits32": "41400000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 144,
+      "literal": "12."
+    },
+    {
+      "slot": 17,
+      "bits64": "3fd3333333333333",
+      "bits32": "3e99999a",
+      "file": "bo1-worker/src/main.rs",
+      "line": 51,
+      "literal": "0.3"
+    },
+    {
+      "slot": 18,
+      "bits64": "3fe51eb851eb851f",
+      "bits32": "3f28f5c3",
+      "file": "gta4-data/src/carpeds.rs",
+      "line": 483,
+      "literal": "0.66"
+    },
+    {
+      "slot": 19,
+      "bits64": "402e000000000000",
+      "bits32": "41700000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 689,
+      "literal": "15"
+    },
+    {
+      "slot": 20,
+      "bits64": "4024000000000000",
+      "bits32": "41200000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 113,
+      "literal": "10"
+    },
+    {
+      "slot": 21,
+      "bits64": "4059000000000000",
+      "bits32": "42c80000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 211,
+      "literal": "100"
+    },
+    {
+      "slot": 22,
+      "bits64": "401c000000000000",
+      "bits32": "40e00000",
+      "file": "bo1-worker/src/protocol.rs",
+      "line": 46,
+      "literal": "7"
+    },
+    {
+      "slot": 23,
+      "bits64": "4004000000000000",
+      "bits32": "40200000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 140,
+      "literal": "2.5"
+    },
+    {
+      "slot": 24,
+      "bits64": "402399999999999a",
+      "bits32": "411ccccd",
+      "file": "gta4-data/src/buoyancy.rs",
+      "line": 137,
+      "literal": "9.8"
+    },
+    {
+      "slot": 25,
+      "bits64": "4018000000000000",
+      "bits32": "40c00000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 27,
+      "literal": "6"
+    },
+    {
+      "slot": 26,
+      "bits64": "4039000000000000",
+      "bits32": "41c80000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1159,
+      "literal": "25"
+    },
+    {
+      "slot": 27,
+      "bits64": "3fe47ae162860716",
+      "bits32": "3f23d70b",
+      "file": "gta4-nm/src/bump.rs",
+      "line": 298,
+      "literal": "0.64000005"
+    },
+    {
+      "slot": 28,
+      "bits64": "405b800000000000",
+      "bits32": "42dc0000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 1506,
+      "literal": "110"
+    },
+    {
+      "slot": 29,
+      "bits64": "4061800000000000",
+      "bits32": "430c0000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "140"
+    },
+    {
+      "slot": 30,
+      "bits64": "4079000000000000",
+      "bits32": "43c80000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 879,
+      "literal": "400.0"
+    },
+    {
+      "slot": 31,
+      "bits64": "3eb0c6f7a0b5ed8d",
+      "bits32": "358637bd",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1235,
+      "literal": "0.000001"
+    },
+    {
+      "slot": 32,
+      "bits64": "3f847ae147ae147b",
+      "bits32": "3c23d70a",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 725,
+      "literal": "0.01"
+    },
+    {
+      "slot": 33,
+      "bits64": "3fe2000000000000",
+      "bits32": "3f100000",
+      "file": "gta4-data/src/entityinterior.rs",
+      "line": 265,
+      "literal": "0.5625"
+    },
+    {
+      "slot": 34,
+      "bits64": "3fc999999999999a",
+      "bits32": "3e4ccccd",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 65,
+      "literal": "0.2"
+    },
+    {
+      "slot": 35,
+      "bits64": "4054000000000000",
+      "bits32": "42a00000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 43,
+      "literal": "80"
+    },
+    {
+      "slot": 36,
+      "bits64": "4014000000000000",
+      "bits32": "40a00000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 250,
+      "literal": "5"
+    },
+    {
+      "slot": 37,
+      "bits64": "4020000000000000",
+      "bits32": "41000000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 77,
+      "literal": "8"
+    },
+    {
+      "slot": 38,
+      "bits64": "3ffb333333333333",
+      "bits32": "3fd9999a",
+      "file": "gta4-data/src/aisteer.rs",
+      "line": 33,
+      "literal": "1.7"
+    },
+    {
+      "slot": 39,
+      "bits64": "3fd6666666666666",
+      "bits32": "3eb33333",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 52,
+      "literal": "0.35"
+    },
+    {
+      "slot": 40,
+      "bits64": "3fa999999999999a",
+      "bits32": "3d4ccccd",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1186,
+      "literal": "0.05"
+    },
+    {
+      "slot": 41,
+      "bits64": "3ff14e3bcd35a858",
+      "bits32": "3f8a71de",
+      "file": "gta4-nm/src/collision.rs",
+      "line": 151,
+      "literal": "1.0816"
+    },
+    {
+      "slot": 42,
+      "bits64": "3d719799812dea11",
+      "bits32": "2b8cbccc",
+      "file": "gta4-data/src/ambientslot.rs",
+      "line": 225,
+      "literal": "1e-12"
+    },
+    {
+      "slot": 43,
+      "bits64": "3fefff2e48e8a71e",
+      "bits32": "3f7ff972",
+      "file": "gta4-nm/src/collision.rs",
+      "line": 229,
+      "literal": "0.9999"
+    },
+    {
+      "slot": 44,
+      "bits64": "3f1a36e2eb1c432d",
+      "bits32": "38d1b717",
+      "file": "gta4-data/examples/fragdump.rs",
+      "line": 22,
+      "literal": "1e-4"
+    },
+    {
+      "slot": 45,
+      "bits64": "409f400000000000",
+      "bits32": "44fa0000",
+      "file": "gta4-data/examples/clock_calendar_cases.rs",
+      "line": 10,
+      "literal": "2000"
+    },
+    {
+      "slot": 46,
+      "bits64": "3fe6666666666666",
+      "bits32": "3f333333",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 235,
+      "literal": "0.7"
+    },
+    {
+      "slot": 47,
+      "bits64": "3edffffffdcd0cd0",
+      "bits32": "37000000",
+      "file": "gta4-nm/src/collision.rs",
+      "line": 760,
+      "literal": "7.629_394_5e-6"
+    },
+    {
+      "slot": 48,
+      "bits64": "3e112e0be826d695",
+      "bits32": "3089705f",
+      "file": "gta4-data/src/getup.rs",
+      "line": 1331,
+      "literal": "1e-9"
+    },
+    {
+      "slot": 49,
+      "bits64": "3fb999999999999a",
+      "bits32": "3dcccccd",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 124,
+      "literal": ".1"
+    },
+    {
+      "slot": 50,
+      "bits64": "3ff3333333333333",
+      "bits32": "3f99999a",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 36,
+      "literal": "1.2"
+    },
+    {
+      "slot": 51,
+      "bits64": "404d6e147ae147ae",
+      "bits32": "426b70a4",
+      "file": "gta4-nm/src/collision.rs",
+      "line": 865,
+      "literal": "58.86"
+    },
+    {
+      "slot": 52,
+      "bits64": "4049000000000000",
+      "bits32": "42480000",
+      "file": "gta4-data/examples/carblock_cases.rs",
+      "line": 21,
+      "literal": "50"
+    },
+    {
+      "slot": 53,
+      "bits64": "408f400000000000",
+      "bits32": "447a0000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 340,
+      "literal": "1000"
+    },
+    {
+      "slot": 54,
+      "bits64": "4091300000000000",
+      "bits32": "44898000",
+      "file": "gta4-data/examples/port_cases.rs",
+      "line": 1069,
+      "literal": "1100"
+    },
+    {
+      "slot": 55,
+      "bits64": "403e000000000000",
+      "bits32": "41f00000",
+      "file": "bo1-worker/src/protocol.rs",
+      "line": 5,
+      "literal": "30"
+    },
+    {
+      "slot": 56,
+      "bits64": "3eb0c6f7a0000000",
+      "bits32": "358637bd",
+      "file": "gta4-data/src/addprojectile.rs",
+      "line": 265,
+      "literal": "f32::from_bits(0x3586_37BD)"
+    },
+    {
+      "slot": 57,
+      "bits64": "3fb1eb851eb851ec",
+      "bits32": "3d8f5c29",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 997,
+      "literal": "0.07"
+    },
+    {
+      "slot": 58,
+      "bits64": "4010000000000000",
+      "bits32": "40800000",
+      "file": "bo1-worker/src/protocol.rs",
+      "line": 12,
+      "literal": "4"
+    },
+    {
+      "slot": 60,
+      "bits64": "3fd999999999999a",
+      "bits32": "3ecccccd",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 31,
+      "literal": "0.4"
+    },
+    {
+      "slot": 61,
+      "bits64": "3feccccccccccccd",
+      "bits32": "3f666666",
+      "file": "bo1-worker/src/main.rs",
+      "line": 19,
+      "literal": "0.9"
+    },
+    {
+      "slot": 62,
+      "bits64": "3f947ae147ae147b",
+      "bits32": "3ca3d70a",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 99,
+      "literal": "0.02"
+    },
+    {
+      "slot": 63,
+      "bits64": "3fe3333333333333",
+      "bits32": "3f19999a",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 47,
+      "literal": "-0.6"
+    },
+    {
+      "slot": 64,
+      "bits64": "40091eb851eb851f",
+      "bits32": "4048f5c3",
+      "file": "gta4-nm/src/nmfl.rs",
+      "line": 378,
+      "literal": "3.14"
+    },
+    {
+      "slot": 65,
+      "bits64": "3feb333333333333",
+      "bits32": "3f59999a",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 274,
+      "literal": "0.85"
+    },
+    {
+      "slot": 66,
+      "bits64": "3fbeb851eb851eb8",
+      "bits32": "3df5c28f",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1518,
+      "literal": ".12"
+    },
+    {
+      "slot": 67,
+      "bits64": "402c000000000000",
+      "bits32": "41600000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 124,
+      "literal": "14."
+    },
+    {
+      "slot": 68,
+      "bits64": "400c000000000000",
+      "bits32": "40600000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 2176,
+      "literal": "3.5"
+    },
+    {
+      "slot": 69,
+      "bits64": "3fc47ae147ae147b",
+      "bits32": "3e23d70a",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 2024,
+      "literal": "0.16"
+    },
+    {
+      "slot": 70,
+      "bits64": "3fb47ae147ae147b",
+      "bits32": "3da3d70a",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1773,
+      "literal": "0.08"
+    },
+    {
+      "slot": 71,
+      "bits64": "3f9eb851eb851eb8",
+      "bits32": "3cf5c28f",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 996,
+      "literal": "0.03"
+    },
+    {
+      "slot": 72,
+      "bits64": "3fe199999999999a",
+      "bits32": "3f0ccccd",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 31,
+      "literal": "0.55"
+    },
+    {
+      "slot": 73,
+      "bits64": "3fa47ae147ae147b",
+      "bits32": "3d23d70a",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 2197,
+      "literal": "0.04"
+    },
+    {
+      "slot": 74,
+      "bits64": "4026000000000000",
+      "bits32": "41300000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 344,
+      "literal": "11.0"
+    },
+    {
+      "slot": 75,
+      "bits64": "3f50624dd2f1a9fc",
+      "bits32": "3a83126f",
+      "file": "gta4-data/src/addprojectile.rs",
+      "line": 377,
+      "literal": "0.001"
+    },
+    {
+      "slot": 76,
+      "bits64": "3fd51eb851eb851f",
+      "bits32": "3ea8f5c3",
+      "file": "gta4-data/examples/ik_cases.rs",
+      "line": 51,
+      "literal": ".33"
+    },
+    {
+      "slot": 77,
+      "bits64": "4022000000000000",
+      "bits32": "41100000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 53,
+      "literal": "9"
+    },
+    {
+      "slot": 78,
+      "bits64": "3ff199999999999a",
+      "bits32": "3f8ccccd",
+      "file": "bo1-worker/src/main.rs",
+      "line": 19,
+      "literal": "1.1"
+    },
+    {
+      "slot": 79,
+      "bits64": "4030000000000000",
+      "bits32": "41800000",
+      "file": "bo1-worker/src/protocol.rs",
+      "line": 24,
+      "literal": "16"
+    },
+    {
+      "slot": 80,
+      "bits64": "4002000000000000",
+      "bits32": "40100000",
+      "file": "gta4-data/src/carpop.rs",
+      "line": 182,
+      "literal": "2.25"
+    },
+    {
+      "slot": 81,
+      "bits64": "3fc70a3d70a3d70a",
+      "bits32": "3e3851ec",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 381,
+      "literal": ".180"
+    },
+    {
+      "slot": 82,
+      "bits64": "4034000000000000",
+      "bits32": "41a00000",
+      "file": "bo1-worker/src/main.rs",
+      "line": 7,
+      "literal": "20"
+    },
+    {
+      "slot": 83,
+      "bits64": "3f60624dd2f1a9fc",
+      "bits32": "3b03126f",
+      "file": "gta4-data/src/carwater.rs",
+      "line": 12,
+      "literal": "0.002"
+    },
+    {
+      "slot": 84,
+      "bits64": "4000cccccccccccd",
+      "bits32": "40066666",
+      "file": "gta4-data/src/aiahead.rs",
+      "line": 164,
+      "literal": "2.1"
+    },
+    {
+      "slot": 85,
+      "bits64": "3fceb851eb851eb8",
+      "bits32": "3e75c28f",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 2048,
+      "literal": ".240"
+    },
+    {
+      "slot": 86,
+      "bits64": "3faeb851eb851eb8",
+      "bits32": "3d75c28f",
+      "file": "gta4-data/src/actiontable.rs",
+      "line": 564,
+      "literal": "0.06"
+    },
+    {
+      "slot": 87,
+      "bits64": "4051800000000000",
+      "bits32": "428c0000",
+      "file": "gta4-data/examples/ambulance_cases.rs",
+      "line": 7,
+      "literal": "70"
+    },
+    {
+      "slot": 88,
+      "bits64": "3fe727cc00046ddf",
+      "bits32": "3f393e60",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 94,
+      "literal": "0.723608017"
+    },
+    {
+      "slot": 89,
+      "bits64": "3fe0d2bd3ff823cf",
+      "bits32": "3f0695ea",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 94,
+      "literal": "-0.525725007"
+    },
+    {
+      "slot": 90,
+      "bits64": "3fdc9f3c7fd1e123",
+      "bits32": "3ee4f9e4",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 94,
+      "literal": "-0.447219014"
+    },
+    {
+      "slot": 91,
+      "bits64": "3fd1b0574083a8c1",
+      "bits32": "3e8d82ba",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 94,
+      "literal": "-0.27638799"
+    },
+    {
+      "slot": 92,
+      "bits64": "3feb38843fe2907b",
+      "bits32": "3f59c422",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 94,
+      "literal": "-0.850648999"
+    },
+    {
+      "slot": 93,
+      "bits64": "3fec9f233fe4e12f",
+      "bits32": "3f64f91a",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 95,
+      "literal": "-0.894425988"
+    },
+    {
+      "slot": 94,
+      "bits64": "3fdc9f2fdfdb6129",
+      "bits32": "3ee4f97f",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 95,
+      "literal": "-0.447216004"
+    },
+    {
+      "slot": 95,
+      "bits64": "3fdc9f40a061bd68",
+      "bits32": "3ee4fa05",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 95,
+      "literal": "-0.447219998"
+    },
+    {
+      "slot": 96,
+      "bits64": "3fdb387dff790b48",
+      "bits32": "3ed9c3f0",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "0.425323009"
+    },
+    {
+      "slot": 97,
+      "bits64": "3fd3c6d61fa9350f",
+      "bits32": "3e9e36b1",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "-0.309011012"
+    },
+    {
+      "slot": 98,
+      "bits64": "3feb388ebfff6787",
+      "bits32": "3f59c476",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "-0.850654006"
+    },
+    {
+      "slot": 99,
+      "bits64": "3fc4cb5bc0678618",
+      "bits32": "3e265ade",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "-0.162456006"
+    },
+    {
+      "slot": 100,
+      "bits64": "3fdfffeaffc651e7",
+      "bits32": "3effff58",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "-0.499994993"
+    },
+    {
+      "slot": 101,
+      "bits64": "3fd0d2d87f88765c",
+      "bits32": "3e8696c4",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "0.262869"
+    },
+    {
+      "slot": 102,
+      "bits64": "3fe9e36d201c88aa",
+      "bits32": "3f4f1b69",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "-0.809011996"
+    },
+    {
+      "slot": 103,
+      "bits64": "3fe0d2d88011e6bb",
+      "bits32": "3f0696c4",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 98,
+      "literal": "-0.525738001"
+    },
+    {
+      "slot": 104,
+      "bits64": "3feb38822008e78e",
+      "bits32": "3f59c411",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 99,
+      "literal": "0.850647986"
+    },
+    {
+      "slot": 105,
+      "bits64": "3fe0d2d43fd52482",
+      "bits32": "3f0696a2",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 99,
+      "literal": "-0.525735974"
+    },
+    {
+      "slot": 106,
+      "bits64": "3fe0d2c7c014fadb",
+      "bits32": "3f06963e",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 99,
+      "literal": "-0.525730014"
+    },
+    {
+      "slot": 107,
+      "bits64": "3feb388a7fc2a54e",
+      "bits32": "3f59c454",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 99,
+      "literal": "-0.850651979"
+    },
+    {
+      "slot": 108,
+      "bits64": "3fe605a6ffcd6ef8",
+      "bits32": "3f302d38",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 100,
+      "literal": "-0.688189983"
+    },
+    {
+      "slot": 109,
+      "bits64": "3fdffff360098006",
+      "bits32": "3effff9b",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 100,
+      "literal": "-0.49999699"
+    },
+    {
+      "slot": 110,
+      "bits64": "3fee6f1120417198",
+      "bits32": "3f737889",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 101,
+      "literal": "0.951057971"
+    },
+    {
+      "slot": 111,
+      "bits64": "3fd3c6de7fec632f",
+      "bits32": "3e9e36f4",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 101,
+      "literal": "0.309013009"
+    },
+    {
+      "slot": 112,
+      "bits64": "3fe2cf24a014d547",
+      "bits32": "3f167925",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 102,
+      "literal": "0.587786019"
+    },
+    {
+      "slot": 113,
+      "bits64": "3fe9e377a0395fb7",
+      "bits32": "3f4f1bbd",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 102,
+      "literal": "-0.809017003"
+    },
+    {
+      "slot": 114,
+      "bits64": "3d0ff9be207438cd",
+      "bits32": "287fcdf1",
+      "file": "gta4-nm/src/gjk.rs",
+      "line": 402,
+      "literal": "1.42e-14"
+    },
+    {
+      "slot": 115,
+      "bits64": "4082c00000000000",
+      "bits32": "44160000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 918,
+      "literal": "600"
+    },
+    {
+      "slot": 116,
+      "bits64": "401199999999999a",
+      "bits32": "408ccccd",
+      "file": "gta4-data/src/carscan.rs",
+      "line": 268,
+      "literal": "4.4"
+    },
+    {
+      "slot": 117,
+      "bits64": "4006666666666666",
+      "bits32": "40333333",
+      "file": "gta4-data/src/jump.rs",
+      "line": 96,
+      "literal": "2.8"
+    },
+    {
+      "slot": 118,
+      "bits64": "3ff6666666666666",
+      "bits32": "3fb33333",
+      "file": "gta4-data/src/camshake.rs",
+      "line": 63,
+      "literal": "1.4"
+    },
+    {
+      "slot": 119,
+      "bits64": "3ffe666666666666",
+      "bits32": "3ff33333",
+      "file": "gta4-data/src/audioconfig.rs",
+      "line": 2370,
+      "literal": "1.9"
+    },
+    {
+      "slot": 120,
+      "bits64": "3fc0000000000000",
+      "bits32": "3e000000",
+      "file": "gta4-data/examples/aiahead_cases.rs",
+      "line": 16,
+      "literal": "0.125"
+    },
+    {
+      "slot": 121,
+      "bits64": "4023cccccccccccd",
+      "bits32": "411e6666",
+      "file": "gta4-data/src/events.rs",
+      "line": 1385,
+      "literal": "9.9"
+    },
+    {
+      "slot": 122,
+      "bits64": "4055400000000000",
+      "bits32": "42aa0000",
+      "file": "gta4-data/examples/cutscene.rs",
+      "line": 11,
+      "literal": "85"
+    },
+    {
+      "slot": 123,
+      "bits64": "3fb70a3d70a3d70a",
+      "bits32": "3db851ec",
+      "file": "gta4-data/src/copblip.rs",
+      "line": 1027,
+      "literal": "0.09"
+    },
+    {
+      "slot": 124,
+      "bits64": "3fd1eb851eb851ec",
+      "bits32": "3e8f5c29",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1906,
+      "literal": ".28"
+    },
+    {
+      "slot": 125,
+      "bits64": "402a000000000000",
+      "bits32": "41500000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 108,
+      "literal": "13"
+    },
+    {
+      "slot": 126,
+      "bits64": "402c48b439581062",
+      "bits32": "416245a2",
+      "file": "gta4-nm/src/nm.rs",
+      "line": 232,
+      "literal": "14.142"
+    },
+    {
+      "slot": 127,
+      "bits64": "3ff4cccccccccccd",
+      "bits32": "3fa66666",
+      "file": "gta4-data/src/animblend.rs",
+      "line": 604,
+      "literal": "1.3"
+    },
+    {
+      "slot": 128,
+      "bits64": "404e000000000000",
+      "bits32": "42700000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 42,
+      "literal": "60."
+    },
+    {
+      "slot": 129,
+      "bits64": "3fcc28f5c28f5c29",
+      "bits32": "3e6147ae",
+      "file": "gta4-data/examples/blockedspot_cases.rs",
+      "line": 43,
+      "literal": ".22"
+    },
+    {
+      "slot": 130,
+      "bits64": "3ffccccccccccccd",
+      "bits32": "3fe66666",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 66,
+      "literal": "1.8"
+    },
+    {
+      "slot": 131,
+      "bits64": "402b000000000000",
+      "bits32": "41580000",
+      "file": "gta4-data/src/camcar.rs",
+      "line": 765,
+      "literal": "13.5"
+    },
+    {
+      "slot": 132,
+      "bits64": "40f0000000000000",
+      "bits32": "47800000",
+      "file": "gta4-data/src/helpers.rs",
+      "line": 1759,
+      "literal": "65536"
+    },
+    {
+      "slot": 133,
+      "bits64": "3ff5eb851eb851ec",
+      "bits32": "3faf5c29",
+      "file": "gta4-data/src/jump.rs",
+      "line": 156,
+      "literal": "-1.37"
+    },
+    {
+      "slot": 134,
+      "bits64": "3ffab851eb851eb8",
+      "bits32": "3fd5c28f",
+      "file": "gta4-nm/src/nm.rs",
+      "line": 2777,
+      "literal": "1.67"
+    },
+    {
+      "slot": 135,
+      "bits64": "4060400000000000",
+      "bits32": "43020000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 697,
+      "literal": "130"
+    },
+    {
+      "slot": 136,
+      "bits64": "4038000000000000",
+      "bits32": "41c00000",
+      "file": "gta4-data/examples/advance_cases.rs",
+      "line": 10,
+      "literal": "24"
+    },
+    {
+      "slot": 137,
+      "bits64": "40b3880000000000",
+      "bits32": "459c4000",
+      "file": "gta4-data/src/aisteer.rs",
+      "line": 484,
+      "literal": "5000"
+    },
+    {
+      "slot": 138,
+      "bits64": "3fd0c152454731ee",
+      "bits32": "3e860a92",
+      "file": "gta4-data/src/timecyc.rs",
+      "line": 226,
+      "literal": "0.261_799_4"
+    },
+    {
+      "slot": 139,
+      "bits64": "3fef333333333333",
+      "bits32": "3f79999a",
+      "file": "gta4-nm/src/nmaw.rs",
+      "line": 83,
+      "literal": "0.975"
+    },
+    {
+      "slot": 140,
+      "bits64": "3fe38e38dd971f6c",
+      "bits32": "3f1c71c7",
+      "file": "gta4-nm/src/nmbb.rs",
+      "line": 178,
+      "literal": "0.611_111_1"
+    },
+    {
+      "slot": 141,
+      "bits64": "3ff1c71c89a38251",
+      "bits32": "3f8e38e4",
+      "file": "gta4-nm/src/nmbb.rs",
+      "line": 178,
+      "literal": "1.111_111_2"
+    },
+    {
+      "slot": 142,
+      "bits64": "3ffaaaaa98c55e44",
+      "bits32": "3fd55555",
+      "file": "gta4-nm/src/nmbb.rs",
+      "line": 178,
+      "literal": "1.666_666_6"
+    },
+    {
+      "slot": 143,
+      "bits64": "408f373333333333",
+      "bits32": "4479b99a",
+      "file": "gta4-nm/src/nmbb.rs",
+      "line": 185,
+      "literal": "998.9"
+    },
+    {
+      "slot": 144,
+      "bits64": "408f38cccccccccd",
+      "bits32": "4479c666",
+      "file": "gta4-nm/src/nmbb.rs",
+      "line": 185,
+      "literal": "999.1"
+    },
+    {
+      "slot": 145,
+      "bits64": "3fe69fbe76c8b439",
+      "bits32": "3f34fdf4",
+      "file": "gta4-data/src/ambulance.rs",
+      "line": 70,
+      "literal": "0.707"
+    },
+    {
+      "slot": 149,
+      "bits64": "3e8000000102f4fd",
+      "bits32": "34000000",
+      "file": "gta4-data/src/buoyancy/ripples.rs",
+      "line": 141,
+      "literal": "1.192_092_9e-7"
+    },
+    {
+      "slot": 150,
+      "bits64": "3ff91eb851eb851f",
+      "bits32": "3fc8f5c3",
+      "file": "gta4-data/src/ik.rs",
+      "line": 388,
+      "literal": "1.57"
+    },
+    {
+      "slot": 151,
+      "bits64": "3fb3333333333333",
+      "bits32": "3d99999a",
+      "file": "gta4-data/src/camcar.rs",
+      "line": 485,
+      "literal": "0.075"
+    },
+    {
+      "slot": 152,
+      "bits64": "4057c00000000000",
+      "bits32": "42be0000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "95"
+    },
+    {
+      "slot": 153,
+      "bits64": "3fc3d70a3d70a3d7",
+      "bits32": "3e1eb852",
+      "file": "gta4-nm/src/nmbr.rs",
+      "line": 210,
+      "literal": "0.155"
+    },
+    {
+      "slot": 154,
+      "bits64": "3fc5c28f5c28f5c3",
+      "bits32": "3e2e147b",
+      "file": "gta4-data/examples/dummyswitch_cases.rs",
+      "line": 64,
+      "literal": ".17"
+    },
+    {
+      "slot": 155,
+      "bits64": "3fcd70a3d70a3d71",
+      "bits32": "3e6b851f",
+      "file": "gta4-data/examples/dummyswitch_cases.rs",
+      "line": 78,
+      "literal": ".23"
+    },
+    {
+      "slot": 156,
+      "bits64": "3ff4000000000000",
+      "bits32": "3fa00000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 329,
+      "literal": "1.25"
+    },
+    {
+      "slot": 157,
+      "bits64": "400721fb5a7ed197",
+      "bits32": "40390fdb",
+      "file": "gta4-nm/src/nmbr.rs",
+      "line": 367,
+      "literal": "2.891_592_7"
+    },
+    {
+      "slot": 158,
+      "bits64": "3e4999999b37ee61",
+      "bits32": "324ccccd",
+      "file": "gta4-nm/src/nmbr.rs",
+      "line": 397,
+      "literal": "1.192_092_9e-8"
+    },
+    {
+      "slot": 159,
+      "bits64": "3e83fffffba28b5a",
+      "bits32": "34200000",
+      "file": "gta4-nm/src/nmbr.rs",
+      "line": 428,
+      "literal": "1.490_116_1e-7"
+    },
+    {
+      "slot": 160,
+      "bits64": "3fea8f5c28f5c28f",
+      "bits32": "3f547ae1",
+      "file": "gta4-data/src/loadingscreens.rs",
+      "line": 453,
+      "literal": "0.83"
+    },
+    {
+      "slot": 161,
+      "bits64": "3fe55555673aa1bc",
+      "bits32": "3f2aaaab",
+      "file": "gta4-nm/src/nmbr.rs",
+      "line": 492,
+      "literal": "-0.666_666_7"
+    },
+    {
+      "slot": 162,
+      "bits64": "400970a3d70a3d71",
+      "bits32": "404b851f",
+      "file": "gta4-nm/src/nmbr.rs",
+      "line": 494,
+      "literal": "3.18"
+    },
+    {
+      "slot": 163,
+      "bits64": "40af400000000000",
+      "bits32": "457a0000",
+      "file": "gta4-data/src/addprojectile.rs",
+      "line": 403,
+      "literal": "4000"
+    },
+    {
+      "slot": 164,
+      "bits64": "3fd9eb8500000000",
+      "bits32": "3ecf5c28",
+      "file": "gta4-nm/src/nmbw.rs",
+      "line": 142,
+      "literal": "f32::from_bits(0x3ecf_5c28)"
+    },
+    {
+      "slot": 165,
+      "bits64": "401e28c75c4a83b2",
+      "bits32": "40f1463b",
+      "file": "gta4-nm/src/nmbw.rs",
+      "line": 147,
+      "literal": "7.539_823"
+    },
+    {
+      "slot": 166,
+      "bits64": "3fe70a3d70a3d70a",
+      "bits32": "3f3851ec",
+      "file": "gta4-data/src/camcar.rs",
+      "line": 1275,
+      "literal": "0.72"
+    },
+    {
+      "slot": 167,
+      "bits64": "3fe0a3d70a3d70a4",
+      "bits32": "3f051eb8",
+      "file": "gta4-data/examples/weaponcallees2_cases.rs",
+      "line": 61,
+      "literal": ".52"
+    },
+    {
+      "slot": 168,
+      "bits64": "4062c00000000000",
+      "bits32": "43160000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "150"
+    },
+    {
+      "slot": 169,
+      "bits64": "3e45798ee2308c3a",
+      "bits32": "322bcc77",
+      "file": "gta4-data/src/collider.rs",
+      "line": 108,
+      "literal": "1e-8"
+    },
+    {
+      "slot": 170,
+      "bits64": "3fe6666680000000",
+      "bits32": "3f333334",
+      "file": "gta4-nm/src/nmcf.rs",
+      "line": 76,
+      "literal": "f32::from_bits(0x3f33_3334)"
+    },
+    {
+      "slot": 171,
+      "bits64": "401399999999999a",
+      "bits32": "409ccccd",
+      "file": "gta4-data/src/collider.rs",
+      "line": 407,
+      "literal": "-4.9"
+    },
+    {
+      "slot": 172,
+      "bits64": "3e699999a0000000",
+      "bits32": "334ccccd",
+      "file": "gta4-nm/src/nmcf.rs",
+      "line": 300,
+      "literal": "f32::from_bits(0x334c_cccd)"
+    },
+    {
+      "slot": 173,
+      "bits64": "3e70000000000000",
+      "bits32": "33800000",
+      "file": "gta4-data/src/projtex.rs",
+      "line": 230,
+      "literal": "f32::from_bits(0x3380_0000)"
+    },
+    {
+      "slot": 174,
+      "bits64": "3e73333320000000",
+      "bits32": "33999999",
+      "file": "gta4-nm/src/nmcf.rs",
+      "line": 302,
+      "literal": "f32::from_bits(0x3399_9999)"
+    },
+    {
+      "slot": 175,
+      "bits64": "3ddb7cdfd9d7bdbb",
+      "bits32": "2edbe6ff",
+      "file": "gta4-nm/src/nmcf.rs",
+      "line": 311,
+      "literal": "1e-10"
+    },
+    {
+      "slot": 176,
+      "bits64": "40041b2f80f70b65",
+      "bits32": "4020d97c",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 581,
+      "literal": "-2.513_274_2"
+    },
+    {
+      "slot": 177,
+      "bits64": "3f9999999999999a",
+      "bits32": "3ccccccd",
+      "file": "gta4-data/src/camcar.rs",
+      "line": 603,
+      "literal": "0.025"
+    },
+    {
+      "slot": 178,
+      "bits64": "407dc00000000000",
+      "bits32": "43ee0000",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 624,
+      "literal": "476.0"
+    },
+    {
+      "slot": 179,
+      "bits64": "406dc00000000000",
+      "bits32": "436e0000",
+      "file": "gta4-data/examples/aimgun_cases.rs",
+      "line": 4,
+      "literal": "238"
+    },
+    {
+      "slot": 180,
+      "bits64": "405a000000000000",
+      "bits32": "42d00000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "104"
+    },
+    {
+      "slot": 181,
+      "bits64": "3f6c71c71963e721",
+      "bits32": "3b638e39",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 630,
+      "literal": "0.003_472_222_2"
+    },
+    {
+      "slot": 182,
+      "bits64": "406a000000000000",
+      "bits32": "43500000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "208"
+    },
+    {
+      "slot": 183,
+      "bits64": "3f7c71c720431f17",
+      "bits32": "3be38e39",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 632,
+      "literal": "-0.006_944_444_5"
+    },
+    {
+      "slot": 184,
+      "bits64": "3ff00068db8bac71",
+      "bits32": "3f800347",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 770,
+      "literal": "1.0001"
+    },
+    {
+      "slot": 185,
+      "bits64": "3feff7ced916872b",
+      "bits32": "3f7fbe77",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1238,
+      "literal": "0.999"
+    },
+    {
+      "slot": 186,
+      "bits64": "3fefac859a085462",
+      "bits32": "3f7d642d",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1276,
+      "literal": "0.9898098"
+    },
+    {
+      "slot": 187,
+      "bits64": "3fce9eea3b729cd6",
+      "bits32": "3e74f752",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1276,
+      "literal": "0.2392247"
+    },
+    {
+      "slot": 188,
+      "bits64": "3fb5478d5d4b34b2",
+      "bits32": "3daa3c6b",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1280,
+      "literal": "0.08312305"
+    },
+    {
+      "slot": 189,
+      "bits64": "3fa6da3a400f3118",
+      "bits32": "3d36d1d2",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1280,
+      "literal": "0.044633694"
+    },
+    {
+      "slot": 190,
+      "bits64": "3fefaa0267b94cbd",
+      "bits32": "3f7d5013",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1284,
+      "literal": "0.9895031"
+    },
+    {
+      "slot": 191,
+      "bits64": "3fc266a8559f18df",
+      "bits32": "3e133543",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1284,
+      "literal": "0.14375786"
+    },
+    {
+      "slot": 192,
+      "bits64": "3f9280796216a080",
+      "bits32": "3c9403cb",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1285,
+      "literal": "-0.018068215"
+    },
+    {
+      "slot": 193,
+      "bits64": "3fac71f39e83f554",
+      "bits32": "3d638f9d",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1285,
+      "literal": "-0.055556882"
+    },
+    {
+      "slot": 194,
+      "bits64": "3fd2f86104fd95c2",
+      "bits32": "3e97c308",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1288,
+      "literal": "0.29640985"
+    },
+    {
+      "slot": 195,
+      "bits64": "3fb8ad4d559e4220",
+      "bits32": "3dc56a6b",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1289,
+      "literal": "0.09639438"
+    },
+    {
+      "slot": 196,
+      "bits64": "4023000000000000",
+      "bits32": "41180000",
+      "file": "gta4-data/src/areaprobe.rs",
+      "line": 204,
+      "literal": "9.5"
+    },
+    {
+      "slot": 197,
+      "bits64": "3ff37e468cac4b4d",
+      "bits32": "3f9bf234",
+      "file": "gta4-nm/src/nmdbm.rs",
+      "line": 1555,
+      "literal": "1.218_329"
+    },
+    {
+      "slot": 198,
+      "bits64": "3ff999999999999a",
+      "bits32": "3fcccccd",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1924,
+      "literal": "1.6"
+    },
+    {
+      "slot": 199,
+      "bits64": "3fd851eb851eb852",
+      "bits32": "3ec28f5c",
+      "file": "gta4-data/src/aiahead.rs",
+      "line": 726,
+      "literal": "0.38"
+    },
+    {
+      "slot": 200,
+      "bits64": "3fefd70a3d70a3d7",
+      "bits32": "3f7eb852",
+      "file": "gta4-nm/src/nmfl.rs",
+      "line": 294,
+      "literal": "0.995"
+    },
+    {
+      "slot": 201,
+      "bits64": "3fbeb85200000000",
+      "bits32": "3df5c290",
+      "file": "gta4-nm/src/nmfl.rs",
+      "line": 348,
+      "literal": "f32::from_bits(0x3df5_c290)"
+    },
+    {
+      "slot": 202,
+      "bits64": "3fceb85200000000",
+      "bits32": "3e75c290",
+      "file": "gta4-nm/src/nmfl.rs",
+      "line": 348,
+      "literal": "f32::from_bits(0x3e75_c290)"
+    },
+    {
+      "slot": 203,
+      "bits64": "3fd70a3d70a3d70a",
+      "bits32": "3eb851ec",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1880,
+      "literal": ".36"
+    },
+    {
+      "slot": 204,
+      "bits64": "3fdeb85200000000",
+      "bits32": "3ef5c290",
+      "file": "gta4-nm/src/nmfl.rs",
+      "line": 348,
+      "literal": "f32::from_bits(0x3ef5_c290)"
+    },
+    {
+      "slot": 205,
+      "bits64": "3fc1eb851eb851ec",
+      "bits32": "3e0f5c29",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 157,
+      "literal": "0.14"
+    },
+    {
+      "slot": 206,
+      "bits64": "4001333333333333",
+      "bits32": "4009999a",
+      "file": "gta4-nm/src/nmfl.rs",
+      "line": 352,
+      "literal": "2.15"
+    },
+    {
+      "slot": 207,
+      "bits64": "4002666666666666",
+      "bits32": "40133333",
+      "file": "gta4-data/src/aimission.rs",
+      "line": 230,
+      "literal": "2.3"
+    },
+    {
+      "slot": 208,
+      "bits64": "3fffeb851eb851ec",
+      "bits32": "3fff5c29",
+      "file": "gta4-nm/src/nmfl.rs",
+      "line": 353,
+      "literal": "1.995"
+    },
+    {
+      "slot": 209,
+      "bits64": "4004cccccccccccd",
+      "bits32": "40266666",
+      "file": "gta4-data/src/carscan.rs",
+      "line": 314,
+      "literal": "2.6"
+    },
+    {
+      "slot": 210,
+      "bits64": "4046800000000000",
+      "bits32": "42340000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 214,
+      "literal": "45."
+    },
+    {
+      "slot": 211,
+      "bits64": "4016000000000000",
+      "bits32": "40b00000",
+      "file": "gta4-data/src/carstyle.rs",
+      "line": 60,
+      "literal": "-5.5"
+    },
+    {
+      "slot": 212,
+      "bits64": "3e699999a439c630",
+      "bits32": "334ccccd",
+      "file": "gta4-nm/src/nmfow.rs",
+      "line": 190,
+      "literal": "4.768_371_7e-8"
+    },
+    {
+      "slot": 213,
+      "bits64": "3ff1eb851eb851ec",
+      "bits32": "3f8f5c29",
+      "file": "gta4-data/src/scripttext.rs",
+      "line": 64,
+      "literal": "1.12"
+    },
+    {
+      "slot": 214,
+      "bits64": "3ff0624dd2f1a9fc",
+      "bits32": "3f83126f",
+      "file": "gta4-nm/src/nmfow.rs",
+      "line": 208,
+      "literal": "1.024"
+    },
+    {
+      "slot": 215,
+      "bits64": "3fe4ed916872b021",
+      "bits32": "3f276c8b",
+      "file": "gta4-nm/src/nmfow.rs",
+      "line": 208,
+      "literal": "0.654"
+    },
+    {
+      "slot": 216,
+      "bits64": "4002cccccccccccd",
+      "bits32": "40166666",
+      "file": "gta4-data/src/camfollow.rs",
+      "line": 20,
+      "literal": "2.35"
+    },
+    {
+      "slot": 217,
+      "bits64": "3fee147ae147ae14",
+      "bits32": "3f70a3d7",
+      "file": "gta4-data/src/linkpick.rs",
+      "line": 157,
+      "literal": "0.94"
+    },
+    {
+      "slot": 218,
+      "bits64": "3fe6b851eb851eb8",
+      "bits32": "3f35c28f",
+      "file": "gta4-nm/src/bump.rs",
+      "line": 560,
+      "literal": ".71"
+    },
+    {
+      "slot": 219,
+      "bits64": "4062000000000000",
+      "bits32": "43100000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "144"
+    },
+    {
+      "slot": 220,
+      "bits64": "4064000000000000",
+      "bits32": "43200000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 249,
+      "literal": "160.0"
+    },
+    {
+      "slot": 221,
+      "bits64": "3ff45d174d239f41",
+      "bits32": "3fa2e8ba",
+      "file": "gta4-nm/src/nmhf.rs",
+      "line": 331,
+      "literal": "1.272_727_3"
+    },
+    {
+      "slot": 222,
+      "bits64": "400b333333333333",
+      "bits32": "4059999a",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 1236,
+      "literal": "3.4"
+    },
+    {
+      "slot": 223,
+      "bits64": "3fd199999999999a",
+      "bits32": "3e8ccccd",
+      "file": "gta4-nm/src/nmhf.rs",
+      "line": 360,
+      "literal": "0.275"
+    },
+    {
+      "slot": 224,
+      "bits64": "3fea2e8b9925d653",
+      "bits32": "3f51745d",
+      "file": "gta4-nm/src/nmhf.rs",
+      "line": 412,
+      "literal": "0.818_181_8"
+    },
+    {
+      "slot": 225,
+      "bits64": "3fb5555560c95d45",
+      "bits32": "3daaaaab",
+      "file": "gta4-nm/src/nmhf.rs",
+      "line": 428,
+      "literal": "0.083_333_336"
+    },
+    {
+      "slot": 226,
+      "bits64": "3ffa666666666666",
+      "bits32": "3fd33333",
+      "file": "gta4-data/src/combat.rs",
+      "line": 1269,
+      "literal": "1.65"
+    },
+    {
+      "slot": 227,
+      "bits64": "3ff7333333333333",
+      "bits32": "3fb9999a",
+      "file": "gta4-nm/src/nmhf.rs",
+      "line": 495,
+      "literal": "1.45"
+    },
+    {
+      "slot": 228,
+      "bits64": "3fce7d3738507e73",
+      "bits32": "3e73e9ba",
+      "file": "gta4-nm/src/nmhl.rs",
+      "line": 93,
+      "literal": "-0.238_196_28"
+    },
+    {
+      "slot": 229,
+      "bits64": "3ff599999999999a",
+      "bits32": "3faccccd",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 2030,
+      "literal": "1.35"
+    },
+    {
+      "slot": 230,
+      "bits64": "3fec28f5c28f5c29",
+      "bits32": "3f6147ae",
+      "file": "gta4-data/src/strafe.rs",
+      "line": 453,
+      "literal": "0.88"
+    },
+    {
+      "slot": 231,
+      "bits64": "3f00002000000000",
+      "bits32": "38000100",
+      "file": "gta4-data/src/camshake.rs",
+      "line": 25,
+      "literal": "f32::from_bits(0x3800_0100)"
+    },
+    {
+      "slot": 232,
+      "bits64": "3f9eb851e0000000",
+      "bits32": "3cf5c28f",
+      "file": "gta4-nm/src/nmrs.rs",
+      "line": 235,
+      "literal": "f32::from_bits(0x3cf5c28f)"
+    },
+    {
+      "slot": 233,
+      "bits64": "3f1a36e2e0000000",
+      "bits32": "38d1b717",
+      "file": "gta4-data/src/cambusted.rs",
+      "line": 40,
+      "literal": "f32::from_bits(0x38D1_B717)"
+    },
+    {
+      "slot": 234,
+      "bits64": "3e801b2b29a4692b",
+      "bits32": "3400d959",
+      "file": "gta4-nm/src/nmrs.rs",
+      "line": 381,
+      "literal": "1.2e-7"
+    },
+    {
+      "slot": 235,
+      "bits64": "3ff6a09e60000000",
+      "bits32": "3fb504f3",
+      "file": "gta4-data/src/ide.rs",
+      "line": 1152,
+      "literal": "1.4142135381698608"
+    },
+    {
+      "slot": 236,
+      "bits64": "4160000000000000",
+      "bits32": "4b000000",
+      "file": "gta4-data/src/dynwater.rs",
+      "line": 417,
+      "literal": "-8_388_608.0"
+    },
+    {
+      "slot": 237,
+      "bits64": "4018cccccccccccd",
+      "bits32": "40c66666",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 999,
+      "literal": "6.2"
+    },
+    {
+      "slot": 238,
+      "bits64": "4028cccccccccccd",
+      "bits32": "41466666",
+      "file": "gta4-nm/src/nmru.rs",
+      "line": 92,
+      "literal": "12.4"
+    },
+    {
+      "slot": 239,
+      "bits64": "3fd555555c7dda4b",
+      "bits32": "3eaaaaab",
+      "file": "gta4-data/src/timecycmod.rs",
+      "line": 188,
+      "literal": "0.333_333_34"
+    },
+    {
+      "slot": 240,
+      "bits64": "400199999999999a",
+      "bits32": "400ccccd",
+      "file": "gta4-data/src/carpop.rs",
+      "line": 251,
+      "literal": "2.2"
+    },
+    {
+      "slot": 241,
+      "bits64": "400599999999999a",
+      "bits32": "402ccccd",
+      "file": "gta4-data/src/carnode.rs",
+      "line": 134,
+      "literal": "2.7"
+    },
+    {
+      "slot": 242,
+      "bits64": "3ff2147ae147ae14",
+      "bits32": "3f90a3d7",
+      "file": "gta4-nm/src/nmru.rs",
+      "line": 157,
+      "literal": "1.13"
+    },
+    {
+      "slot": 243,
+      "bits64": "3fc9999a04f96405",
+      "bits32": "3e4cccd0",
+      "file": "gta4-nm/src/nmru.rs",
+      "line": 175,
+      "literal": "0.200_000_05"
+    },
+    {
+      "slot": 244,
+      "bits64": "400399999999999a",
+      "bits32": "401ccccd",
+      "file": "gta4-data/src/collider.rs",
+      "line": 409,
+      "literal": "-2.45"
+    },
+    {
+      "slot": 245,
+      "bits64": "3f8999999999999a",
+      "bits32": "3c4ccccd",
+      "file": "gta4-data/src/projprestep.rs",
+      "line": 34,
+      "literal": "0.0125"
+    },
+    {
+      "slot": 246,
+      "bits64": "400aaaaaa6315791",
+      "bits32": "40555555",
+      "file": "gta4-data/src/statscreen.rs",
+      "line": 215,
+      "literal": "3.333_333_3"
+    },
+    {
+      "slot": 247,
+      "bits64": "4056800000000000",
+      "bits32": "42b40000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 187,
+      "literal": "-90"
+    },
+    {
+      "slot": 248,
+      "bits64": "3fed1745e20c7a0c",
+      "bits32": "3f68ba2f",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 364,
+      "literal": "0.909_090_94"
+    },
+    {
+      "slot": 249,
+      "bits64": "3ffd1745e76addc4",
+      "bits32": "3fe8ba2f",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 365,
+      "literal": "1.818_181_9"
+    },
+    {
+      "slot": 250,
+      "bits64": "400ccccccccccccd",
+      "bits32": "40666666",
+      "file": "gta4-data/src/disc.rs",
+      "line": 199,
+      "literal": "3.6"
+    },
+    {
+      "slot": 251,
+      "bits64": "3fc851eb851eb852",
+      "bits32": "3e428f5c",
+      "file": "gta4-data/examples/compositebox_cases.rs",
+      "line": 31,
+      "literal": ".19"
+    },
+    {
+      "slot": 252,
+      "bits64": "3e799999c0000000",
+      "bits32": "33ccccce",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 787,
+      "literal": "f32::from_bits(0x33CC_CCCE)"
+    },
+    {
+      "slot": 253,
+      "bits64": "3fe91eb851eb851f",
+      "bits32": "3f48f5c3",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 810,
+      "literal": "0.785"
+    },
+    {
+      "slot": 254,
+      "bits64": "3fff666666666666",
+      "bits32": "3ffb3333",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 809,
+      "literal": "1.9625"
+    },
+    {
+      "slot": 255,
+      "bits64": "3ff2666666666666",
+      "bits32": "3f933333",
+      "file": "gta4-data/src/armik.rs",
+      "line": 12,
+      "literal": "1.15"
+    },
+    {
+      "slot": 256,
+      "bits64": "3fd5555560000000",
+      "bits32": "3eaaaaab",
+      "file": "gta4-data/src/complexguncallees.rs",
+      "line": 25,
+      "literal": "f32::from_bits(0x3EAA_AAAB)"
+    },
+    {
+      "slot": 257,
+      "bits64": "4006bb950184647e",
+      "bits32": "4035dca8",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 1027,
+      "literal": "2.841_592_8"
+    },
+    {
+      "slot": 258,
+      "bits64": "3fd47ae147ae147b",
+      "bits32": "3ea3d70a",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 145,
+      "literal": "0.32"
+    },
+    {
+      "slot": 259,
+      "bits64": "3fd8000000000000",
+      "bits32": "3ec00000",
+      "file": "gta4-data/examples/routewalk_cases.rs",
+      "line": 58,
+      "literal": "0.375"
+    },
+    {
+      "slot": 260,
+      "bits64": "4012000000000000",
+      "bits32": "40900000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 77,
+      "literal": "4.5"
+    },
+    {
+      "slot": 261,
+      "bits64": "4008552e9b1dfe18",
+      "bits32": "4042a975",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 1045,
+      "literal": "3.041_592_8"
+    },
+    {
+      "slot": 262,
+      "bits64": "4031000000000000",
+      "bits32": "41880000",
+      "file": "gta4-data/examples/aimgun_cases.rs",
+      "line": 86,
+      "literal": "17"
+    },
+    {
+      "slot": 263,
+      "bits64": "4003333333333333",
+      "bits32": "4019999a",
+      "file": "gta4-data/src/aiahead.rs",
+      "line": 787,
+      "literal": "2.4"
+    },
+    {
+      "slot": 264,
+      "bits64": "3fdaaaaaa38225b5",
+      "bits32": "3ed55555",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 1225,
+      "literal": "0.416_666_66"
+    },
+    {
+      "slot": 265,
+      "bits64": "405e000000000000",
+      "bits32": "42f00000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 1534,
+      "literal": "120"
+    },
+    {
+      "slot": 266,
+      "bits64": "3fd4924923099a5e",
+      "bits32": "3ea49249",
+      "file": "gta4-nm/src/nmshot.rs",
+      "line": 1276,
+      "literal": "0.321_428_57"
+    },
+    {
+      "slot": 267,
+      "bits64": "3f91df469963e11d",
+      "bits32": "3c8efa35",
+      "file": "gta4-data/src/actiontable.rs",
+      "line": 101,
+      "literal": "0.017453292"
+    },
+    {
+      "slot": 268,
+      "bits64": "405fe00000000000",
+      "bits32": "42ff0000",
+      "file": "gta4-data/src/controls.rs",
+      "line": 288,
+      "literal": "127.5"
+    },
+    {
+      "slot": 269,
+      "bits64": "3f80101029aa03b0",
+      "bits32": "3c008081",
+      "file": "gta4-nm/src/playerctl.rs",
+      "line": 21,
+      "literal": "0.007843138"
+    },
+    {
+      "slot": 270,
+      "bits64": "4050000000000000",
+      "bits32": "42800000",
+      "file": "gta4-data/examples/anyped_cases.rs",
+      "line": 2,
+      "literal": "64"
+    },
+    {
+      "slot": 271,
+      "bits64": "3f747ae147ae147b",
+      "bits32": "3ba3d70a",
+      "file": "gta4-data/src/blendshape.rs",
+      "line": 501,
+      "literal": "0.005"
+    },
+    {
+      "slot": 272,
+      "bits64": "3ee4f8b580000000",
+      "bits32": "3727c5ac",
+      "file": "gta4-data/src/shotsoundpick.rs",
+      "line": 32,
+      "literal": "f32::from_bits(0x3727_C5AC)"
+    },
+    {
+      "slot": 273,
+      "bits64": "3f7cac083126e979",
+      "bits32": "3be56042",
+      "file": "gta4-data/src/pedbodies.rs",
+      "line": 37,
+      "literal": "0.007"
+    },
+    {
+      "slot": 274,
+      "bits64": "3f3a36e2eb1c432d",
+      "bits32": "39d1b717",
+      "file": "gta4-nm/src/ragdoll.rs",
+      "line": 1507,
+      "literal": "0.0004"
+    },
+    {
+      "slot": 275,
+      "bits64": "46293e5939a08cea",
+      "bits32": "7149f2ca",
+      "file": "gta4-data/src/copblip.rs",
+      "line": 1118,
+      "literal": "1e30"
+    },
+    {
+      "slot": 276,
+      "bits64": "3fd554c985f06f69",
+      "bits32": "3eaaa64c",
+      "file": "gta4-nm/src/ragdoll.rs",
+      "line": 2036,
+      "literal": "0.3333"
+    },
+    {
+      "slot": 277,
+      "bits64": "3ec0c6f7a0b5ed8d",
+      "bits32": "360637bd",
+      "file": "gta4-data/src/audioconfig.rs",
+      "line": 2409,
+      "literal": "2e-6"
+    },
+    {
+      "slot": 278,
+      "bits64": "3f95810624dd2f1b",
+      "bits32": "3cac0831",
+      "file": "gta4-nm/src/ragdoll.rs",
+      "line": 3221,
+      "literal": "0.021"
+    },
+    {
+      "slot": 279,
+      "bits64": "3ff69fbe76c8b439",
+      "bits32": "3fb4fdf4",
+      "file": "gta4-nm/src/ragdoll.rs",
+      "line": 3667,
+      "literal": "1.414"
+    },
+    {
+      "slot": 280,
+      "bits64": "3e9828c0be769dc1",
+      "bits32": "34c14606",
+      "file": "gta4-data/src/collider.rs",
+      "line": 88,
+      "literal": "3.6e-7"
+    },
+    {
+      "slot": 281,
+      "bits64": "4092c00000000000",
+      "bits32": "44960000",
+      "file": "gta4-data/src/aisteer.rs",
+      "line": 484,
+      "literal": "1200"
+    },
+    {
+      "slot": 282,
+      "bits64": "3f91df46a0000000",
+      "bits32": "3c8efa35",
+      "file": "gta4-data/src/actiontable.rs",
+      "line": 103,
+      "literal": "f32::from_bits(0x3C8E_FA35)"
+    },
+    {
+      "slot": 283,
+      "bits64": "4066800000000000",
+      "bits32": "43340000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1021,
+      "literal": "180"
+    },
+    {
+      "slot": 284,
+      "bits64": "401921fb60000000",
+      "bits32": "40c90fdb",
+      "file": "gta4-data/src/actiontable.rs",
+      "line": 119,
+      "literal": "f32::from_bits(0x40C9_0FDB)"
+    },
+    {
+      "slot": 285,
+      "bits64": "3fb3b13b20000000",
+      "bits32": "3d9d89d9",
+      "file": "gta4-data/src/carscan.rs",
+      "line": 125,
+      "literal": "f32::from_bits(0x3D9D_89D9)"
+    },
+    {
+      "slot": 286,
+      "bits64": "3fa99999a0000000",
+      "bits32": "3d4ccccd",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 24,
+      "literal": "f32::from_bits(0x3D4C_CCCD)"
+    },
+    {
+      "slot": 287,
+      "bits64": "3fd99999a0000000",
+      "bits32": "3ecccccd",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 1191,
+      "literal": "f32::from_bits(0x3ECC_CCCD)"
+    },
+    {
+      "slot": 288,
+      "bits64": "3f947ae140000000",
+      "bits32": "3ca3d70a",
+      "file": "gta4-data/src/aimgunparts.rs",
+      "line": 588,
+      "literal": "f32::from_bits(0x3CA3_D70A)"
+    },
+    {
+      "slot": 289,
+      "bits64": "406c200000000000",
+      "bits32": "43610000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "225"
+    },
+    {
+      "slot": 290,
+      "bits64": "3fc9999a00000000",
+      "bits32": "3e4cccd0",
+      "file": "gta4-data/src/carscan.rs",
+      "line": 261,
+      "literal": "f32::from_bits(0x3E4C_CCD0)"
+    },
+    {
+      "slot": 291,
+      "bits64": "3fecccccc0000000",
+      "bits32": "3f666666",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 68,
+      "literal": "f32::from_bits(0x3F66_6666)"
+    },
+    {
+      "slot": 292,
+      "bits64": "3f80101020000000",
+      "bits32": "3c008081",
+      "file": "gta4-data/src/controls.rs",
+      "line": 291,
+      "literal": "f32::from_bits(0x3C00_8081)"
+    },
+    {
+      "slot": 293,
+      "bits64": "3f70101020000000",
+      "bits32": "3b808081",
+      "file": "gta4-data/src/controls.rs",
+      "line": 302,
+      "literal": "f32::from_bits(0x3B80_8081)"
+    },
+    {
+      "slot": 294,
+      "bits64": "3f80204080000000",
+      "bits32": "3c010204",
+      "file": "gta4-data/src/carrec.rs",
+      "line": 38,
+      "literal": "0.007_874_015_718_698_502"
+    },
+    {
+      "slot": 295,
+      "bits64": "3fe23d70a0000000",
+      "bits32": "3f11eb85",
+      "file": "gta4-data/src/controls.rs",
+      "line": 363,
+      "literal": "f32::from_bits(0x3F11_EB85)"
+    },
+    {
+      "slot": 296,
+      "bits64": "3fe99999a0000000",
+      "bits32": "3f4ccccd",
+      "file": "gta4-data/src/aisteer.rs",
+      "line": 247,
+      "literal": "f32::from_bits(0x3F4C_CCCD)"
+    },
+    {
+      "slot": 297,
+      "bits64": "406fe00000000000",
+      "bits32": "437f0000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 93,
+      "literal": "255"
+    },
+    {
+      "slot": 298,
+      "bits64": "40dd4c0000000000",
+      "bits32": "46ea6000",
+      "file": "gta4-data/examples/fall_cases.rs",
+      "line": 247,
+      "literal": "30000"
+    },
+    {
+      "slot": 299,
+      "bits64": "4041800000000000",
+      "bits32": "420c0000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1889,
+      "literal": "35"
+    },
+    {
+      "slot": 300,
+      "bits64": "3fa47ae160000000",
+      "bits32": "3d23d70b",
+      "file": "gta4-data/src/damage.rs",
+      "line": 113,
+      "literal": "f32::from_bits(0x3D23_D70B)"
+    },
+    {
+      "slot": 301,
+      "bits64": "406f400000000000",
+      "bits32": "437a0000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "250"
+    },
+    {
+      "slot": 302,
+      "bits64": "407f400000000000",
+      "bits32": "43fa0000",
+      "file": "gta4-data/examples/boatgetin_cases.rs",
+      "line": 79,
+      "literal": "500"
+    },
+    {
+      "slot": 303,
+      "bits64": "4087700000000000",
+      "bits32": "443b8000",
+      "file": "gta4-data/src/carnode.rs",
+      "line": 3,
+      "literal": "750"
+    },
+    {
+      "slot": 304,
+      "bits64": "4093880000000000",
+      "bits32": "449c4000",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 801,
+      "literal": "1250"
+    },
+    {
+      "slot": 305,
+      "bits64": "4097700000000000",
+      "bits32": "44bb8000",
+      "file": "gta4-data/src/aisteer.rs",
+      "line": 407,
+      "literal": "1500"
+    },
+    {
+      "slot": 306,
+      "bits64": "40a7700000000000",
+      "bits32": "453b8000",
+      "file": "gta4-data/examples/fall_cases.rs",
+      "line": 239,
+      "literal": "3000"
+    },
+    {
+      "slot": 307,
+      "bits64": "4072c00000000000",
+      "bits32": "43960000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 973,
+      "literal": "300"
+    },
+    {
+      "slot": 308,
+      "bits64": "3f647ae147ae147b",
+      "bits32": "3b23d70a",
+      "file": "gta4-data/src/crt.rs",
+      "line": 1023,
+      "literal": "-0.25e-2"
+    },
+    {
+      "slot": 309,
+      "bits64": "bf5767dce0000000",
+      "bits32": "babb3ee7",
+      "file": "gta4-data/src/damage.rs",
+      "line": 299,
+      "literal": "f32::from_bits(0xBABB_3EE7)"
+    },
+    {
+      "slot": 310,
+      "bits64": "40ac200000000000",
+      "bits32": "45610000",
+      "file": "gta4-data/src/carnode.rs",
+      "line": 339,
+      "literal": "3600"
+    },
+    {
+      "slot": 311,
+      "bits64": "40a9000000000000",
+      "bits32": "45480000",
+      "file": "gta4-data/src/damage.rs",
+      "line": 293,
+      "literal": "-3200"
+    },
+    {
+      "slot": 312,
+      "bits64": "3f547ae147ae147b",
+      "bits32": "3aa3d70a",
+      "file": "gta4-data/src/damage.rs",
+      "line": 292,
+      "literal": "0.00125"
+    },
+    {
+      "slot": 313,
+      "bits64": "40690000e0000000",
+      "bits32": "43480007",
+      "file": "gta4-data/src/damage.rs",
+      "line": 322,
+      "literal": "f32::from_bits(0x4348_0007)"
+    },
+    {
+      "slot": 314,
+      "bits64": "3f00002000000000",
+      "bits32": "38000100",
+      "file": "gta4-data/src/camshake.rs",
+      "line": 25,
+      "literal": "f32::from_bits(0x3800_0100)"
+    },
+    {
+      "slot": 315,
+      "bits64": "3e80000000000000",
+      "bits32": "34000000",
+      "file": "gta4-data/src/damage.rs",
+      "line": 398,
+      "literal": "1.1920928955078125e-07"
+    },
+    {
+      "slot": 316,
+      "bits64": "3fe921fb60000000",
+      "bits32": "3f490fdb",
+      "file": "gta4-data/src/fall.rs",
+      "line": 105,
+      "literal": "f32::from_bits(0x3F49_0FDB)"
+    },
+    {
+      "slot": 317,
+      "bits64": "400921fb60000000",
+      "bits32": "40490fdb",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 381,
+      "literal": "f32::from_bits(0x4049_0FDB)"
+    },
+    {
+      "slot": 318,
+      "bits64": "3fe45f3060000000",
+      "bits32": "3f22f983",
+      "file": "gta4-data/src/fall.rs",
+      "line": 108,
+      "literal": "f32::from_bits(0x3F22_F983)"
+    },
+    {
+      "slot": 319,
+      "bits64": "404c200000000000",
+      "bits32": "42610000",
+      "file": "gta4-data/src/fall.rs",
+      "line": 326,
+      "literal": "56.25"
+    },
+    {
+      "slot": 320,
+      "bits64": "3ff19999a0000000",
+      "bits32": "3f8ccccd",
+      "file": "gta4-data/src/entrypick.rs",
+      "line": 256,
+      "literal": "f32::from_bits(0x3F8C_CCCD)"
+    },
+    {
+      "slot": 321,
+      "bits64": "4042000000000000",
+      "bits32": "42100000",
+      "file": "bo1-worker/src/gait.rs",
+      "line": 144,
+      "literal": "36."
+    },
+    {
+      "slot": 322,
+      "bits64": "40c3880000000000",
+      "bits32": "461c4000",
+      "file": "gta4-data/examples/dynsample_cases.rs",
+      "line": 11,
+      "literal": "10000"
+    },
+    {
+      "slot": 323,
+      "bits64": "3fb1df46a0000000",
+      "bits32": "3d8efa35",
+      "file": "gta4-data/src/follow.rs",
+      "line": 286,
+      "literal": "f32::from_bits(0x3D8E_FA35)"
+    },
+    {
+      "slot": 324,
+      "bits64": "4090000000000000",
+      "bits32": "44800000",
+      "file": "bo1-worker/src/recovery.rs",
+      "line": 100,
+      "literal": "1024"
+    },
+    {
+      "slot": 325,
+      "bits64": "3fb0000000000000",
+      "bits32": "3d800000",
+      "file": "gta4-data/examples/routewalk_cases.rs",
+      "line": 57,
+      "literal": "0.0625"
+    },
+    {
+      "slot": 326,
+      "bits64": "3ff921fb60000000",
+      "bits32": "3fc90fdb",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 381,
+      "literal": "f32::from_bits(0x3FC9_0FDB)"
+    },
+    {
+      "slot": 327,
+      "bits64": "405f400000000000",
+      "bits32": "42fa0000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 676,
+      "literal": "125"
+    },
+    {
+      "slot": 328,
+      "bits64": "3f90000000000000",
+      "bits32": "3c800000",
+      "file": "gta4-data/examples/aiahead_cases.rs",
+      "line": 16,
+      "literal": "0.015625"
+    },
+    {
+      "slot": 329,
+      "bits64": "3fd99999c0000000",
+      "bits32": "3eccccce",
+      "file": "gta4-data/src/getup.rs",
+      "line": 1105,
+      "literal": "f32::from_bits(0x3ECC_CCCE)"
+    },
+    {
+      "slot": 330,
+      "bits64": "3ff6a09e60000000",
+      "bits32": "3fb504f3",
+      "file": "gta4-data/src/ide.rs",
+      "line": 1152,
+      "literal": "1.4142135381698608"
+    },
+    {
+      "slot": 331,
+      "bits64": "404ca5dc00000000",
+      "bits32": "42652ee0",
+      "file": "gta4-data/src/carnode.rs",
+      "line": 303,
+      "literal": "f32::from_bits(0x4265_2EE0)"
+    },
+    {
+      "slot": 332,
+      "bits64": "40f5f90000000000",
+      "bits32": "47afc800",
+      "file": "gta4-data/src/drunk.rs",
+      "line": 9,
+      "literal": "90_000"
+    },
+    {
+      "slot": 333,
+      "bits64": "40d0000000000000",
+      "bits32": "46800000",
+      "file": "gta4-data/src/aidrive.rs",
+      "line": 724,
+      "literal": "16384"
+    },
+    {
+      "slot": 334,
+      "bits64": "43abc16d674ec800",
+      "bits32": "5d5e0b6b",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 13,
+      "literal": "1e18"
+    },
+    {
+      "slot": 335,
+      "bits64": "3fd45f306dc9c883",
+      "bits32": "3ea2f983",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 29,
+      "literal": "0x3FD4_5F30_6DC9_C883"
+    },
+    {
+      "slot": 336,
+      "bits64": "400921fb54400000",
+      "bits32": "40490fdb",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 31,
+      "literal": "0x4009_21FB_5440_0000"
+    },
+    {
+      "slot": 337,
+      "bits64": "3de0b4611a600000",
+      "bits32": "2f05a309",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 32,
+      "literal": "0x3DE0_B461_1A60_0000"
+    },
+    {
+      "slot": 338,
+      "bits64": "41aa39de00000000",
+      "bits32": "4d51cef0",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 34,
+      "literal": "220_000_000.0"
+    },
+    {
+      "slot": 339,
+      "bits64": "3ce880ff6993df95",
+      "bits32": "274407fb",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 39,
+      "literal": "0x3CE8_80FF_6993_DF95"
+    },
+    {
+      "slot": 340,
+      "bits64": "bd6ae420dc08499c",
+      "bits32": "ab572107",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 40,
+      "literal": "0xBD6A_E420_DC08_499C"
+    },
+    {
+      "slot": 341,
+      "bits64": "3de6123c686ad430",
+      "bits32": "2f3091e3",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 41,
+      "literal": "0x3DE6_123C_686A_D430"
+    },
+    {
+      "slot": 342,
+      "bits64": "be5ae6454b5dc0ab",
+      "bits32": "b2d7322a",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 42,
+      "literal": "0xBE5A_E645_4B5D_C0AB"
+    },
+    {
+      "slot": 343,
+      "bits64": "3ec71de3a524f063",
+      "bits32": "3638ef1d",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 43,
+      "literal": "0x3EC7_1DE3_A524_F063"
+    },
+    {
+      "slot": 344,
+      "bits64": "bf2a01a01a013e1a",
+      "bits32": "b9500d01",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 44,
+      "literal": "0xBF2A_01A0_1A01_3E1A"
+    },
+    {
+      "slot": 345,
+      "bits64": "3f811111111110b0",
+      "bits32": "3c088889",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 45,
+      "literal": "0x3F81_1111_1111_10B0"
+    },
+    {
+      "slot": 346,
+      "bits64": "bfc5555555555555",
+      "bits32": "be2aaaab",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 46,
+      "literal": "0xBFC5_5555_5555_5555"
+    },
+    {
+      "slot": 347,
+      "bits64": "400921fb54442d18",
+      "bits32": "40490fdb",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 100,
+      "literal": "3.141592653589793"
+    },
+    {
+      "slot": 348,
+      "bits64": "3ff921fb54442d18",
+      "bits32": "3fc90fdb",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 109,
+      "literal": "1.5707963267948966"
+    },
+    {
+      "slot": 349,
+      "bits64": "3fd126145e9ecd56",
+      "bits32": "3e8930a3",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 116,
+      "literal": "0.2679491924311227"
+    },
+    {
+      "slot": 350,
+      "bits64": "3ffbb67ae8584caa",
+      "bits32": "3fddb3d7",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 118,
+      "literal": "1.7320508075688772"
+    },
+    {
+      "slot": 351,
+      "bits64": "3feacd7ad9b187bd",
+      "bits32": "3f566bd7",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 122,
+      "literal": "-0.8375829936815006f64"
+    },
+    {
+      "slot": 352,
+      "bits64": "4020fd3f5c8d6a63",
+      "bits32": "4107e9fb",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 122,
+      "literal": "-8.494624035132068"
+    },
+    {
+      "slot": 353,
+      "bits64": "402e0c49e14ac710",
+      "bits32": "4170624f",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 123,
+      "literal": "15.024001160028575"
+    },
+    {
+      "slot": 354,
+      "bits64": "404dca0a320da3d7",
+      "bits32": "426e5052",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 124,
+      "literal": "59.57843614259735"
+    },
+    {
+      "slot": 355,
+      "bits64": "4034817fb9e2bccb",
+      "bits32": "41a40bfe",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 125,
+      "literal": "-20.505855195861653"
+    },
+    {
+      "slot": 356,
+      "bits64": "40558a12040b6da5",
+      "bits32": "42ac5090",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 126,
+      "literal": "86.15734959713025"
+    },
+    {
+      "slot": 357,
+      "bits64": "402b60a651061ce2",
+      "bits32": "415b0533",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 127,
+      "literal": "-13.688768894191927"
+    },
+    {
+      "slot": 358,
+      "bits64": "4044887cbcc495a9",
+      "bits32": "422443e6",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 128,
+      "literal": "41.06630668257578"
+    },
+    {
+      "slot": 359,
+      "bits64": "3fe0c152382d7366",
+      "bits32": "3f060a92",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 133,
+      "literal": "0.5235987755982989"
+    },
+    {
+      "slot": 360,
+      "bits64": "3ff0c152382d7366",
+      "bits32": "3f860a92",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 133,
+      "literal": "1.0471975511965979"
+    },
+    {
+      "slot": 361,
+      "bits64": "c03b5e55a83a0a62",
+      "bits32": "c1daf2ad",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 152,
+      "literal": "0xC03B5E55A83A0A62"
+    },
+    {
+      "slot": 362,
+      "bits64": "404c9aa7360ad48a",
+      "bits32": "4264d53a",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 152,
+      "literal": "0x404C9AA7360AD48A"
+    },
+    {
+      "slot": 363,
+      "bits64": "c043d82ca9a6da9f",
+      "bits32": "c21ec165",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 152,
+      "literal": "0xC043D82CA9A6DA9F"
+    },
+    {
+      "slot": 364,
+      "bits64": "40244e1764ec3927",
+      "bits32": "412270bb",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 152,
+      "literal": "0x40244E1764EC3927"
+    },
+    {
+      "slot": 365,
+      "bits64": "bfe64bbdb5e61e65",
+      "bits32": "bf325dee",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 152,
+      "literal": "0xBFE64BBDB5E61E65"
+    },
+    {
+      "slot": 366,
+      "bits64": "c06486c03e2b87cc",
+      "bits32": "c3243602",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 153,
+      "literal": "0xC06486C03E2B87CC"
+    },
+    {
+      "slot": 367,
+      "bits64": "407a124f101eb843",
+      "bits32": "43d09279",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 153,
+      "literal": "0x407A124F101EB843"
+    },
+    {
+      "slot": 368,
+      "bits64": "c077ddcefc56a848",
+      "bits32": "c3beee78",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 153,
+      "literal": "0xC077DDCEFC56A848"
+    },
+    {
+      "slot": 369,
+      "bits64": "4062de7c96591c70",
+      "bits32": "4316f3e5",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 153,
+      "literal": "0x4062DE7C96591C70"
+    },
+    {
+      "slot": 370,
+      "bits64": "c037d2e86ef9861f",
+      "bits32": "c1be9743",
+      "file": "gta4-data/src/mathrt.rs",
+      "line": 153,
+      "literal": "0xC037D2E86EF9861F"
+    },
+    {
+      "slot": 371,
+      "bits64": "405fc00000000000",
+      "bits32": "42fe0000",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1172,
+      "literal": "127.0"
+    },
+    {
+      "slot": 372,
+      "bits64": "400a666666666666",
+      "bits32": "40533333",
+      "file": "gta4-data/src/melee_task.rs",
+      "line": 32,
+      "literal": "3.3"
+    },
+    {
+      "slot": 373,
+      "bits64": "4036000000000000",
+      "bits32": "41b00000",
+      "file": "gta4-data/examples/aimgun_cases.rs",
+      "line": 67,
+      "literal": "22"
+    },
+    {
+      "slot": 374,
+      "bits64": "407ff00000000000",
+      "bits32": "43ff8000",
+      "file": "gta4-data/src/anim.rs",
+      "line": 362,
+      "literal": "511"
+    },
+    {
+      "slot": 375,
+      "bits64": "3fc99999a0000000",
+      "bits32": "3e4ccccd",
+      "file": "gta4-data/src/aiahead.rs",
+      "line": 331,
+      "literal": "f32::from_bits(0xBE4C_CCCD)"
+    },
+    {
+      "slot": 376,
+      "bits64": "40efffe000000000",
+      "bits32": "477fff00",
+      "file": "bo1-worker/src/runtime.rs",
+      "line": 1150,
+      "literal": "65535.0"
+    },
+    {
+      "slot": 377,
+      "bits64": "4070000000000000",
+      "bits32": "43800000",
+      "file": "bo1-worker/src/protocol.rs",
+      "line": 23,
+      "literal": "256"
+    },
+    {
+      "slot": 378,
+      "bits64": "40b5b38ccccccccd",
+      "bits32": "45ad9c66",
+      "file": "gta4-data/src/ped.rs",
+      "line": 166,
+      "literal": "5555.55"
+    },
+    {
+      "slot": 379,
+      "bits64": "4029000000000000",
+      "bits32": "41480000",
+      "file": "gta4-data/src/carslots.rs",
+      "line": 128,
+      "literal": "12.5"
+    },
+    {
+      "slot": 380,
+      "bits64": "405a400000000000",
+      "bits32": "42d20000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 1489,
+      "literal": "105"
+    },
+    {
+      "slot": 381,
+      "bits64": "40c387f340000000",
+      "bits32": "461c3f9a",
+      "file": "gta4-data/src/aisteer.rs",
+      "line": 378,
+      "literal": "f32::from_bits(0xC61C_3F9A)"
+    },
+    {
+      "slot": 382,
+      "bits64": "3f00000000000000",
+      "bits32": "38000000",
+      "file": "gta4-data/src/carpeds.rs",
+      "line": 626,
+      "literal": "f32::from_bits(0x3800_0000)"
+    },
+    {
+      "slot": 383,
+      "bits64": "3fedc28f5c28f5c3",
+      "bits32": "3f6e147b",
+      "file": "gta4-data/src/carlamps.rs",
+      "line": 354,
+      "literal": "-0.93"
+    },
+    {
+      "slot": 384,
+      "bits64": "3fefae147ae147ae",
+      "bits32": "3f7d70a4",
+      "file": "gta4-data/examples/soundtree.rs",
+      "line": 90,
+      "literal": ".99"
+    },
+    {
+      "slot": 385,
+      "bits64": "3fba1f58c0000000",
+      "bits32": "3dd0fac6",
+      "file": "gta4-data/src/tyre.rs",
+      "line": 335,
+      "literal": "f32::from_bits(0x3DD0_FAC6)"
+    },
+    {
+      "slot": 386,
+      "bits64": "3fc47ae160000000",
+      "bits32": "3e23d70b",
+      "file": "gta4-data/src/tyre.rs",
+      "line": 438,
+      "literal": "f32::from_bits(0x3E23_D70B)"
+    },
+    {
+      "slot": 387,
+      "bits64": "3f50624de0000000",
+      "bits32": "3a83126f",
+      "file": "gta4-data/src/aisteer.rs",
+      "line": 543,
+      "literal": "f32::from_bits(0x3A83_126F)"
+    },
+    {
+      "slot": 388,
+      "bits64": "40c387f333333333",
+      "bits32": "461c3f9a",
+      "file": "gta4-data/src/skidmarks.rs",
+      "line": 237,
+      "literal": "9999.9"
+    },
+    {
+      "slot": 389,
+      "bits64": "4067200000000000",
+      "bits32": "43390000",
+      "file": "gta4-data/examples/entity_cases.rs",
+      "line": 48,
+      "literal": "185"
+    },
+    {
+      "slot": 390,
+      "bits64": "4019000000000000",
+      "bits32": "40c80000",
+      "file": "gta4-data/src/follow.rs",
+      "line": 524,
+      "literal": "6.25"
+    }
+  ],
+  "unreferenced_slots_trap": true
+}

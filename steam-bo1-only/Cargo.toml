@@ -1,0 +1,21 @@
+[workspace]
+members = ["crates/delirium-data", "crates/delirium", "crates/bo1-worker"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+publish = false
+
+[profile.release]
+debug = 0
+strip = "symbols"
+lto = "off"
+codegen-units = 16
+
+
+[workspace.metadata.delirium-upstream]
+repository = "https://github.com/PVCPC/delirium-physics"
+revision = "23ea7cfa2a1000d64870d2549834006d21b3e05c"
+# BO1 host adapters retain removed-part masks, sole contacts and persistent worker pools.
