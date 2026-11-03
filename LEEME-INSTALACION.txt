@@ -1,4 +1,4 @@
-BO1 DELIRIUM STEAM - 0.2.2-bo1-only-beta3 - UN JUGADOR
+BO1 DELIRIUM STEAM - 0.2.3-bo1-only-beta4 - UN JUGADOR
 
 INSTALACION
 1. Descomprime el RAR.
@@ -21,6 +21,7 @@ Solo la primera pulsacion de cada partida solicita el salto a ronda 10, con la t
 No reinicia las rondas en las siguientes pulsaciones ni retrocede si ya estas por encima de 10.
 
 CAMBIOS
+Los controles se cargan solo al entrar en un mapa de Zombies, despues del menu principal.
 La preparacion espera a los recursos reales, informa del progreso y muestra el registro si falla.
 Corregido el enlace entre la cabeza del cuerpo y los huesos compartidos del modelo facial.
 El cuerpo de 21 partes se construye desde los huesos, masas y limites del ragdoll de BO1.

@@ -6,10 +6,45 @@ static int pressHandle,hintHandle;
 static bool held,hinted;
 static bool regression;
 static void (__cdecl* originalLoadScripts)(int);
+
+static constexpr const char* stockScripts[]={
+    "maps/_utility.gsc",
+    "common_scripts/utility.gsc",
+    "maps/_zombiemode_utility.gsc",
+    "maps/_zombiemode_score.gsc",
+    "maps/_zombiemode.gsc",
+};
+
+static void __cdecl findStockScript(void* asset,void* context){
+    const auto* name=native::at<const char*>(asset,0);
+    auto& found=*static_cast<unsigned*>(context);
+    for(unsigned i=0;i<std::size(stockScripts);++i){
+        if(name&&strcmp(name,stockScripts[i])==0)found|=1u<<i;
+    }
+}
+
+static bool stockScriptsReady(){
+    const auto* mode=reinterpret_cast<void*(__cdecl*)(const char*)>(0x5ae810)("zombiemode");
+    if(!mode||!native::at<bool>(mode,0x18))return false;
+
+    // Query loaded raw files without asking the script compiler to load them.
+    constexpr int rawFileAssetType=36;
+    unsigned found=0;
+    reinterpret_cast<void(__cdecl*)(int,void(__cdecl*)(void*,void*),void*,bool)>(0x54c1c0)(
+        rawFileAssetType,findStockScript,&found,false);
+    return found==((1u<<std::size(stockScripts))-1u);
+}
+
 static void __cdecl loadScripts(int instance){
     originalLoadScripts(instance);
     if(instance)return;
     pressHandle=0;hintHandle=0;held=false;hinted=false;
+    // The frontend also compiles server scripts, but only Zombies maps load
+    // the stock scripts referenced by our controls.
+    if(!stockScriptsReady()){
+        log("Steam test controls skipped: Zombies scripts unavailable");
+        return;
+    }
     // The function table exists only during script compilation. Resolve our
     // own function now; never use a stale VM handle after a map restart.
     constexpr char script[]="maps/delirium/controls";

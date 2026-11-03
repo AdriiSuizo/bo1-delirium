@@ -1,10 +1,10 @@
-# BO1 Delirium Steam beta 3
+# BO1 Delirium Steam beta 4
 
-Mod para Zombies de un jugador en Black Ops de Steam. La preparación usa los recursos de la instalación local de BO1. La beta 3 espera a que estén listos antes de abrir el juego y conserva el arreglo facial y el atajo de flecha abajo de la beta 2.
+Mod para Zombies de un jugador en Black Ops de Steam. La preparación usa los recursos de la instalación local de BO1. La beta 4 carga el atajo de flecha abajo cuando están disponibles los scripts de Zombies. El menú principal puede arrancar con sus propios scripts.
 
 - [Instalación y controles](LEEME-INSTALACION.txt)
 - [Compilar desde el código fuente](BUILD.txt)
-- [Descarga de la beta 3](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/steam-v0.2.2-beta3)
+- [Descarga de la beta 4](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/steam-v0.2.3-beta4)
 
 El arranque desde una caché sin preparar se comprobó en Kino con BO1 de Steam Build 7.0.152 CL 966072. Para jugar se requiere Windows x64 y una instalación de BO1 en Steam. El lanzador descarga Game_Mod 1.3.2 durante la primera preparación.
 
