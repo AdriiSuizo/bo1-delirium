@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <tlhelp32.h>
 #include <filesystem>
 #include <string>
 #include <cstdio>
@@ -13,37 +12,6 @@ static BOOL CALLBACK describeWindow(HWND window,LPARAM){
 }
 static BOOL CALLBACK describeTopWindow(HWND window,LPARAM arg){
     describeWindow(window,arg);EnumChildWindows(window,describeWindow,arg);return TRUE;
-}
-static uintptr_t moduleBase(DWORD pid,const wchar_t* name){
-    HANDLE snapshot=CreateToolhelp32Snapshot(TH32CS_SNAPMODULE|TH32CS_SNAPMODULE32,pid);
-    if(snapshot==INVALID_HANDLE_VALUE)return 0; // loader has not initialized its module list yet
-    MODULEENTRY32W m{};m.dwSize=sizeof(m);uintptr_t result=0;
-    for(BOOL more=Module32FirstW(snapshot,&m);more;more=Module32NextW(snapshot,&m))
-        if(!_wcsicmp(m.szModule,name)){result=reinterpret_cast<uintptr_t>(m.modBaseAddr);break;}
-    CloseHandle(snapshot);return result;
-}
-static DWORD remoteCall(HANDLE process,uintptr_t address,void* arg){
-    HANDLE thread=CreateRemoteThread(process,nullptr,0,reinterpret_cast<LPTHREAD_START_ROUTINE>(address),arg,0,nullptr);
-    if(!thread)fail("remote initialization thread");
-    if(WaitForSingleObject(thread,30000)!=WAIT_OBJECT_0)fail("initialization timeout");
-    DWORD result=0;GetExitCodeThread(thread,&result);CloseHandle(thread);return result;
-}
-static uintptr_t load(HANDLE process,DWORD pid,const fs::path& path){
-    const std::wstring text=path.wstring();size_t bytes=(text.size()+1)*sizeof(wchar_t);
-    void* memory=VirtualAllocEx(process,nullptr,bytes,MEM_COMMIT|MEM_RESERVE,PAGE_READWRITE);
-    if(!memory||!WriteProcessMemory(process,memory,text.c_str(),bytes,nullptr))fail("DLL path");
-    auto address=GetProcAddress(GetModuleHandleW(L"kernel32.dll"),"LoadLibraryW");HMODULE owner=nullptr;
-    if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-        reinterpret_cast<LPCWSTR>(address),&owner))fail("LoadLibrary owner");
-    wchar_t ownerPath[MAX_PATH];GetModuleFileNameW(owner,ownerPath,MAX_PATH);
-    uintptr_t remote=moduleBase(pid,fs::path(ownerPath).filename().c_str());
-    // A freshly suspended Win32 process can have no PEB loader list yet
-    // (ERROR_PARTIAL_COPY). LinkerMod's launcher uses the shared system DLL
-    // address for this initial load; later loads resolve the remote base.
-    if(!remote)remote=reinterpret_cast<uintptr_t>(owner);
-    uintptr_t result=remoteCall(process,remote+reinterpret_cast<uintptr_t>(address)-reinterpret_cast<uintptr_t>(owner),memory);
-    VirtualFreeEx(process,memory,0,MEM_RELEASE);
-    if(!result)fail("LoadLibraryW returned null");return result;
 }
 #include "portable_paths.hpp"
 int wmain(int argc,wchar_t**argv){
@@ -77,22 +45,20 @@ int wmain(int argc,wchar_t**argv){
         desktop=CreateDesktopW(desktopName.c_str(),nullptr,nullptr,0,GENERIC_ALL,nullptr);
         if(!desktop)fail("private test desktop");si.lpDesktop=desktopName.data();
     }
-    std::wstring args=L"\""+(game/L"BlackOps.exe").wstring()+L"\" +set fs_homepath \""+home.wstring()+
+    std::wstring args=L"\""+(game/L"BlackOps.exe").wstring()+L"\" allowdupe +set fs_homepath \""+home.wstring()+
         L"\" +set fs_basepath \""+game.wstring()+L"\" +set logfile 2 +set r_fullscreen 0 +set r_d3d9ex 1 +set r_customMode 1280x720 +set com_maxfps 150 +set r_vsync 0 +set com_introPlayed 1 +set com_startupIntroPlayed 1";
     args+=diagnostics?L" +set developer 1":L" +set developer 0";
     if(!map.empty())args+=L" +devmap "+map;
+    if (!SetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_GAMEMOD", loader.c_str()) ||
+        !SetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER", adapter.c_str()))
+        fail("set in-process mod paths");
     PROCESS_INFORMATION pi{};HANDLE job=CreateJobObjectW(nullptr,nullptr);if(!job)fail("owned process job");
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
     if(!SetInformationJobObject(job,JobObjectExtendedLimitInformation,&limits,sizeof(limits)))fail("job limits");
     if(!CreateProcessW((game/L"BlackOps.exe").c_str(),args.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,game.c_str(),&si,&pi))fail("Steam BlackOps.exe launch");
     if(!AssignProcessToJobObject(job,pi.hProcess))fail("own process job assignment");
-    load(pi.hProcess,pi.dwProcessId,loader);
-    uintptr_t remote=load(pi.hProcess,pi.dwProcessId,adapter);
-    HMODULE local=LoadLibraryExW(adapter.c_str(),nullptr,DONT_RESOLVE_DLL_REFERENCES);if(!local)fail("read adapter export");
-    auto entry=GetProcAddress(local,"DeliriumAttach");if(!entry)fail("adapter export");
-    DWORD attached=remoteCall(pi.hProcess,remote+reinterpret_cast<uintptr_t>(entry)-reinterpret_cast<uintptr_t>(local),nullptr);
-    FreeLibrary(local);if(attached!=1)fail("adapter refused native ABI");
-    printf("Original Steam BlackOps.exe PID %lu, adapter attached, private test %d seconds, physics selftest %d\n",pi.dwProcessId,seconds,diagnostics);fflush(stdout);
+    printf("Original Steam BlackOps.exe PID %lu, private test %d seconds\n",pi.dwProcessId,seconds);
+    fflush(stdout);
     ResumeThread(pi.hThread);CloseHandle(pi.hThread);
     DWORD wait;bool captured=false;
     if(preparing){

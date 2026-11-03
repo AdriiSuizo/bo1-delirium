@@ -36,7 +36,7 @@ static void setupTool(const fs::path& program,std::wstring args,const fs::path& 
   if(++seconds%10==0){printf("BO1 setup: working (%u s)...\n",seconds);fflush(stdout);}
  }
  DWORD code=1;GetExitCodeProcess(process.hProcess,&code);CloseHandle(process.hProcess);CloseHandle(output);
- if(code){fwprintf(stderr,L"BO1 preparation tool exited with code %lu. Details: %ls\n",code,log.c_str());ExitProcess(1);}
+ if(code){fwprintf(stderr,L"BO1 preparation tool exited with code %lu. Details: %ls\n",code,log.c_str());throw std::runtime_error("BO1 preparation failed");}
 }
 static void prepareResources(const fs::path& root,const fs::path& game,const fs::path& cache){
  if(cacheReady(cache))return;

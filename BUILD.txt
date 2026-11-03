@@ -1,4 +1,4 @@
-Corresponding source: BO1 Delirium Steam 0.2.3-bo1-only-beta4
+Corresponding source: BO1 Delirium Steam 0.2.4-bo1-only-beta5
 Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
 Native game adapter and bridge:
   cmake -S native -B native-build -A Win32
@@ -15,6 +15,7 @@ Own control script archive (standard ZIP/IWD; no original game scripts):
   python -c "import zipfile; z=zipfile.ZipFile('bo1delirium_controls.iwd','w',zipfile.ZIP_DEFLATED); z.write('scripts/maps/delirium/controls.gsc','maps/delirium/controls.gsc'); z.close()"
 Binary layout is described in manifest.json in the installation archive.
 Rename bo1-delirium-worker.exe to runtime/delirium_worker.exe.
+Copy winmm.dll to BO1Delirium/runtime/. The launcher stages it temporarily beside BlackOps.exe.
 Copy CaptureBO1.exe, BO1CharacterCapture.dll, PrepareBO1.exe and FetchLoader.ps1 to tools/.
 Copy bo1delirium_controls.iwd to BO1Delirium/scripts/. The launcher installs this own script into its private profile.
 Keep the original native BO1 executable, assets and private generated cache out of redistribution.
