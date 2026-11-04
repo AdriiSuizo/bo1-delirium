@@ -77,7 +77,9 @@ static void __cdecl loadScripts(int instance){
     log("Steam test controls script loaded %d handle %d",loaded,actionHandles[God]);
 }
 static bool press(Action action){
-    if(!actionHandles[action]||!phys::g_world||strncmp(phys::mapName.c_str(),"maps/zombie_",12))return false;
+    // Script handles are resolved only for a selected Zombies mod/map. The
+    // first AI creates the physical world, so controls must work before it.
+    if(!actionHandles[action]||!phys::modSelected)return false;
     auto* player=native::entity(0);
     if(!native::at<void*>(player,0x13c)||native::at<int>(player,0x184)<=0)return false;
     auto& flags=native::at<unsigned>(player,0x170);
@@ -108,7 +110,7 @@ static unsigned inputs(){
     return mask;
 }
 static void tick(){
-    if(!hinted&&hintHandle&&phys::g_world&&native::at<void*>(native::entity(0),0x13c)&&native::at<int>(native::entity(0),0x184)>0){
+    if(!hinted&&hintHandle&&phys::modSelected&&native::at<void*>(native::entity(0),0x13c)&&native::at<int>(native::entity(0),0x184)>0){
         auto thread=reinterpret_cast<unsigned short(__cdecl*)(int,int,unsigned)>(0x5598e0)(0,hintHandle,0);
         reinterpret_cast<void(__cdecl*)(unsigned,int)>(0x5de2c0)(thread,0);
         hinted=true;log("Steam test controls hint shown");
@@ -116,7 +118,7 @@ static void tick(){
     const unsigned mask=inputs(), edges=mask&~held;
     for(unsigned i=0;i<ActionCount;++i)if(edges&(1u<<i))press(static_cast<Action>(i));
     held=mask;
-    if(testEnabled&&phys::g_world){
+    if(testEnabled&&phys::modSelected){
         auto* event=reinterpret_cast<void*(__cdecl*)(const char*)>(0x5ae810)("delirium_control_event");
         const auto* message=event?native::at<const char*>(event,0x18):nullptr;
         if(message&&lastEvent!=message){
@@ -124,7 +126,7 @@ static void tick(){
             log("STEAM CONTROLS RESULT %s",message);
         }
     }
-    if(regression&&phys::g_world){
+    if(regression&&phys::modSelected){
         constexpr Action sequence[]={God,Pause,Spawn,Pursuit,Pursuit,Pause,God};
         if(testAction<std::size(sequence)&&native::time()>=testNext&&press(sequence[testAction])){
             log("STEAM CONTROLS TEST action %u",testAction);
