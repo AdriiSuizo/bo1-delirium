@@ -53,6 +53,28 @@ inline void install(const fs::path& root,const fs::path& plutonium){
     registerRoot(root);
     publishFile(root/L"runtime/BO1DeliriumPlugin.dll",plutonium/L"plugins/BO1DeliriumPlugin.dll",backup);
 }
+inline void deployPayload(const fs::path& source,const fs::path& game){
+    const auto target=game/L"BO1Delirium";
+    if(fs::exists(target)&&fs::equivalent(source,target))return;
+    const auto base=fs::weakly_canonical(target).wstring()+L"\\";
+    if(!fs::equivalent(fs::weakly_canonical(target).parent_path(),game))
+        throw std::runtime_error("BO1Delirium must be a folder inside the selected BO1 installation");
+    const auto backup=localData()/L"installation-backups"/(L"payload-"+std::to_wstring(GetTickCount64()));
+    for(const auto& entry:fs::recursive_directory_iterator(source)){
+        if(GetFileAttributesW(entry.path().c_str())&FILE_ATTRIBUTE_REPARSE_POINT)
+            throw std::runtime_error("The mod package must contain regular files and folders");
+        if(!entry.is_regular_file())continue;
+        const auto relative=fs::relative(entry.path(),source),destination=target/relative;
+        const auto resolved=fs::weakly_canonical(destination).wstring();
+        if(resolved.size()<base.size()||CompareStringOrdinal(resolved.c_str(),static_cast<int>(base.size()),base.c_str(),static_cast<int>(base.size()),TRUE)!=CSTR_EQUAL)
+            throw std::runtime_error("A mod destination points outside BO1Delirium");
+        publishFile(entry.path(),destination,backup/relative.parent_path());
+    }
+    for(auto name:{L"Instalar-BO1Delirium.exe",L"Desinstalar-BO1Delirium.exe",L"LEEME-INSTALACION.txt",L"manifest.json"}){
+        const auto original=source.parent_path()/name,destination=game/name;
+        if(fs::is_regular_file(original)&&(!fs::exists(destination)||!fs::equivalent(original,destination)))publishFile(original,destination,backup);
+    }
+}
 inline void uninstall(const fs::path& root,const fs::path& plutonium){
     const auto registered=registeredRoot();
     if(registered.empty())return;

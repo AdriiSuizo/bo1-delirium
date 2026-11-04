@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include "mod_install.hpp"
+#include "steam_discovery.hpp"
+#include "lan_shortcut.hpp"
 namespace fs=std::filesystem;
 static void require(bool ok,const char* reason){if(!ok){fprintf(stderr,"%s\n",reason);std::exit(1);}}
 static void write(const fs::path& file,const char* text){fs::create_directories(file.parent_path());std::ofstream output(file,std::ios::binary);output<<text;}
@@ -11,12 +13,38 @@ int wmain() try {
     require(!fs::exists(home),"test directory must be new");
     fs::create_directories(home);
     require(SetEnvironmentVariableW(L"LOCALAPPDATA",home.c_str()),"test environment setup failed");
+    const auto steam=home/L"Steam",library=home/L"Other Library";
+    const auto utf8=library.generic_u8string();
+    write(steam/L"steamapps/libraryfolders.vdf",("// library list\n\"libraryfolders\" { \"1\" { \"path\" \""+std::string(utf8.begin(),utf8.end())+"\" } }").c_str());
+    write(library/L"steamapps/appmanifest_42700.acf","\"AppState\" { \"installdir\" \"Black Ops\" }");
+    write(library/L"steamapps/common/Black Ops/BlackOps.exe","test file");
+    require(steamDiscovery::installedGames(steam)==std::vector<fs::path>{library/L"steamapps/common/Black Ops"},"secondary Steam library discovery failed");
+    write(steam/L"steamapps/appmanifest_42700.acf","\"AppState\" { \"installdir\" \"../../OtherGame\" }");
+    require(steamDiscovery::installedGames(steam).size()==1,"unsafe manifest path was accepted");
+    require(steamDiscovery::values("\"path\" \"C:\\\\Games\\\\Steam\"","path")==std::vector<std::string>{"C:\\Games\\Steam"},"VDF path escapes changed");
     const auto root=home/L"Steam \u6e2c\u8a66/Call of Duty Black Ops/BO1Delirium",plutonium=home/L"Plutonium";
+    const auto package=home/L"Downloaded package/BO1Delirium";
+    write(package/L"runtime/worker.exe","new payload");
+    write(root/L"runtime/worker.exe","old payload");
+    write(root/L"custom.txt","preserve user file");
+    installation::deployPayload(package,root.parent_path());
+    require(steamDiscovery::read(root/L"runtime/worker.exe")=="new payload"&&steamDiscovery::read(root/L"custom.txt")=="preserve user file","deployment lost payload or user files");
+    write(plutonium/L"bin/plutonium-bootstrapper-win32.exe","test launcher");
     require(installation::registeredRoot().empty(),"uninstalled root unexpectedly exists");
     write(root/L"scripts/bo1delirium_controls.iwd","own scripts");
     write(root/L"runtime/BO1DeliriumPlugin.dll","own loader");
     write(plutonium/L"plugins/OtherMod.dll","unrelated");
     installation::install(root,plutonium);
+    const auto shortcut=home/L"Jugar-BO1-LAN.lnk";
+    lanShortcut::create(shortcut,plutonium,root.parent_path());
+    require(SUCCEEDED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)),"COM verification setup failed");
+    IShellLinkW* link=nullptr;IPersistFile* persisted=nullptr;
+    require(SUCCEEDED(CoCreateInstance(CLSID_ShellLink,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&link))),"shortcut inspection failed");
+    require(SUCCEEDED(link->QueryInterface(IID_PPV_ARGS(&persisted)))&&SUCCEEDED(persisted->Load(shortcut.c_str(),STGM_READ)),"shortcut could not be loaded");
+    wchar_t target[32768]{},arguments[32768]{},working[32768]{};
+    link->GetPath(target,32768,nullptr,0);link->GetArguments(arguments,32768);link->GetWorkingDirectory(working,32768);
+    require(fs::path(target)==plutonium/L"bin/plutonium-bootstrapper-win32.exe"&&std::wstring(arguments)==L"t5sp \""+root.parent_path().wstring()+L"\" -lan"&&fs::path(working)==plutonium,"LAN shortcut did not target the official offline launcher");
+    persisted->Release();link->Release();CoUninitialize();
     require(installation::registeredRoot()==root,"Unicode installation path did not round trip");
     require(fs::is_regular_file(plutonium/L"plugins/BO1DeliriumPlugin.dll"),"native plugin not installed");
     require(fs::is_regular_file(plutonium/L"storage/t5/mods/bo1delirium/description.txt"),"Mods menu entry missing");

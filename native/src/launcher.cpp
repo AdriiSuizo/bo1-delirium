@@ -58,6 +58,16 @@ public:
 };
 #include "portable_paths.hpp"
 #include "mod_install.hpp"
+#ifdef BO1_DELIRIUM_INSTALLER
+#include "steam_discovery.hpp"
+#include "lan_shortcut.hpp"
+static fs::path findSteamGame(){
+    wchar_t location[32768]{};DWORD bytes=sizeof(location);
+    if(RegGetValueW(HKEY_CURRENT_USER,L"Software\\Valve\\Steam",L"SteamPath",RRF_RT_REG_SZ,nullptr,location,&bytes)!=ERROR_SUCCESS)return {};
+    const auto games=steamDiscovery::installedGames(location);
+    return games.size()==1?games.front():fs::path{};
+}
+#endif
 int wmain(int argc,wchar_t**argv) try {
     wchar_t exe[MAX_PATH];GetModuleFileNameW(nullptr,exe,MAX_PATH);
     fs::path root=fs::path(exe).parent_path();
@@ -67,7 +77,7 @@ int wmain(int argc,wchar_t**argv) try {
     fs::path game=root.parent_path(),adapter=root/L"DeliriumBO1.dll";
     fs::path cache=environment(L"BO1_DELIRIUM_CACHE_DIR");
     if(cache.empty())cache=fs::path(environment(L"LOCALAPPDATA"))/L"BO1PlutoniumDelirium/bo1-character-v1";
-    int seconds=0;bool diagnostics=false,quiet=false,uninstall=false;std::wstring map;
+    int seconds=0;bool diagnostics=false,quiet=false,uninstall=false;std::wstring map;fs::path iso;
     for(int i=1;i<argc;i++){
         if(!wcscmp(argv[i],L"--test-seconds")&&i+1<argc){seconds=_wtoi(argv[++i]);diagnostics=true;}
         else if(!wcscmp(argv[i],L"--smoke-seconds")&&i+1<argc){seconds=_wtoi(argv[++i]);diagnostics=false;}
@@ -77,6 +87,7 @@ int wmain(int argc,wchar_t**argv) try {
 #ifdef BO1_DELIRIUM_INSTALLER
         else if(!wcscmp(argv[i],L"--quiet"))quiet=true;
         else if(!wcscmp(argv[i],L"--uninstall"))uninstall=true;
+        else if(!wcscmp(argv[i],L"--iso")&&i+1<argc)iso=fs::absolute(argv[++i]);
 #endif
         else fail("unknown launcher option");
     }
@@ -89,6 +100,15 @@ int wmain(int argc,wchar_t**argv) try {
 #endif
     const fs::path plutonium=fs::path(environment(L"LOCALAPPDATA"))/L"Plutonium";
 #ifdef BO1_DELIRIUM_INSTALLER
+    const auto source=root;
+    if(!fs::is_regular_file(game/L"BlackOps.exe")){
+        game=findSteamGame();
+        if(game.empty()){
+            if(quiet)throw std::runtime_error("Steam BO1 was not found. Select BlackOps.exe in the interactive installer.");
+            game=selectFile(L"Selecciona BlackOps.exe de tu instalacion de Steam",L"BlackOps.exe\0BlackOps.exe\0\0").parent_path();
+        }
+    }
+    root=game/L"BO1Delirium";adapter=root/L"DeliriumBO1.dll";
     if(uninstall){
         installation::uninstall(root,plutonium);
         puts("Delirium plugin and Mods registration removed. Local resources and other mods preserved.");
@@ -96,16 +116,31 @@ int wmain(int argc,wchar_t**argv) try {
         return 0;
     }
 #endif
-    if(!fs::exists(game/L"BlackOps.exe")||!fs::exists(adapter))fail("Copy BO1Delirium into the original Steam BO1 folder first");
+    if(!fs::exists(game/L"BlackOps.exe"))fail("The selected folder does not contain BlackOps.exe");
+#ifdef BO1_DELIRIUM_INSTALLER
+    if(!fs::is_regular_file(source/L"DeliriumBO1.dll"))fail("Extract the complete mod package before installing");
+#else
+    if(!fs::exists(adapter))fail("Copy BO1Delirium into the original Steam BO1 folder first");
+#endif
     if(!supportedGame(game/L"BlackOps.exe"))fail("Unsupported BlackOps.exe: requires original Steam Build 7.0.152 CL 966072");
+#ifdef BO1_DELIRIUM_INSTALLER
+    installation::deployPayload(source,game);
+#endif
     const auto bootstrap=plutonium/L"bin/plutonium-bootstrapper-win32.exe";
     if(!fs::is_regular_file(bootstrap)||!supportedGame(plutonium/L"games/t5sp.exe"))
         throw std::runtime_error("Install a compatible Plutonium T5 Zombies client first");
     TemporaryWinmm winmm(bootstrap.parent_path(),root);
     const auto tuning=cache.parent_path()/L"gta4-xbox360-v060.kv";
     fs::create_directories(cache.parent_path());
+#ifdef BO1_DELIRIUM_INSTALLER
+    if(iso.empty()&&!fs::is_regular_file(tuning.parent_path()/L"gta4-development-v1.ready")){
+        bool hasImage=false;for(const auto& file:fs::directory_iterator(game))hasImage|=file.is_regular_file()&&!_wcsicmp(file.path().extension().c_str(),L".iso");
+        if(!hasImage&&!quiet)iso=selectFile(L"Selecciona tu ISO de GTA IV base de Xbox 360",L"Xbox 360 ISO\0*.iso\0\0");
+    }
+#endif
+    const auto discSource=iso.empty()?game:iso;
     setupTool(root/L"runtime/delirium_worker.exe",
-        L"--prepare-disc \""+game.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log");
+        L"--prepare-disc \""+discSource.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log");
     puts("GTA IV tuning and get-up cache ready. You can remove the ISO.");
     fflush(stdout);
     if(!SetEnvironmentVariableW(L"BO1_DELIRIUM_GTA_CACHE",tuning.c_str())||
@@ -114,8 +149,10 @@ int wmain(int argc,wchar_t**argv) try {
 #ifdef BO1_DELIRIUM_INSTALLER
     if(cache!=installation::localData()/L"bo1-character-v1")throw std::runtime_error("The normal installation requires the default resource cache");
     installation::install(root,plutonium);
+    lanShortcut::create(game/L"Jugar-BO1-LAN.lnk",plutonium,game);
+    lanShortcut::create(lanShortcut::desktop()/L"BO1 - Plutonium LAN.lnk",plutonium,game);
     puts("Installation complete. Start Plutonium normally, choose T5 Zombies LAN mode, then BO1 Delirium in Mods. The ISO can now be removed.");
-    if(!quiet)MessageBoxW(nullptr,L"Instalacion completada.\n\nAbre Plutonium normalmente, elige T5 Zombies en modo LAN y selecciona BO1 Delirium en Mods.\n\nYa puedes retirar la ISO. No necesitas un CMD para jugar.",L"BO1 Delirium",MB_OK|MB_ICONINFORMATION);
+    if(!quiet)MessageBoxW(nullptr,L"Instalacion completada.\n\nAbre BO1 - Plutonium LAN en el escritorio y selecciona BO1 Delirium en Mods.\n\nYa no necesitas la ISO para jugar. El modo comprobado es un jugador.",L"BO1 Delirium",MB_OK|MB_ICONINFORMATION);
     return 0;
 #endif
     fs::path home=cache.parent_path()/L"profile",logs=cache.parent_path()/L"logs";
