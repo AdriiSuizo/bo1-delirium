@@ -1,4 +1,5 @@
 #include "rig_hierarchy.hpp"
+#include "damage_routing.hpp"
 #include <array>
 #include <cstdio>
 #include <cstdlib>
@@ -7,6 +8,13 @@ static void require(bool value, const char* message) {
     if (!value) { std::fprintf(stderr, "%s\n", message); std::exit(1); }
 }
 int main() {
+    for (int cause : {0, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, -1, 99})
+        require(bo1damage::route(cause) == bo1damage::Route::Environment, "environmental damage acquired a weapon impulse");
+    for (int cause : {1, 2, 9})
+        require(bo1damage::route(cause) == bo1damage::Route::Bullet, "native bullet/headshot lost weapon routing");
+    for (int cause : {3, 4, 5, 6, 15})
+        require(bo1damage::route(cause) == bo1damage::Route::Explosion, "native explosive lost blast routing");
+    require(bo1damage::route(7) == bo1damage::Route::Melee && bo1damage::route(8) == bo1damage::Route::Melee, "knife/bayonet routing changed");
     std::array<uint8_t, 23> table{};
     table[20] = 5; table[21] = 2;
     std::array<short, 5> decoded{};

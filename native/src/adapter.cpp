@@ -133,8 +133,10 @@ static void __cdecl pain(void* ent,void* attacker,int damage,const float* point,
     // Preserve native damage metadata, attacker memory and scripts, while
     // giving the physical bridge the pain response instead of AIS_PAIN.
     void* owner=native::at<void*>(ent,0x140);int index=native::at<int>(ent,0);
-    bool physical=phys::g_world&&index>=0&&index<1024&&phys::actors[index].bound
-        &&native::time()-phys::actors[index].sampleTime<250&&(mod==1||mod==2||mod==9);
+    const auto route=bo1damage::route(mod);
+    bool physical=phys::g_world&&index>=0&&index<1024&&phys::actors[index].bound&&owner
+        &&native::time()-phys::actors[index].sampleTime<250&&native::at<int>(owner,0xde0)==1
+        &&(route==bo1damage::Route::Bullet||route==bo1damage::Route::Explosion);
     unsigned char allowed=owner?native::at<unsigned char>(owner,0xc60):0;
     if(physical&&owner)native::at<unsigned char>(owner,0xc60)=0;
     originalPain(ent,attacker,damage,point,mod,dir,hitloc,weapon);

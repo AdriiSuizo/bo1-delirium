@@ -15,6 +15,7 @@
 #include <string>
 #include <mutex>
 #include <chrono>
+#include "damage_routing.hpp"
 
 namespace phys {
 using namespace euphoria;
@@ -220,6 +221,8 @@ static unsigned profile(int weapon){
 }
 static bool activate(Actor& a,void* ent,int now){
     if(!g_world||!a.bound||a.active||now-a.sampleTime>250)return a.active;
+    // Let native scripted traversals own their root until code movement resumes.
+    if(!a.dead){auto* owner=native::at<void*>(ent,0x140);if(!owner||native::at<int>(owner,0xde0)!=1)return false;}
     bool incoming=now>=a.incomingTime&&now-a.incomingTime<500;
     Vec3 velocity=incoming?a.incoming:a.velocity;
     RdQuat rotations[16];for(int i=0;i<16;i++)rotations[i]=r(qnormalize(a.animationQ[a.bone[i]]*a.offset[i]*conj(bodyOffset[i])));
@@ -332,8 +335,12 @@ static void hit(void* ent,int damage,const float* point,int mod,const float* dir
         a.sampleTime=now;a.incomingTime=0;a.rootVelocity={};a.velocity={};
         std::fill_n(a.linear,16,Vec3{});std::fill_n(a.angular,16,Vec3{});
     }
-    bool explosion=mod==3||mod==4||mod==5||mod==6||mod==15;
-    bool fullWound=dead||explosion||mod==7||mod==8||a.wounds.hit(damage,native::at<int>(ent,0x184)+damage,now);
+    const auto route=bo1damage::route(mod);
+    const bool explosion=route==bo1damage::Route::Explosion,melee=route==bo1damage::Route::Melee;
+    // Native fall, burn, gas and trigger damage have no projectile momentum.
+    // Their lethal response still inherits the body's current motion below.
+    if(route==bo1damage::Route::Environment&&!dead)return;
+    bool fullWound=dead||explosion||melee||a.wounds.hit(damage,native::at<int>(ent,0x184)+damage,now);
     static const int parts[]={8,9,9,9,8,7,13,10,14,11,15,12,4,1,5,2,6,3,8};
     int body=location>=0&&location<19?parts[location]:8;
     Vec3 p=point?Vec3{point[0],point[1],point[2]}:a.animation[a.bone[body]];
@@ -346,8 +353,8 @@ static void hit(void* ent,int damage,const float* point,int mod,const float* dir
         away.z=std::max(length(v3(away.x,away.y,0))*.55f,24.f);
         a.blast+=normalize(away)*clampf(3.f+damage*.016f,3.f,10.f);
         float n=length(a.blast);if(n>12)a.blast=a.blast*(12.f/n);
-    }else{
-        if(mod==7||mod==8){kind=10;impulse=75.f*1.5f*.15f;duration=.15f;speed=450;}
+    }else if(route==bo1damage::Route::Bullet||melee){
+        if(melee){kind=10;impulse=75.f*1.5f*.15f;duration=.15f;speed=450;}
         else if(g_api.weapon_response(kind,&impulse,&duration,&speed)){log("missing verified weapon response %u",kind);return;}
         if(!fullWound&&!a.active&&!a.hits.ready(now)){
             if(kind==6||kind==7){
