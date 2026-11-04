@@ -12,7 +12,6 @@ pub struct Joint {
     pub damping: f32,
     pub strength: f32,
     pub max_torque: [f32; 2],
-    pub centred: bool,
 }
 
 const SHIFT: usize = 3;
@@ -311,14 +310,6 @@ pub fn rigid(m: &[f32; 16], tol: f32) -> bool {
     ok(det - 1.0)
 }
 
-pub fn in_order<T>(d: &[u8], f: impl FnOnce() -> T) -> T {
-    use std::sync::atomic::Ordering::Relaxed;
-    let was = crate::LE.swap(d.get(8) == Some(&0x07), Relaxed);
-    let out = f();
-    crate::LE.store(was, Relaxed);
-    out
-}
-
 pub fn read(d: &[u8]) -> Vec<Joint> {
     joints(d).0
 }
@@ -344,12 +335,7 @@ fn joints(d: &[u8]) -> (Vec<Joint>, usize) {
             let Ok(v) = s.vec3() else { break };
             vecs.push(v);
         }
-        let mut flags = vec![];
-        while s.tag() == 2 {
-            let Ok(f) = s.flag() else { break };
-            flags.push(f);
-        }
-        let centred = flags.first().is_some_and(|&f| f != 0);
+        while s.tag() == 2 && s.flag().is_ok() {}
         if s.tag() != 7 || vecs.len() < 2 { o += 1; continue; }
         let Ok(blob) = s.string(None) else { o += 1; continue };
         let f = |k: usize| f32::from_bits(crate::u32_of(std::array::from_fn(|i| blob.get(k + i).copied().unwrap_or(0))));
@@ -357,11 +343,11 @@ fn joints(d: &[u8]) -> (Vec<Joint>, usize) {
             Joint { name, index, three, pos: vecs[0], twist_axis: vecs[1], lean_axis: vecs.get(2).copied().unwrap_or_default(),
                     limits: [(f(12), f(16)), (f(20), f(24)), (f(28), f(32))],
                     flip: [blob[8] != 0, blob[9] != 0, blob[10] != 0],
-                    muscle_stiffness: f(56), damping: f(60), strength: f(64), max_torque: [f(48), f(52)], centred }
+                    muscle_stiffness: f(56), damping: f(60), strength: f(64), max_torque: [f(48), f(52)] }
         } else {
             Joint { name, index, three, pos: vecs[0], twist_axis: vecs[1], lean_axis: [0.0; 3],
                     limits: [(f(8), f(12)), (0.0, 0.0), (0.0, 0.0)], flip: [false; 3],
-                    muscle_stiffness: f(20), damping: f(24), strength: f(28), max_torque: [f(16), 0.0], centred }
+                    muscle_stiffness: f(20), damping: f(24), strength: f(28), max_torque: [f(16), 0.0] }
         };
         o = s.pos + SHIFT;
         end = o;

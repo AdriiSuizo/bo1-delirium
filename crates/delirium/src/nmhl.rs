@@ -1,4 +1,3 @@
-use crate::fneg;
 use std::f32::consts::FRAC_PI_2;
 use crate::Vx;
 
@@ -9,12 +8,8 @@ use crate::rigid::{nrm, q_axis, q_scaled, qrot};
 use crate::Fma;
 use crate::nmrs::{Character, NECK, SPINE};
 
-#[allow(non_snake_case)]
-#[inline]
-fn SPINE3() -> usize { delirium_data::kv!(81 int) }
-#[allow(non_snake_case)]
-#[inline]
-fn HEAD() -> usize { delirium_data::kv!(55 int) }
+const SPINE3: usize = 10;
+const HEAD: usize = 12;
 
 #[derive(Clone, Debug)]
 pub struct HeadLook {
@@ -33,7 +28,7 @@ pub struct HeadLook {
 
 impl Default for HeadLook {
     fn default() -> HeadLook {
-        HeadLook { pos: Vec3::ZERO, vel: Vec3::ZERO, stiffness: delirium_data::kv!(31), damping: 1.0, always_look: false, always_eyes_horizontal: true,
+        HeadLook { pos: Vec3::ZERO, vel: Vec3::ZERO, stiffness: delirium_data::kv!(20), damping: 1.0, always_look: false, always_eyes_horizontal: true,
                    active: false, visible: false, cone: 0.0, len: 0.0, local: None }
     }
 }
@@ -51,7 +46,7 @@ impl HeadLook {
         self.active = true;
         self.cone = std::f32::consts::FRAC_PI_3;
         self.visible = false;
-        self.len = slen(b.at(HEAD()) - b.at(SPINE3()), b"xyz");
+        self.len = slen(b.at(HEAD) - b.at(SPINE3), b"xyz");
         ch.set_stiffness(self.stiffness, self.damping, "un", None);
     }
 
@@ -69,15 +64,15 @@ impl HeadLook {
             (self.pos, self.vel) = crate::nmbb::from_own(x, b);
         }
         ch.set_stiffness(self.stiffness, self.damping, "un", None);
-        let (neck, head) = ((*NECK())[0], (*NECK())[1]);
+        let (neck, head) = (NECK[0], NECK[1]);
         let strength = (ch.eff[head].strength + ch.eff[neck].strength) * 0.5;
-        let damping = (ch.eff[head].damping + ch.eff[neck].damping) * delirium_data::kv!(17);
+        let damping = (ch.eff[head].damping + ch.eff[neck].damping) * delirium_data::kv!(12);
         let (nl, hl) = (ch.limits(neck), ch.limits(head));
-        let sp = b.pmat(SPINE3());
+        let sp = b.pmat(SPINE3);
         let m = sp.m;
-        let q = q_scaled(m.b * -delirium_data::kv!(516));
+        let q = q_scaled(m.b * -delirium_data::kv!(228));
         let (a, c) = (qrot(q, m.a, false), qrot(q, m.c, false));
-        let h = a.mul_add(Vec3::splat(self.len), b.at(SPINE3()));
+        let h = a.mul_add(Vec3::splat(self.len), b.at(SPINE3));
         let t = (((self.pos - m.d).vx(sp.w) - sp.v) + self.vel).mul_add(Vec3::splat(damping / strength), self.pos);
         let dir = nrm(t - m.d);
         let x = sdot(dir, a, b"zyx");
@@ -89,7 +84,7 @@ impl HeadLook {
         let mut n = nrm((t - h) * -1.0);
         let p = nrm(a.vx(n).vx(a));
         let tw = acos(sdot(p, c, b"zyx"));
-        let max = (nl[delirium_data::kv!(2 int)] + hl[delirium_data::kv!(2 int)]) * delirium_data::kv!(136);
+        let max = (nl[5] + hl[5]) * delirium_data::kv!(50);
         let mut over = 0.0;
         if tw > max {
             over = max - tw;
@@ -100,12 +95,12 @@ impl HeadLook {
         }
         let up = ch.up;
         let ua = sdot(up, a, b"zyx");
-        let s = if ua * ua <= delirium_data::kv!(17) && !self.always_eyes_horizontal {
+        let s = if ua * ua <= delirium_data::kv!(12) && !self.always_eyes_horizontal {
             a.vx(n)
-        } else if sdot(up, n, b"zyx").abs() < delirium_data::kv!(28) {
+        } else if sdot(up, n, b"zyx").abs() < delirium_data::kv!(61) {
             up.vx(n)
         } else {
-            (Vec3::ONE - up) * b.pmat(HEAD()).m.a
+            (Vec3::ONE - up) * b.pmat(HEAD).m.a
         };
         let s = nrm(s);
         let w = nrm(n.vx(s));
@@ -113,20 +108,20 @@ impl HeadLook {
         let n2 = nrm(qrot(r, n, false));
         let sign = |x: f32| if x < 0.0 { -1.0 } else { 1.0 };
         let twist = acos(sdot(n2, c, b"zyx")) * sign(-sdot(n2, m.b, b"zyx"));
-        let u1 = nrm(fneg(w.vx(m.b).vx(m.b)));
+        let u1 = nrm(w.vx(m.b).vx(m.b) * -1.0);
         let lean1 = acos(sdot(u1, a, b"zyx")) * sign(-sdot(u1, c, b"zyx"));
-        let u2 = nrm(fneg(w.vx(c).vx(c)));
+        let u2 = nrm(w.vx(c).vx(c) * -1.0);
         let lean2 = acos(sdot(u2, a, b"zyx")) * sign(sdot(u2, m.b, b"zyx"));
-        let (s2, s3) = ((*SPINE())[2], (*SPINE())[delirium_data::kv!(0 int)]);
+        let (s2, s3) = (SPINE[2], SPINE[3]);
         let (l2, l3) = (ch.limits(s2), ch.limits(s3));
-        let x3 = over.fma(delirium_data::kv!(8), ch.eff[s3].desired[2]);
-        ch.eff[s3].desired[2] = x3.max(l3[delirium_data::kv!(1 int)] * delirium_data::kv!(517)).min(l3[delirium_data::kv!(2 int)] * delirium_data::kv!(517));
-        let x2 = over.fma(delirium_data::kv!(140), ch.eff[s2].desired[2]);
-        ch.eff[s2].desired[2] = x2.max(l2[delirium_data::kv!(1 int)] * delirium_data::kv!(517)).min(l2[delirium_data::kv!(2 int)] * delirium_data::kv!(517));
-        for (n, x, lo, hi) in [(2, twist, delirium_data::kv!(1 int), delirium_data::kv!(2 int)), (0, lean1, 0, 1), (1, lean2, 2, delirium_data::kv!(0 int))] {
+        let x3 = over.fma(delirium_data::kv!(3), ch.eff[s3].desired[2]);
+        ch.eff[s3].desired[2] = x3.max(l3[4] * delirium_data::kv!(229)).min(l3[5] * delirium_data::kv!(229));
+        let x2 = over.fma(delirium_data::kv!(39), ch.eff[s2].desired[2]);
+        ch.eff[s2].desired[2] = x2.max(l2[4] * delirium_data::kv!(229)).min(l2[5] * delirium_data::kv!(229));
+        for (n, x, lo, hi) in [(2, twist, 4, 5), (0, lean1, 0, 1), (1, lean2, 2, 3)] {
             let (xn, xh) = split(x, nl[lo], nl[hi], hl[lo], hl[hi]);
-            ch.eff[neck].desired[n] = xn.clamp(-delirium_data::kv!(137), delirium_data::kv!(137));
-            ch.eff[head].desired[n] = xh.clamp(-delirium_data::kv!(137), delirium_data::kv!(137));
+            ch.eff[neck].desired[n] = xn.clamp(-delirium_data::kv!(77), delirium_data::kv!(77));
+            ch.eff[head].desired[n] = xh.clamp(-delirium_data::kv!(77), delirium_data::kv!(77));
         }
     }
 }

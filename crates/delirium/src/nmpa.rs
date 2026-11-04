@@ -27,14 +27,14 @@ pub struct PointArm {
 
 impl Default for PointArmParams {
     fn default() -> PointArmParams {
-        PointArmParams { target: Vec3::ZERO, twist: delirium_data::kv!(24), arm_straightness: delirium_data::kv!(20), arm_stiffness: delirium_data::kv!(30), arm_damping: 1.0, instance_index: -1,
-                         point_swing_limit: delirium_data::kv!(12), use_left_arm: false, use_zero_pose_when_not_pointing: false }
+        PointArmParams { target: Vec3::ZERO, twist: delirium_data::kv!(17), arm_straightness: delirium_data::kv!(15), arm_stiffness: delirium_data::kv!(19), arm_damping: 1.0, instance_index: -1,
+                         point_swing_limit: delirium_data::kv!(7), use_left_arm: false, use_zero_pose_when_not_pointing: false }
     }
 }
 
 impl Default for PointArm {
     fn default() -> PointArm {
-        PointArm { p: PointArmParams::default(), reach: delirium_data::kv!(74), active: false, pointing: false }
+        PointArm { p: PointArmParams::default(), reach: delirium_data::kv!(46), active: false, pointing: false }
     }
 }
 
@@ -42,7 +42,7 @@ fn swing(ch: &Character, j: usize) -> f32 {
     let l = ch.limits(j);
     let d = ch.eff[j].desired;
     let (m0, h0) = ((l[0] + l[1]) * 0.5, (l[1] - l[0]) * 0.5);
-    let (m1, h1) = ((l[2] + l[delirium_data::kv!(0 int)]) * 0.5, (l[delirium_data::kv!(0 int)] - l[2]) * 0.5);
+    let (m1, h1) = ((l[2] + l[3]) * 0.5, (l[3] - l[2]) * 0.5);
     (((d[0] - m0) / h0).powi(2) + ((d[1] - m1) / h1).powi(2)).sqrt()
 }
 
@@ -81,13 +81,13 @@ impl PointArm {
         let t = (crate::rigid::nrm(p.target - at) * self.reach).mul_add(Vec3::splat(p.arm_straightness), at);
         let (clav, sh) = (c.ch.eff[l.e[0]].desired, c.ch.eff[l.e[1]].desired);
         c.ch.set_stiffness(p.arm_stiffness, p.arm_damping, mask, None);
-        crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[delirium_data::kv!(0 int)], t, p.twist, 1.0, side, 1.0, Vec3::ZERO, None);
+        crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[3], t, p.twist, 1.0, side, 1.0, Vec3::ZERO, None);
         share(c.ch, c.b.frames, l.e[0], l.e[1]);
         let s = swing(c.ch, l.e[0]);
-        if !self.pointing && s < p.point_swing_limit - delirium_data::kv!(78) {
+        if !self.pointing && s < p.point_swing_limit - delirium_data::kv!(49) {
             self.pointing = true;
         }
-        if self.pointing && s > p.point_swing_limit + delirium_data::kv!(78) {
+        if self.pointing && s > p.point_swing_limit + delirium_data::kv!(49) {
             self.pointing = false;
         }
         let ch = &mut *c.ch;
@@ -95,11 +95,11 @@ impl PointArm {
             for j in l.e {
                 ch.eff[j].oppose_gravity = 1.0;
             }
-            ch.eff[l.e[delirium_data::kv!(0 int)]].desired = [0.0; 3];
-            ch.eff[l.e[0]].muscle_stiffness = delirium_data::kv!(12);
+            ch.eff[l.e[3]].desired = [0.0; 3];
+            ch.eff[l.e[0]].muscle_stiffness = delirium_data::kv!(7);
             ch.eff[l.e[1]].muscle_stiffness = 0.5;
             ch.eff[l.e[2]].muscle_stiffness = 0.5;
-            ch.eff[l.e[delirium_data::kv!(0 int)]].desired[0] = ch.eff[l.e[2]].desired[0] * -0.5;
+            ch.eff[l.e[3]].desired[0] = ch.eff[l.e[2]].desired[0] * -0.5;
         } else if p.use_zero_pose_when_not_pointing {
             ch.eff[l.e[0]].desired = [0.0; 3];
             ch.eff[l.e[1]].desired = [0.0, 0.5, 0.0];
@@ -107,7 +107,7 @@ impl PointArm {
             for j in Character::mask(mask) {
                 ch.eff[j].blend_to_zero(1.0);
             }
-            ch.set_stiffness(delirium_data::kv!(65), 1.0, mask, None);
+            ch.set_stiffness(delirium_data::kv!(37), 1.0, mask, None);
         } else {
             ch.eff[l.e[0]].desired = clav;
             ch.eff[l.e[1]].desired = sh;

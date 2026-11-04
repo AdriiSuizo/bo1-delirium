@@ -1,4 +1,3 @@
-use crate::estimate::fneg;
 use crate::vehicles::Handling;
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -23,13 +22,13 @@ pub struct Transmission {
 
 impl Default for Transmission {
     fn default() -> Self {
-        Transmission { gear: 1, flags: 0, revs: crate::kv!(60), clutch: 1.0, throttle: 0.0, last_shift_ms: 0 }
+        Transmission { gear: 1, flags: 0, revs: crate::kv!(34), clutch: 1.0, throttle: 0.0, last_shift_ms: 0 }
     }
 }
 
 #[allow(non_snake_case)]
 #[inline]
-fn IDLE_REVS() -> f32 { crate::kv!(60) }
+fn IDLE_REVS() -> f32 { crate::kv!(34) }
 
 fn sel(c: f32, a: f32, b: f32) -> f32 {
     if c >= 0.0 { a } else { b }
@@ -58,53 +57,53 @@ impl Transmission {
     fn gear_change(&mut self, h: &Handling, c: Controls, s1: f32, s2: f32, drive_wheels: usize, grounded: usize,
                    dt: f32, now_ms: u32) {
         let thr = c.throttle;
-        let load = c.brake.abs().mul_add(crate::kv!(28), thr.abs());
-        let f = sel(1.0 - load, load, 1.0).mul_add(crate::kv!(24), crate::kv!(74));
-        if thr.abs() < crate::kv!(74) {
-            self.flags &= !crate::kv!(1 int);
+        let load = c.brake.abs().mul_add(crate::kv!(61), thr.abs());
+        let f = sel(1.0 - load, load, 1.0).mul_add(crate::kv!(17), crate::kv!(46));
+        if thr.abs() < crate::kv!(46) {
+            self.flags &= !4;
         }
         let locked = |bit: u16, ms: u32| {
-            self.flags & bit != 0 && self.flags & crate::kv!(1 int) != 0 && now_ms < self.last_shift_ms.wrapping_add(ms)
+            self.flags & bit != 0 && self.flags & 4 != 0 && now_ms < self.last_shift_ms.wrapping_add(ms)
         };
-        let (can_up, can_down) = (!locked(2, crate::kv!(43 int)), !locked(1, crate::kv!(42 int)));
+        let (can_up, can_down) = (!locked(2, 2000), !locked(1, 3000));
         let d = s1 - s2;
         let (slow, fast) = if s1 > 0.0 { (sel(d, s2, s1), sel(d, s1, s2)) } else { (sel(d, s1, s2), sel(d, s2, s1)) };
         if self.clutch < 1.0 {
-            let rate: f32 = if h.drive_inertia < 1.0 { crate::kv!(119) } else { crate::kv!(80) };
+            let rate: f32 = if h.drive_inertia < 1.0 { crate::kv!(63) } else { crate::kv!(127) };
             self.clutch = rate.mul_add(dt, self.clutch);
             if self.clutch > 1.0 {
                 self.clutch = 1.0;
             }
         }
         let mfv = h.max_flat_velocity;
-        if thr.abs() < crate::kv!(51) && self.ratio(h, 1) / mfv * s1 < crate::kv!(60) {
-            self.clutch = crate::kv!(78);
+        if thr.abs() < crate::kv!(32) && self.ratio(h, 1) / mfv * s1 < crate::kv!(34) {
+            self.clutch = crate::kv!(49);
             return;
         }
         if thr < 0.0 && self.ratio(h, 0) / mfv * slow > -0.5 {
             if self.gear != 0 {
-                (self.clutch, self.gear) = (crate::kv!(78), 0);
+                (self.clutch, self.gear) = (crate::kv!(49), 0);
             }
             return;
         }
         if thr > 0.0 && self.gear == 0 && self.ratio(h, 1) / mfv * slow < 0.5 {
-            (self.clutch, self.gear) = (crate::kv!(78), 1);
+            (self.clutch, self.gear) = (crate::kv!(49), 1);
             return;
         }
         let per = 1.0 / mfv;
         let g = self.gear;
-        let (to, flags) = if self.ratio(h, g) * per * slow > f * crate::kv!(1050) {
+        let (to, flags) = if self.ratio(h, g) * per * slow > f * crate::kv!(383) {
             if g >= h.gears as i16 || thr <= 0.0 || grounded != drive_wheels || !can_up {
                 return;
             }
-            (g + 1, crate::kv!(2 int))
+            (g + 1, 5)
         } else {
-            if g <= 1 || self.ratio(h, g - 1) * per * fast >= f * crate::kv!(18) || !can_down {
+            if g <= 1 || self.ratio(h, g - 1) * per * fast >= f * crate::kv!(13) || !can_down {
                 return;
             }
-            (g - 1, crate::kv!(6 int))
+            (g - 1, 6)
         };
-        (self.gear, self.flags, self.clutch, self.last_shift_ms) = (to, flags, crate::kv!(78), now_ms);
+        (self.gear, self.flags, self.clutch, self.last_shift_ms) = (to, flags, crate::kv!(49), now_ms);
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -116,7 +115,7 @@ impl Transmission {
             self.throttle = 0.0;
             return 0.0;
         }
-        if !c.handbrake && self.clutch < crate::kv!(119) && self.gear > 1 {
+        if !c.handbrake && self.clutch < crate::kv!(63) && self.gear > 1 {
             (self.throttle, thr) = (0.0, 0.0);
         }
         let clutch = if c.handbrake {
@@ -145,7 +144,7 @@ impl Transmission {
                 self.revs = target;
             }
         } else if self.revs > target {
-            self.revs = fneg(h.drive_inertia.mul_add(dt, -self.revs));
+            self.revs = -h.drive_inertia.mul_add(dt, -self.revs);
             if self.revs < target {
                 self.revs = target;
             }
@@ -154,22 +153,22 @@ impl Transmission {
             return pushed;
         }
         if self.revs > 1.0 {
-            (self.throttle, self.revs) = (self.throttle * 0.0, crate::kv!(28));
-            thr *= crate::kv!(1051);
+            (self.throttle, self.revs) = (self.throttle * 0.0, crate::kv!(61));
+            thr *= crate::kv!(384);
         } else if ratio / h.max_flat_velocity * s2 > 1.0 {
             thr = 0.0;
         }
         if self.gear < 2 && self.revs < 0.5 {
             let r = self.revs * 2.0;
-            let r = sel(crate::kv!(60) - r, crate::kv!(60), r);
+            let r = sel(crate::kv!(34) - r, crate::kv!(34), r);
             self.clutch = sel(self.clutch - r, r, self.clutch);
         }
         let k = clutch * 2.0;
         let force = thr.abs() * ratio * sel(1.0 - k, k, 1.0) * h.drive_force * (self.revs / target) / drive_wheels as f32;
-        if c.flags_f80 & crate::kv!(1052 int) != 0 {
-            force * crate::kv!(12)
-        } else if c.flags_f80 & crate::kv!(1053 int) != 0 {
-            force * crate::kv!(136)
+        if c.flags_f80 & 0x0080_0040 != 0 {
+            force * crate::kv!(7)
+        } else if c.flags_f80 & 0x0040_0020 != 0 {
+            force * crate::kv!(50)
         } else {
             force
         }

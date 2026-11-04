@@ -331,7 +331,8 @@ impl Runtime {
         delirium::nmrs::set(0,joints,parts,masses,pairs);
         // These custom frames are explicitly defined in the host's frame;
         // they need no Fred fragment link correction or logged GTA NM_LINKS.
-        let (build,mut rest)=character.build().ok_or("invalid BO1 character build")?;
+        let _=delirium::nmdbm::DERIVED_LINKS[0].set(vec![Quat::IDENTITY;PARTS]);
+        let (mut build,mut rest)=character.build().ok_or("invalid BO1 character build")?;
         let low=build.parts.iter().zip(&rest).map(|(p,t)| {
             let r=Mat3::from_quat(t.rotation);
             let extent=p.boxed.map_or(r.y_axis.z.abs()*p.half+p.radius,
@@ -711,7 +712,6 @@ impl Runtime {
         let build = Build {
             parts: vec![part],
             nm: 0,
-            links: vec![],
         };
         let t = tf(&f.pose);
         let mut agent = Agent::new(
@@ -1013,7 +1013,7 @@ impl Runtime {
                 }
                 continue;
             }
-            let supported = a.agent.doll.support_mask != 0;
+            let supported = a.agent.doll.touch.iter().any(|t| t & 0x28 == 0x20);
             a.airborne = if supported { 0.0 } else { a.airborne + DT };
             if a.airborne > 0.2
                 && !a.highfall
@@ -1102,7 +1102,7 @@ impl Runtime {
                     vz,
                     near,
                 );
-                let supported = a.agent.doll.support_mask != 0;
+                let supported = a.agent.doll.touch.iter().any(|x| x & 0x28 == 0x20);
                 let age = (self.frame - a.blast_start) as f32 * DT;
                 if !(supported
                     && ((age > 2.0 && a.agent.doll.com().1.length() < 0.2)
@@ -1127,7 +1127,7 @@ impl Runtime {
                     pose.rotation = q.normalize();
                 }
                 if valid {
-                    let rows = delirium::nmrs::incoming_rows(&a.build.links, &poses);
+                    let rows = delirium::nmrs::incoming_rows(a.build.nm, &poses);
                     let weight = reference.weight as f32 / 65535.0;
                     if let Some(ch) = a.agent.character() {
                         let targets = std::array::from_fn(|i| {
@@ -1137,7 +1137,7 @@ impl Runtime {
                         let drive = nm::LocomotionDrive { targets,
                             stance: [reference.stance & 1 != 0, reference.stance & 2 != 0],
                             weight, gain_weight: 0.0,
-                            leg_stiffness: [delirium_data::bo1_kv!(25); 2], response: [1.0; 2] };
+                            leg_stiffness: [delirium_data::kv!(25); 2], response: [1.0; 2] };
                         a.agent.set_locomotion_drive(Some(drive)).map_err(str::to_owned)?;
                     }
                 }
@@ -1233,7 +1233,7 @@ impl Runtime {
             .chain(self.fragments.iter_mut().enumerate().map(|(i,a)|(ACTORS+i,a)))
             .filter_map(|(id,a)| a.as_mut().map(|a| (&mut a.agent,id,&a.build,&[][..],&[][..])))
             .collect();
-        Agent::step_group(&mut members, &self.world, DT, &mut self.contact_group, &mut |_, _, _| {});
+        Agent::step_group(&mut members, &self.world, DT, &mut self.contact_group);
         drop(members);
         self.body_contacts = self.contact_group.contacts().collect();
         for a in self.actors.iter_mut().chain(self.fragments.iter_mut()).flatten() {
@@ -1332,7 +1332,12 @@ impl Runtime {
             let (p, vel) = a.agent.doll.com();
             s.com = [p.x, p.y, p.z, 0.0];
             s.velocity = [vel.x, vel.y, vel.z, 0.0];
-            s.support_mask = a.agent.doll.support_mask & !a.detached;
+            for (k, t) in a.agent.doll.touch.iter().enumerate() {
+                if t & 0x28 == 0x20 {
+                    s.support_mask |= 1 << k;
+                }
+            }
+            s.support_mask &= !a.detached;
             s.foot_speed = [3, 6]
                 .iter()
                 .map(|&k| a.agent.doll.vel(k).0.length())
@@ -1415,7 +1420,7 @@ pub fn recover_test() -> Result<(), String> {
     let yaw = Quat::from_rotation_x(1.5);
     let root = a.agent.doll.root();
     let poses: Vec<_> = a.agent.doll.frames().collect();
-    let rows = delirium::nmrs::incoming_rows(&a.build.links, &poses);
+    let rows = delirium::nmrs::incoming_rows(a.build.nm, &poses);
     let ch = a.agent.character().unwrap();
     for j in 0..20 {
         println!(
@@ -1451,7 +1456,7 @@ pub fn recover_test() -> Result<(), String> {
                 knee_low[side] = knee_low[side].min(bend);
                 knee_high[side] = knee_high[side].max(bend);
                 let target = body.agent.character().unwrap().incoming_angle(joint,
-                    &delirium::nmrs::incoming_rows(&body.build.links, &body.agent.incoming))[0];
+                    &delirium::nmrs::incoming_rows(body.build.nm, &body.agent.incoming))[0];
                 target_low[side] = target_low[side].min(target);
                 target_high[side] = target_high[side].max(target);
             }

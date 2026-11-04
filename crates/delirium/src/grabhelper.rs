@@ -5,13 +5,7 @@ use crate::{Fma, Vd};
 
 #[allow(non_snake_case)]
 #[inline]
-fn BLOCK() -> &'static [f32; 7] { static V: std::sync::OnceLock<[f32; 7]> = std::sync::OnceLock::new(); let f = || [delirium_data::kv!(176), delirium_data::kv!(31), delirium_data::kv!(177), delirium_data::kv!(178), delirium_data::kv!(179), 0.0, 1.0]; if delirium_data::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
-const NAMES: [&str; 7] = ["defaultGrabStrength", "grabBodyStiffness", "grabDistance", "grabReachAngle", "grabOneSideReachAngle",
-                          "grabPullUpStrength", "grabPullUpTimer"];
-
-pub fn read_block(tp: &delirium_data::taskparams::TaskParams) -> [f32; 7] {
-    std::array::from_fn(|k| tp.get("GrabHelper", "*", NAMES[k], (*BLOCK())[k]))
-}
+fn BLOCK() -> [f32; 7] { [delirium_data::kv!(115), delirium_data::kv!(20), delirium_data::kv!(116), delirium_data::kv!(117), delirium_data::kv!(118), 0.0, 1.0] }
 
 #[derive(Clone, Debug, Default)]
 pub struct GrabHelper {
@@ -23,7 +17,6 @@ pub struct GrabHelper {
     pub pos4: Vec3,
     pub flags: u32,
     pub instance: Option<(i32, i32)>,
-    pub block: [f32; 7],
     pub strength: f32,
     pub find_left: f32,
     pub hold_left: f32,
@@ -31,7 +24,7 @@ pub struct GrabHelper {
 
 impl GrabHelper {
     pub fn new() -> GrabHelper {
-        GrabHelper { strength: (*BLOCK())[0], block: (*BLOCK()), ..Default::default() }
+        GrabHelper { strength: BLOCK()[0], ..Default::default() }
     }
 
     pub fn set_points(&mut self, instance: Option<(i32, i32)>, p: [Option<Vec3>; 6]) {
@@ -45,7 +38,7 @@ impl GrabHelper {
     }
 
     pub fn grabbing(&self) -> bool {
-        self.flags & delirium_data::kv!(180 int) != 0
+        self.flags & 0x600 != 0
     }
 
     pub fn start(&mut self) -> Option<Msg> {
@@ -54,9 +47,9 @@ impl GrabHelper {
             return None;
         }
         let mut p = vec![];
-        if self.flags & delirium_data::kv!(96 int) == 0 {
+        if self.flags & 0x100 == 0 {
             p.push(("start", B(true)));
-            self.flags |= delirium_data::kv!(96 int);
+            self.flags |= 0x100;
         }
         for (n, v) in [("pos1", self.pos1), ("normalL", self.normal_l), ("pos2", self.pos2), ("normalR", self.normal_r), ("pos3", self.pos3), ("pos4", self.pos4)] {
             if v != Vec3::ZERO {
@@ -67,18 +60,17 @@ impl GrabHelper {
             p.extend([("instanceIndex", I(i)), ("instancePartIndex", I(part))]);
         }
         p.extend([("useLeft", B(self.pos1 != Vec3::ZERO)), ("useRight", B(self.pos2 != Vec3::ZERO))]);
-        if self.flags & delirium_data::kv!(23 int) != 0 {
+        if self.flags & 8 != 0 {
             p.push(("justbrace", B(true)));
         }
-        if self.flags & delirium_data::kv!(54 int) != 0 {
+        if self.flags & 0x10 != 0 {
             p.push(("linegrab", B(true)));
-        } else if self.flags & delirium_data::kv!(7 int) != 0 {
+        } else if self.flags & 0x20 != 0 {
             p.push(("surfaceGrab", B(true)));
         }
-        let b = self.block;
-        p.extend([("bodyStiffness", F(b[1])), ("grabStrength", F(self.strength)), ("grabDist", F(b[2])),
-                  ("reachAngle", F(b[delirium_data::kv!(0 int)])), ("oneSideReachAngle", F(b[delirium_data::kv!(1 int)])), ("dontLetGo", B(true)),
-                  ("pullUpStrengthLeft", F(b[delirium_data::kv!(2 int)])), ("pullUpStrengthRight", F(b[delirium_data::kv!(2 int)])), ("pullUpTime", F(b[delirium_data::kv!(6 int)]))]);
+        p.extend([("bodyStiffness", F(BLOCK()[1])), ("grabStrength", F(self.strength)), ("grabDist", F(BLOCK()[2])),
+                  ("reachAngle", F(BLOCK()[3])), ("oneSideReachAngle", F(BLOCK()[4])), ("dontLetGo", B(true)),
+                  ("pullUpStrengthLeft", F(BLOCK()[5])), ("pullUpStrengthRight", F(BLOCK()[5])), ("pullUpTime", F(BLOCK()[6]))]);
         Some(("grab", p))
     }
 
@@ -108,7 +100,7 @@ impl GrabHelper {
     pub fn feedback(&mut self, success: bool, name: &str) {
         let (left, right) = (name.starts_with("LeftArmGrab"), name.starts_with("RightArmGrab"));
         if left || right {
-            self.flags |= if !success { delirium_data::kv!(181 int) } else if left { delirium_data::kv!(182 int) } else { delirium_data::kv!(183 int) };
+            self.flags |= if !success { 0x1000 } else if left { 0x200 } else { 0x400 };
         }
     }
 }
@@ -143,19 +135,19 @@ impl GrabHelper {
     pub fn find_surface(&mut self, i: &FindIn, probe: impl FnOnce(Vec3) -> Option<Hit>) -> Option<Msg> {
         #[allow(non_snake_case)]
         #[inline]
-        fn SPEED() -> &'static [f32; 2] { static V: std::sync::OnceLock<[f32; 2]> = std::sync::OnceLock::new(); let f = || [delirium_data::kv!(24), 0.5]; if delirium_data::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+        fn SPEED() -> [f32; 2] { [delirium_data::kv!(17), 0.5] }
         #[allow(non_snake_case)]
         #[inline]
-        fn REACH() -> f32 { delirium_data::kv!(24) }
+        fn REACH() -> f32 { delirium_data::kv!(17) }
         const LIFT: f32 = 0.0;
         let sum = i.vel[0] + i.vel[1];
         let fast = |t: f32| sum.x.fma(sum.x, sum.y.fma(sum.y, sum.z * sum.z)) > t * t;
         let mut go = false;
-        if self.flags & 2 != 0 && self.flags & delirium_data::kv!(184 int) != 0 {
-            go |= fast((*SPEED())[0]);
+        if self.flags & 2 != 0 && self.flags & 0x10000 != 0 {
+            go |= fast(SPEED()[0]);
         }
-        if self.flags & delirium_data::kv!(1 int) != 0 && self.flags & delirium_data::kv!(185 int) != 0 {
-            go |= fast((*SPEED())[1]);
+        if self.flags & 4 != 0 && self.flags & 0x70000 != 0 {
+            go |= fast(SPEED()[1]);
         }
         if !go || self.flags & 1 != 0 {
             return None;
@@ -164,11 +156,11 @@ impl GrabHelper {
         let end = Vec3::new(i.hand_dir.x.fma(REACH(), start.x), i.hand_dir.y.fma(REACH(), start.y), i.hand_dir.z.fma(REACH(), start.z));
         let hit = probe(end)?;
         let (mut point, mut normal, mut held) = (hit.point, hit.normal, None);
-        if let Some(e) = hit.entity.filter(|e| (2..delirium_data::kv!(2 int)).contains(&e.kind)) {
-            let d = hit.point - e.rows[delirium_data::kv!(0 int)];
+        if let Some(e) = hit.entity.filter(|e| (2..5).contains(&e.kind)) {
+            let d = hit.point - e.rows[3];
             let local = |v: Vec3| Vec3::new(e.rows[0].vd(v), e.rows[1].vd(v), e.rows[2].vd(v));
             (point, normal) = (local(d), local(hit.normal));
-            if !(e.kind == delirium_data::kv!(1 int) && e.b555 != 0) {
+            if !(e.kind == 4 && e.b555 != 0) {
                 if !e.grabbable || e.n482 >= 2 {
                     return None;
                 }

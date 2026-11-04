@@ -30,7 +30,6 @@ pub struct Weapon {
     pub muzzle: Option<String>,
     pub shell: Option<String>,
     pub anims: Option<String>,
-    pub melee_groups: [Option<String>; 2],
     pub rumble: (f32, f32),
 }
 
@@ -41,8 +40,6 @@ pub struct Projectile {
     pub explosion: Option<String>,
     pub force: f32,
     pub explode_impact: f32,
-    pub offset: [f32; 3],
-    pub rot_offset: [f32; 3],
 }
 
 impl Weapon {
@@ -71,7 +68,7 @@ fn lookup(table: &[&str], name: &str, none: i32) -> i32 {
 }
 
 pub fn slot_index(name: &str) -> i32 { lookup(&SLOTS, name, 0) }
-pub fn damage_type_index(name: &str) -> i32 { lookup(&DAMAGE_TYPES, name, crate::kv!(23 int)) }
+pub fn damage_type_index(name: &str) -> i32 { lookup(&DAMAGE_TYPES, name, 8) }
 pub fn group_index(name: &str) -> i32 { lookup(&GROUPS, name, 0) }
 pub fn flag_bit(name: &str) -> i32 { lookup(&FLAGS, name, -1) }
 
@@ -119,7 +116,7 @@ fn tree(xml: &str) -> Element {
         }
         rest = &rest[lt..];
         if rest.starts_with("<!--") {
-            rest = rest.find("-->").map_or("", |i| &rest[i + crate::kv!(0 int)..]);
+            rest = rest.find("-->").map_or("", |i| &rest[i + 3..]);
             continue;
         }
         let Some(gt) = rest.find('>') else { break };
@@ -164,7 +161,7 @@ fn weapons_in<'a>(el: &'a Element, out: &mut Vec<&'a Element>) {
 }
 
 fn word(row: &Row, at: usize) -> u32 {
-    u32::from_be_bytes([row[at], row[at + 1], row[at + 2], row[at + crate::kv!(0 int)]])
+    u32::from_be_bytes([row[at], row[at + 1], row[at + 2], row[at + 3]])
 }
 
 fn half(row: &Row, at: usize) -> u16 {
@@ -193,56 +190,53 @@ pub fn read(xml: &str) -> Vec<Weapon> {
 }
 
 fn from_row(w: &Element, data: &Element, name: &str, row: &Row) -> Weapon {
-    let fire = FIRE_TYPES.get(word(row, crate::kv!(23 int)) as usize).copied().unwrap_or("").to_string();
-    let word20 = word(row, crate::kv!(7 int));
+    let fire = FIRE_TYPES.get(word(row, 8) as usize).copied().unwrap_or("").to_string();
+    let word20 = word(row, 0x20);
     let flags = FLAGS.iter().enumerate().filter(|&(bit, _)| (word20 >> bit) & 1 != 0).map(|(_, f)| f.to_string()).collect();
     let projectile = data.children.iter().find(|c| c.name == "projectile").filter(|_| fire == "PROJECTILE").map(|p| {
-        let explosion = word(row, crate::kv!(419 int)) as i32;
+        let explosion = word(row, 0xAC) as i32;
         Projectile {
             kind: if p.children.iter().any(|c| c.name == "typetocreate") {
-                name_at(row, &WEAPON_TYPES, crate::kv!(323 int))
+                name_at(row, &WEAPON_TYPES, 0xA8)
             } else {
-                name_at(row, &PROJECTILE_TYPES, crate::kv!(88 int))
+                name_at(row, &PROJECTILE_TYPES, 0xA0)
             },
-            fuse: word(row, crate::kv!(374 int)) as i32 as f32,
+            fuse: word(row, 0xA4) as i32 as f32,
             explosion: (explosion >= 0).then(|| EXPLOSIONS.get(explosion as usize).copied().unwrap_or("").to_string()),
-            force: if p.children.iter().any(|c| c.name == "physics") { float(row, crate::kv!(107 int)) } else { 0.0 },
-            explode_impact: float(row, crate::kv!(364 int)),
-            offset: [float(row, crate::kv!(91 int)), float(row, crate::kv!(97 int)), float(row, crate::kv!(461 int))],
-            rot_offset: [float(row, crate::kv!(454 int)), float(row, crate::kv!(367 int)), float(row, crate::kv!(89 int))],
+            force: if p.children.iter().any(|c| c.name == "physics") { float(row, 0x18) } else { 0.0 },
+            explode_impact: float(row, 0xD0),
         }
     });
     Weapon {
         name: name.to_string(),
         fire,
-        damage: half(row, crate::kv!(369 int)) as f32,
-        damage_fps: half(row, crate::kv!(362 int)) as f32,
-        range: float(row, crate::kv!(107 int)),
-        target_range: float(row, crate::kv!(127 int)),
-        clip: half(row, crate::kv!(329 int)) as u32,
-        ammo_max: half(row, crate::kv!(321 int)) as u32,
-        between_shots: word(row, crate::kv!(290 int)) as i32 as f32,
-        reload: word(row, crate::kv!(298 int)) as i32 as f32,
-        reload_crouch: word(row, crate::kv!(485 int)) as i32 as f32,
-        reload_fast: word(row, crate::kv!(408 int)) as i32 as f32,
-        force: float(row, crate::kv!(87 int)),
-        accuracy: float(row, crate::kv!(379 int)),
-        accuracy_fps: float(row, crate::kv!(317 int)),
-        crouch_drop: float(row, crate::kv!(477 int)) - float(row, crate::kv!(314 int)),
-        aim_offset: [float(row, crate::kv!(253 int)), float(row, crate::kv!(324 int)), float(row, crate::kv!(477 int))],
+        damage: half(row, 0x82) as f32,
+        damage_fps: half(row, 0x84) as f32,
+        range: float(row, 0x18),
+        target_range: float(row, 0x14),
+        clip: half(row, 0x86) as u32,
+        ammo_max: half(row, 0x88) as u32,
+        between_shots: word(row, 0x8C) as i32 as f32,
+        reload: word(row, 0x94) as i32 as f32,
+        reload_crouch: word(row, 0x9C) as i32 as f32,
+        reload_fast: word(row, 0x98) as i32 as f32,
+        force: float(row, 0x90),
+        accuracy: float(row, 0x34),
+        accuracy_fps: float(row, 0x38),
+        crouch_drop: float(row, 0x48) - float(row, 0x58),
+        aim_offset: [float(row, 0x40), float(row, 0x44), float(row, 0x48)],
         fire_rate: desc_attr(w, "rates", "firerate").and_then(|v| v.parse().ok()).unwrap_or(1.0),
         blind_rate: desc_attr(w, "rates", "blindfirerate").and_then(|v| v.parse().ok()).unwrap_or(1.0),
         model: desc_attr(w, "assets", "model").map(str::to_string),
-        slot: name_at(row, &SLOTS, crate::kv!(1 int)),
-        damage_type: name_at(row, &DAMAGE_TYPES, crate::kv!(55 int)),
-        group: name_at(row, &GROUPS, crate::kv!(54 int)),
+        slot: name_at(row, &SLOTS, 4),
+        damage_type: name_at(row, &DAMAGE_TYPES, 0xC),
+        group: name_at(row, &GROUPS, 0x10),
         flags,
         projectile,
         muzzle: desc_attr(w, "muzzle", "fx").map(str::to_string),
         shell: desc_attr(w, "shell", "fx").map(str::to_string),
         anims: desc_attr(w, "anim", "group").map(str::to_string),
-        melee_groups: ["meleegroup1", "meleegroup2"].map(|k| desc_attr(w, "anim", k).map(str::to_string)),
-        rumble: (word(row, crate::kv!(431 int)) as i32 as f32, float(row, crate::kv!(370 int))),
+        rumble: (word(row, 0x70) as i32 as f32, float(row, 0x74)),
     }
 }
 
@@ -250,10 +244,10 @@ pub fn pad_motors(intensity: f32) -> (u8, u8) {
     let i = intensity.max(0.0).min(1.0);
     if i == 0.0 {
         (0, 0)
-    } else if i < crate::kv!(78) {
-        (0, (i * crate::kv!(31)).mul_add(crate::kv!(147), crate::kv!(79)) as u8)
+    } else if i < crate::kv!(49) {
+        (0, (i * crate::kv!(20)).mul_add(crate::kv!(87), crate::kv!(52)) as u8)
     } else {
-        (i.mul_add(crate::kv!(1069), crate::kv!(30)) as u8, if i >= crate::kv!(28) { crate::kv!(300 int) } else { 0 })
+        (i.mul_add(crate::kv!(389), crate::kv!(19)) as u8, if i >= crate::kv!(61) { 120 } else { 0 })
     }
 }
 

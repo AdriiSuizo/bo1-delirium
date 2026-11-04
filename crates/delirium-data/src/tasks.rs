@@ -1,173 +1,64 @@
 use crate::movement::{self, Movement, Moves, Mover};
 
 pub mod kind {
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn REACT_TO_GUN_AIMED_AT() -> u32 { crate::kv!(976 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn PLAYER_ON_FOOT() -> u32 { crate::kv!(1 int) }
+    pub const PLAYER_ON_FOOT: u32 = 4;
     pub const PAUSE: u32 = 202;
     pub const STAND_STILL: u32 = 203;
-    pub const IN_WATER: u32 = 268;
     pub const SIMPLE_DIE: u32 = 212;
     pub const DIE: u32 = 217;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn DEAD() -> u32 { crate::kv!(433 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn INJURED_ON_GROUND() -> u32 { crate::kv!(977 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn PATHFIND_PROBLEM() -> u32 { crate::kv!(978 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn PLAY_RANDOM_AMBIENTS() -> u32 { crate::kv!(979 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn RUN_NAMED_ANIM() -> u32 { crate::kv!(980 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn HIT_WALL() -> u32 { crate::kv!(966 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn SEQUENCE() -> u32 { crate::kv!(352 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn USE_SEQUENCE() -> u32 { crate::kv!(981 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn DO_NOTHING() -> u32 { crate::kv!(982 int) }
+    pub const DEAD: u32 = 218;
+    pub const INJURED_ON_GROUND: u32 = 278;
+    pub const PLAY_RANDOM_AMBIENTS: u32 = 291;
+    pub const RUN_NAMED_ANIM: u32 = 401;
+    pub const HIT_WALL: u32 = 411;
+    pub const SEQUENCE: u32 = 244;
+    pub const USE_SEQUENCE: u32 = 273;
+    pub const DO_NOTHING: u32 = 281;
     pub const MOVE_STAND_STILL: u32 = 282;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn MOVE_DO_NOTHING() -> u32 { crate::kv!(983 int) }
+    pub const MOVE_DO_NOTHING: u32 = 283;
     pub const MOVE_NONE: u32 = 284;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn MOVE_PATHFIND_PROBLEM() -> u32 { crate::kv!(984 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn CONTROL_MOVEMENT() -> u32 { crate::kv!(985 int) }
-    pub const MOVE_PLAYER: u32 = 2;
+    pub const MOVE_PATHFIND_PROBLEM: u32 = 292;
+    pub const CONTROL_MOVEMENT: u32 = 285;
     pub const MOVE_SWIM: u32 = 1304;
     pub const USE_MOBILE_PHONE: u32 = 1600;
     pub const CAR_DRIVE_MISSION: u32 = 724;
     pub const MOVE_GO_TO_POINT: u32 = 900;
     pub const MOVE_ACHIEVE_HEADING: u32 = 902;
     pub const MOVE_GO_TO_POINT_AND_STAND_STILL: u32 = 903;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn FOLLOW_POINT_ROUTE() -> u32 { crate::kv!(986 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn SMART_FLEE_POINT() -> u32 { crate::kv!(987 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn SMART_FLEE_ENTITY() -> u32 { crate::kv!(988 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn SEEK_COVER() -> u32 { crate::kv!(989 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn MOVE_ABOUT_INJURED() -> u32 { crate::kv!(990 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn REVIVE() -> u32 { crate::kv!(991 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn WANDER() -> u32 { crate::kv!(640 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn FOLLOW_LEADER_IN_FORMATION() -> u32 { crate::kv!(992 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn FOLLOW_LEADER_ANY_MEANS() -> u32 { crate::kv!(993 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn FLEE_ANY_MEANS() -> u32 { crate::kv!(994 int) }
+    pub const FOLLOW_POINT_ROUTE: u32 = 905;
+    pub const SMART_FLEE_POINT: u32 = 910;
+    pub const SMART_FLEE_ENTITY: u32 = 911;
+    pub const WANDER: u32 = 912;
+    pub const FOLLOW_LEADER_IN_FORMATION: u32 = 913;
+    pub const FOLLOW_LEADER_ANY_MEANS: u32 = 923;
+    pub const FLEE_ANY_MEANS: u32 = 927;
     pub const MOVE_FOLLOW_NAV_MESH_ROUTE: u32 = 942;
     pub const MOVE_GO_TO_POINT_ON_ROUTE: u32 = 943;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn MOVE_GO_TO_POINT_STAND_STILL_ACHIEVE_HEADING() -> u32 { crate::kv!(995 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn MOVE_WANDER() -> u32 { crate::kv!(996 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn MOVE_BE_IN_FORMATION() -> u32 { crate::kv!(997 int) }
+    pub const MOVE_WANDER: u32 = 949;
+    pub const MOVE_BE_IN_FORMATION: u32 = 950;
     pub const MOVE_CROWD_AROUND_LOCATION: u32 = 951;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn GUN() -> u32 { crate::kv!(998 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn AIM_GUN() -> u32 { crate::kv!(999 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn FIRE_GUN() -> u32 { crate::kv!(1000 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn RELOAD_GUN() -> u32 { crate::kv!(1001 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn DUCK() -> u32 { crate::kv!(1002 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn SAY_AUDIO() -> u32 { crate::kv!(1003 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn GANG_HASSLE_PED() -> u32 { crate::kv!(1004 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn COMBAT() -> u32 { crate::kv!(1005 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_RELAX() -> u32 { crate::kv!(1006 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_SHOT() -> u32 { crate::kv!(1007 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_BALANCE() -> u32 { crate::kv!(793 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_EXPLOSION() -> u32 { crate::kv!(1008 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_ON_FIRE() -> u32 { crate::kv!(1009 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_BRACE() -> u32 { crate::kv!(1010 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_HIGH_FALL() -> u32 { crate::kv!(1011 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn JUMP_IN_AIR() -> u32 { crate::kv!(445 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_FLINCH() -> u32 { crate::kv!(1012 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_FALL_DOWN() -> u32 { crate::kv!(1013 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_SCRIPT_CONTROL() -> u32 { crate::kv!(538 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn COMPLEX_NM() -> u32 { crate::kv!(1014 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_POSE() -> u32 { crate::kv!(519 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn NM_SIT() -> u32 { crate::kv!(559 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn REACT() -> u32 { crate::kv!(1015 int) }
+    pub const GUN: u32 = 1040;
+    pub const AIM_GUN: u32 = 1041;
+    pub const FIRE_GUN: u32 = 1042;
+    pub const RELOAD_GUN: u32 = 1043;
+    pub const DUCK: u32 = 415;
+    pub const SAY_AUDIO: u32 = 364;
+    pub const GANG_HASSLE_PED: u32 = 1212;
+    pub const COMBAT: u32 = 1900;
+    pub const NM_RELAX: u32 = 2104;
+    pub const NM_SHOT: u32 = 2107;
+    pub const NM_BALANCE: u32 = 2109;
+    pub const NM_EXPLOSION: u32 = 2110;
+    pub const NM_ON_FIRE: u32 = 2111;
+    pub const NM_BRACE: u32 = 2106;
+    pub const NM_HIGH_FALL: u32 = 2108;
+    pub const NM_FLINCH: u32 = 2114;
+    pub const NM_FALL_DOWN: u32 = 2116;
+    pub const NM_SCRIPT_CONTROL: u32 = 2112;
+    pub const COMPLEX_NM: u32 = 2118;
+    pub const NM_POSE: u32 = 2105;
+    pub const NM_SIT: u32 = 2115;
+    pub const REACT: u32 = 1312;
     pub const ON_FIRE: u32 = 250;
     pub const END: u32 = u32::MAX;
 }
@@ -175,12 +66,8 @@ pub mod kind {
 pub const PHYSICAL_RESPONSE: usize = 0;
 pub const EVENT_RESPONSE_TEMP: usize = 1;
 pub const EVENT_RESPONSE_NONTEMP: usize = 2;
-#[allow(non_snake_case)]
-#[inline]
-pub fn PRIMARY() -> usize { crate::kv!(0 int) }
-#[allow(non_snake_case)]
-#[inline]
-pub fn DEFAULT() -> usize { crate::kv!(1 int) }
+pub const PRIMARY: usize = 3;
+pub const DEFAULT: usize = 4;
 
 pub const ABORT_LEAVE: u8 = 0;
 pub const ABORT_URGENT: u8 = 1;
@@ -234,10 +121,6 @@ pub trait Task<P>: TaskClone<P> + Send + Sync {
     fn control_ask(&self, _new: &dyn Task<P>) -> Option<(u8, NewTask)> {
         None
     }
-    fn control_ask_keep(&self, _new: &dyn Task<P>) -> Option<u8> {
-        None
-    }
-    fn refused(&mut self, _ped: &mut P) {}
     fn tune(&mut self, _ped: &mut P, _sub: &mut dyn Task<P>) {}
     fn abortable_for(&mut self, ped: &mut P, urgency: u8, _new: Option<&NewTask>) -> bool {
         self.make_abortable(ped, urgency)
@@ -245,21 +128,6 @@ pub trait Task<P>: TaskClone<P> + Send + Sync {
     fn set_status(&mut self, _status: Status) {}
     fn mover(&mut self) -> Option<&mut Mover> {
         None
-    }
-    fn move_target(&self) -> Option<[f32; 3]> {
-        None
-    }
-    fn walk_round(&self) -> Option<(u32, bool, u32)> {
-        None
-    }
-    fn move_ratio(&self) -> Option<f32> {
-        None
-    }
-    fn set_target(&mut self, _ped: &mut P, _at: [f32; 3]) {}
-    fn set_move_state(&mut self, _ped: &mut P, state: u32) {
-        if let Some(m) = self.mover() {
-            m.set_state(state);
-        }
     }
     fn progress(&self) -> Option<i32> {
         None
@@ -275,7 +143,7 @@ pub struct Status {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NewTask {
-    pub secondary: Option<u32>,
+    pub secondary: bool,
     pub drop_main: std::cell::Cell<bool>,
     pub kind: Option<u32>,
     pub priority: usize,
@@ -284,13 +152,9 @@ pub struct NewTask {
     pub switched: Option<u32>,
 }
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn NEW_TASK_EVENT() -> u32 { crate::kv!(300 int) }
+pub const NEW_TASK_EVENT: u32 = 120;
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn SWITCH_PRIORITY() -> usize { crate::kv!(326 int) }
+pub const SWITCH_PRIORITY: usize = 74;
 
 pub trait TaskClone<P> {
     fn clone_task(&self) -> Box<dyn Task<P>>;
@@ -313,19 +177,12 @@ pub(crate) struct Node<P> {
     pub(crate) abortable: bool,
     pub(crate) ran: bool,
     pub(crate) tag: u64,
-    pub(crate) id: u32,
 }
 
 pub(crate) type Chain<P> = Vec<Node<P>>;
 
 pub(crate) fn node<P>(task: Box<dyn Task<P>>) -> Node<P> {
-    use std::sync::atomic::{AtomicU32, Ordering::Relaxed};
-    static NEXT: AtomicU32 = AtomicU32::new(1);
-    let id = match NEXT.fetch_add(1, Relaxed) {
-        0 => NEXT.fetch_add(1, Relaxed),
-        n => n,
-    };
-    Node { task, abortable: false, ran: false, tag: 0, id }
+    Node { task, abortable: false, ran: false, tag: 0 }
 }
 
 impl<P> Node<P> {
@@ -387,23 +244,15 @@ pub(crate) fn control<P>(chain: &mut Chain<P>, ped: &mut P) {
     while k + 1 < chain.len() && !chain[k].task.simple() {
         let (head, tail) = chain.split_at_mut(k + 1);
         head[k].tell();
-        tail[0].tell();
         head[k].task.tune(ped, &mut *tail[0].task);
         let new = head[k].task.control(ped, &*tail[0].task);
         head[k].mark_ran();
         if let Some(t) = new {
-            if let Some(urgency) = chain[k].task.control_ask_keep(&*t) {
-                if !abort(&mut chain[k + 1..], ped, urgency, None) {
-                    chain[k].task.refused(ped);
-                    k += 1;
-                    continue;
-                }
-            }
             if let Some((urgency, ev)) = chain[k].task.control_ask(&*t) {
                 abort(&mut chain[k + 1..], ped, urgency, Some(&ev));
             }
             if !chain[k + 1].abortable {
-                let ev = NewTask { secondary: None, drop_main: Default::default(), kind: (t.kind() != kind::END).then(|| t.kind()), priority: SWITCH_PRIORITY(), event: NEW_TASK_EVENT(), flag: false, switched: None };
+                let ev = NewTask { secondary: false, drop_main: Default::default(), kind: (t.kind() != kind::END).then(|| t.kind()), priority: SWITCH_PRIORITY, event: NEW_TASK_EVENT, flag: false, switched: None };
                 abort(&mut chain[k + 1..], ped, ABORT_IMMEDIATE, Some(&ev));
             }
             chain.truncate(k + 1);
@@ -454,7 +303,7 @@ impl NetObject {
         if self.clone {
             return self.may_give();
         }
-        !self.owned() || priority == DEFAULT() && !default_busy
+        !self.owned() || priority == DEFAULT && !default_busy
     }
 
     pub fn refuses_events(&self) -> bool {
@@ -491,13 +340,13 @@ impl<P> Manager<P> {
     }
 
     pub fn give(&mut self, ped: &mut P, task: Option<Box<dyn Task<P>>>, priority: usize) {
-        if self.running == Some(DEFAULT()) && priority == DEFAULT() && !self.primary[DEFAULT()].is_empty() {
+        if self.running == Some(DEFAULT) && priority == DEFAULT && !self.primary[DEFAULT].is_empty() {
             return;
         }
-        if self.net.is_some_and(|o| !o.lets_give(priority, !self.primary[DEFAULT()].is_empty())) {
+        if self.net.is_some_and(|o| !o.lets_give(priority, !self.primary[DEFAULT].is_empty())) {
             return;
         }
-        let ev = NewTask { secondary: None, drop_main: Default::default(), kind: task.as_ref().map(|t| t.kind()), priority, event: NEW_TASK_EVENT(), flag: false, switched: None };
+        let ev = NewTask { secondary: false, drop_main: Default::default(), kind: task.as_ref().map(|t| t.kind()), priority, event: NEW_TASK_EVENT, flag: false, switched: None };
         for chain in &mut self.primary[priority..] {
             if !abort(chain, ped, ABORT_URGENT, Some(&ev)) {
                 abort(chain, ped, ABORT_IMMEDIATE, Some(&ev));
@@ -510,9 +359,9 @@ impl<P> Manager<P> {
         build(chain, ped);
         if !simple_leaf(chain) {
             clean_up(chain, ped);
-            if priority == DEFAULT() {
+            if priority == DEFAULT {
                 let t = (self.default)(ped);
-                self.give(ped, t, DEFAULT());
+                self.give(ped, t, DEFAULT);
             }
         }
     }
@@ -530,7 +379,7 @@ impl<P> Manager<P> {
     }
 
     pub fn flush_secondary(&mut self, ped: &mut P) {
-        for slot in (0..self.secondary.len()).filter(|&s| s != crate::kv!(0 int)) {
+        for slot in (0..self.secondary.len()).filter(|&s| s != 3) {
             if self.secondary[slot].is_empty() {
                 continue;
             }
@@ -543,7 +392,7 @@ impl<P> Manager<P> {
     }
 
     pub fn flush_primary(&mut self, ped: &mut P) {
-        let ev = NewTask { secondary: None, drop_main: Default::default(), kind: None, priority: 0, event: NEW_TASK_EVENT(), flag: false, switched: None };
+        let ev = NewTask { secondary: false, drop_main: Default::default(), kind: None, priority: 0, event: NEW_TASK_EVENT, flag: false, switched: None };
         for chain in &mut self.primary {
             if !chain.is_empty() && abort(chain, ped, ABORT_IMMEDIATE, Some(&ev)) {
                 clean_up(chain, ped);
@@ -560,9 +409,9 @@ impl<P> Manager<P> {
 
     fn ended(&mut self, s: usize, ped: &mut P) -> bool {
         self.primary[s].clear();
-        if s == DEFAULT() {
+        if s == DEFAULT {
             let t = (self.default)(ped);
-            self.give(ped, t, DEFAULT());
+            self.give(ped, t, DEFAULT);
         }
         !self.primary[s].is_empty()
     }
@@ -654,14 +503,6 @@ impl<P> Manager<P> {
         self.secondary[slot].first().map_or(0, |n| n.tag)
     }
 
-    pub fn root_id(&self, priority: usize) -> u32 {
-        self.primary[priority].first().map_or(0, |n| n.id)
-    }
-
-    pub fn secondary_id(&self, slot: usize) -> u32 {
-        self.secondary[slot].first().map_or(0, |n| n.id)
-    }
-
     pub fn tag_root(&mut self, priority: usize, tag: u64) {
         if let Some(n) = self.primary[priority].first_mut() {
             n.tag = tag;
@@ -683,9 +524,9 @@ impl<P> Manager<P> {
 
 impl<P: Moves> Manager<P> {
     pub fn run(&mut self, ped: &mut P) {
-        if self.primary[DEFAULT()].is_empty() {
+        if self.primary[DEFAULT].is_empty() {
             let t = (self.default)(ped);
-            self.give(ped, t, DEFAULT());
+            self.give(ped, t, DEFAULT);
         }
         if self.run_primary(ped) {
             movement::with(ped, |mv, ped| {
@@ -715,7 +556,7 @@ impl<P: Moves> Manager<P> {
         let mut rounds = 0;
         loop {
             rounds += 1;
-            let last = rounds > crate::kv!(81 int);
+            let last = rounds > 10;
             control(&mut self.primary[s], ped);
             if !simple_leaf(&self.primary[s]) {
                 let k = self.primary[s].len() - 1;
@@ -873,7 +714,7 @@ impl Clone for DoNothing {
 
 impl<P: Clock> Task<P> for DoNothing {
     fn kind(&self) -> u32 {
-        kind::DO_NOTHING()
+        kind::DO_NOTHING
     }
 
     fn process(&mut self, ped: &mut P) -> bool {
@@ -885,7 +726,7 @@ impl<P: Clock> Task<P> for DoNothing {
             return true;
         }
         if self.ms > 0 {
-            self.ms -= (ped.dt() * crate::kv!(82)) as i32;
+            self.ms -= (ped.dt() * crate::kv!(53)) as i32;
             return self.ms <= 0;
         }
         false
@@ -922,7 +763,7 @@ impl<P> Sequence<P> {
     }
 
     pub fn add(&mut self, task: Box<dyn Task<P>>) -> bool {
-        let room = self.tasks.len() < crate::kv!(54 int);
+        let room = self.tasks.len() < 16;
         if room {
             self.tasks.push(task);
         }
@@ -932,7 +773,7 @@ impl<P> Sequence<P> {
 
 impl<P: 'static> Task<P> for Sequence<P> {
     fn kind(&self) -> u32 {
-        kind::SEQUENCE()
+        kind::SEQUENCE
     }
 
     fn simple(&self) -> bool {

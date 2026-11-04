@@ -1,6 +1,4 @@
-#[allow(non_snake_case)]
-#[inline]
-pub fn TYPE() -> u32 { delirium_data::kv!(538 int) }
+pub const TYPE: u32 = 2112;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Table<'a> {
@@ -31,9 +29,7 @@ pub struct Script {
 
 pub const FAILURE: u8 = 8;
 pub const SUCCESS: u8 = 12;
-#[allow(non_snake_case)]
-#[inline]
-pub fn FINISH() -> u8 { delirium_data::kv!(54 int) }
+pub const FINISH: u8 = 16;
 
 impl Script {
     pub fn new(ms: u32, flag: bool) -> Self {

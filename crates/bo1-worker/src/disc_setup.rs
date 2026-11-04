@@ -1,4 +1,4 @@
-use delirium_data::{disc::Disc, kv, xex};
+use delirium_data::{disc::Disc, disc_kv as kv, xex};
 use std::{
     fs::{self, File, OpenOptions},
     io::{Read, Write},

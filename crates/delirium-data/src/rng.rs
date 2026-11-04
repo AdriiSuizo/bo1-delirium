@@ -15,8 +15,8 @@ impl Rand {
     }
 
     pub fn next(&mut self) -> u32 {
-        self.seed = self.seed.wrapping_mul(crate::kv!(962 int)).wrapping_add(crate::kv!(963 int));
-        (self.seed >> crate::kv!(54 int)) & crate::kv!(562 int)
+        self.seed = self.seed.wrapping_mul(0x343FD).wrapping_add(0x269EC3);
+        (self.seed >> 16) & 0x7FFF
     }
 
     pub fn float_in_range(&mut self, min: f32, max: f32) -> f32 {
@@ -40,43 +40,43 @@ impl ScriptRand {
     }
 
     pub fn seeded(seed: u32) -> Self {
-        ScriptRand { low: if seed == 0 { 1 } else { seed }, carry: seed.rotate_left(crate::kv!(54 int)) ^ seed }
+        ScriptRand { low: if seed == 0 { 1 } else { seed }, carry: seed.rotate_left(16) ^ seed }
     }
 
     fn step(&mut self) -> u32 {
-        let t = u64::from(self.low) * crate::kv!(192 int) + u64::from(self.carry);
+        let t = u64::from(self.low) * 0x5CDC_FAA7 + u64::from(self.carry);
         self.low = t as u32;
-        self.carry = (t >> crate::kv!(7 int)) as u32;
+        self.carry = (t >> 32) as u32;
         self.low
     }
 
     pub fn int(&mut self) -> i32 {
-        (self.step() & crate::kv!(562 int)) as i32
+        (self.step() & 0x7FFF) as i32
     }
 
     pub fn float(&mut self) -> f32 {
-        (self.step() & crate::kv!(190 int)) as f32 * crate::kv!(762 f32)
+        (self.step() & 0x7F_FFFF) as f32 * crate::kv!(315 f32)
     }
 
     pub fn int_in_range(&mut self, min: i32, max: i32) -> i32 {
-        let bits = i64::from(self.step() & crate::kv!(527 int));
+        let bits = i64::from(self.step() & 0x7FFF_FFFF);
         let range = i64::from(max.wrapping_sub(min));
-        ((bits.wrapping_mul(range) as u64 >> crate::kv!(456 int)) as u32 as i32).wrapping_add(min)
+        ((bits.wrapping_mul(range) as u64 >> 31) as u32 as i32).wrapping_add(min)
     }
 
     pub fn float_in_range(&mut self, min: f32, max: f32) -> f32 {
-        let unit = (self.step() & crate::kv!(190 int)) as f32 * crate::kv!(762 f32);
+        let unit = (self.step() & 0x7F_FFFF) as f32 * crate::kv!(315 f32);
         unit.mul_add(max - min, min)
     }
 }
 
 pub fn float_from_draw(draw: u32, min: f32, max: f32) -> f32 {
-    let unit = draw as f32 * crate::kv!(100 f32);
+    let unit = draw as f32 * crate::kv!(231 f32);
     unit.mul_add(max - min, min)
 }
 
 pub fn int_from_draw(draw: u32, min: i32, max: i32) -> i32 {
-    let unit = (draw & crate::kv!(53 int)) as f32 * crate::kv!(964 f32);
+    let unit = (draw & 0xFFFF) as f32 * crate::kv!(382 f32);
     let scaled = unit * max.wrapping_sub(min) as f32;
     (scaled as i32).wrapping_add(min)
 }
@@ -89,35 +89,22 @@ pub struct AudioRand {
 
 impl Default for AudioRand {
     fn default() -> Self {
-        AudioRand { value: 1, carry: crate::kv!(965 int) }
+        AudioRand { value: 1, carry: 0x10001 }
     }
 }
 
 impl AudioRand {
-    pub fn seeded(seed: u32) -> Self {
-        AudioRand { value: seed.wrapping_add((seed == 0) as u32), carry: seed.rotate_left(crate::kv!(54 int)) ^ seed }
-    }
-
     pub fn int_in_range(&mut self, min: i32, max: i32) -> i32 {
         let range = max.wrapping_sub(min).wrapping_add(1);
         assert_ne!(range, 0, "audio random integer range has zero wrapping width");
-        let x = (self.value as u64).wrapping_mul(crate::kv!(192 int)).wrapping_add(self.carry as u64);
-        (self.value, self.carry) = (x as u32, (x >> crate::kv!(7 int)) as u32);
-        ((self.value & crate::kv!(527 int)) as i32).wrapping_rem(range).wrapping_add(min)
-    }
-
-    pub fn chance(&mut self, p: f32) -> bool {
-        if !(p < 1.0) {
-            return true;
-        }
-        let x = (self.value as u64).wrapping_mul(crate::kv!(192 int)).wrapping_add(self.carry as u64);
-        (self.value, self.carry) = (x as u32, (x >> crate::kv!(7 int)) as u32);
-        ((self.value & crate::kv!(190 int)) as f32) * crate::kv!(762 f32) < p
+        let x = (self.value as u64).wrapping_mul(0x5CDC_FAA7).wrapping_add(self.carry as u64);
+        (self.value, self.carry) = (x as u32, (x >> 32) as u32);
+        ((self.value & 0x7FFF_FFFF) as i32).wrapping_rem(range).wrapping_add(min)
     }
 
     pub fn float_in_range(&mut self, min: f32, max: f32) -> f32 {
-        let x = (self.value as u64).wrapping_mul(crate::kv!(192 int)).wrapping_add(self.carry as u64);
-        (self.value, self.carry) = (x as u32, (x >> crate::kv!(7 int)) as u32);
-        ((max - min) * (self.value & crate::kv!(190 int)) as f32).mul_add(1.0 / crate::kv!(526), min)
+        let x = (self.value as u64).wrapping_mul(0x5CDC_FAA7).wrapping_add(self.carry as u64);
+        (self.value, self.carry) = (x as u32, (x >> 32) as u32);
+        ((max - min) * (self.value & 0x7F_FFFF) as f32).mul_add(1.0 / crate::kv!(236), min)
     }
 }

@@ -21,11 +21,7 @@ fn scan_after(line: &str, words: &[&str], fields: &mut [Field]) -> usize {
 }
 
 fn short(v: f32) -> i16 {
-    v as i32 as i16
-}
-
-fn byte(v: f32) -> u8 {
-    v as i32 as u8
+    (v.trunc() as i64) as i16
 }
 
 #[derive(Clone, Debug, Default)]
@@ -36,20 +32,16 @@ pub struct MapZones {
 impl MapZones {
     pub fn add(&mut self, a: [f32; 3], b: [f32; 3], area: i32) {
         let Some(list) = usize::try_from(area).ok().and_then(|k| self.boxes.get_mut(k)) else { return };
-        if list.len() >= crate::kv!(81 int) {
+        if list.len() >= 10 {
             return;
         }
-        let pair = |k: usize| if a[k] > b[k] { (b[k], a[k]) } else { (a[k], b[k]) };
-        let (x, y, z) = (pair(0), pair(1), pair(2));
-        list.push(([x.0, y.0, z.0], [x.1, y.1, z.1]));
+        list.push(([a[0].min(b[0]), a[1].min(b[1]), a[2].min(b[2])], [a[0].max(b[0]), a[1].max(b[1]), a[2].max(b[2])]));
     }
     pub fn in_area(&self, area: usize, p: [f32; 2]) -> bool {
-        self.boxes.get(area).is_some_and(|l| {
-            l.iter().any(|(lo, hi)| !(p[0] < lo[0] || p[0] > hi[0] || p[1] < lo[1] || p[1] > hi[1]))
-        })
+        self.boxes.get(area).is_some_and(|l| l.iter().any(|(lo, hi)| p[0] >= lo[0] && p[0] <= hi[0] && p[1] >= lo[1] && p[1] <= hi[1]))
     }
     pub fn area_of(&self, p: [f32; 2]) -> i32 {
-        (0..crate::kv!(1 int)).find(|&k| self.in_area(k, p)).map_or(crate::kv!(2 int), |k| k as i32)
+        (0..4).find(|&k| self.in_area(k, p)).map_or(5, |k| k as i32)
     }
 }
 
@@ -76,7 +68,7 @@ pub struct OccluderLists {
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn OCCLUDER_NEAR() -> f32 { crate::kv!(809) }
+pub fn OCCLUDER_NEAR() -> f32 { crate::kv!(332) }
 
 impl OccluderLists {
     pub fn new(count: usize) -> OccluderLists {
@@ -84,8 +76,8 @@ impl OccluderLists {
     }
 
     fn key(o: &Occluder, cam: [f32; 3]) -> f32 {
-        let (dx, dy) = (cam[0] - o.pos[0] as f32 / crate::kv!(84), cam[1] - o.pos[1] as f32 / crate::kv!(84));
-        dx * dx + dy * dy - o.radius as f32 / crate::kv!(84)
+        let (dx, dy) = (cam[0] - o.pos[0] as f32 / crate::kv!(58), cam[1] - o.pos[1] as f32 / crate::kv!(58));
+        dx * dx + dy * dy - o.radius as f32 / crate::kv!(58)
     }
 
     pub fn update(&mut self, occluders: &[Occluder], cam: [f32; 3], frame: u32) {
@@ -111,7 +103,7 @@ impl OccluderLists {
                 }
                 walked += 1;
                 cur = next;
-                if walked >= crate::kv!(197 int) || next == -1 {
+                if walked >= 100 || next == -1 {
                     break;
                 }
             }
@@ -137,8 +129,8 @@ impl OccluderLists {
             }
             cur = next;
         }
-        if frame & crate::kv!(22 int) == 2 && near.len() > crate::kv!(253 int) {
-            let mid = near.len().min(crate::kv!(197 int));
+        if frame & 7 == 2 && near.len() > 64 {
+            let mid = near.len().min(100);
             partial_sort(&mut near, mid);
             self.near = near[0].1;
             for w in near.windows(2) {
@@ -228,17 +220,6 @@ pub struct CullZone {
 }
 
 impl CullZone {
-    pub fn new(centre: [f32; 2], a: [f32; 2], z_low: f32, b: [f32; 2], z_high: f32, flags: u32) -> Option<CullZone> {
-        let flags = flags as u16 & crate::kv!(810 int);
-        (flags != 0).then(|| CullZone {
-            corner: [short(centre[0] - a[0] - b[0]), short(centre[1] - a[1] - b[1])],
-            axis_a: [short(a[0] * 2.0), short(a[1] * 2.0)],
-            axis_b: [short(b[0] * 2.0), short(b[1] * 2.0)],
-            z_low: short(z_low),
-            z_high: short(z_high),
-            flags,
-        })
-    }
     pub fn bounds(&self) -> ([f32; 3], [f32; 3]) {
         let c = |i: usize| self.corner[i] as i32;
         let (a, b) = (|i: usize| self.axis_a[i] as i32, |i: usize| self.axis_b[i] as i32);
@@ -274,35 +255,32 @@ impl CullState {
     pub fn update(&mut self, zones: &[CullZone], player: [f32; 3], camera: [f32; 3], frame: u32) {
         let moved = self.built_at.is_none_or(|b| {
             let d = [player[0] - b[0], player[1] - b[1], player[2] - b[2]];
-            d[0].mul_add(d[0], d[2].mul_add(d[2], d[1] * d[1])) > crate::kv!(26)
+            d[0] * d[0] + d[2] * d[2] + d[1] * d[1] > crate::kv!(21)
         });
         if moved {
             self.built_at = Some(player);
             self.near.clear();
             for (i, z) in zones.iter().enumerate() {
                 let (lo, hi) = z.bounds();
-                if (0..crate::kv!(0 int)).all(|k| !(player[k] <= lo[k] - crate::kv!(27) || player[k] >= hi[k] + crate::kv!(27))) && !self.near.contains(&i) {
-                    self.near.insert(0, i);
+                if (0..3).all(|k| lo[k] - crate::kv!(55) < player[k] && player[k] < hi[k] + crate::kv!(55)) && !self.near.contains(&i) {
+                    self.near.push(i);
                 }
             }
         }
-        match frame & crate::kv!(22 int) {
-            2 => self.camera_flags = self.flags_at(zones, camera),
-            6 => self.player_flags = self.flags_at(zones, player),
+        let flags_at = |p: [f32; 3]| self.near.iter().filter(|&&i| zones[i].contains(p)).fold(0u16, |f, &i| f | zones[i].flags);
+        match frame & 7 {
+            2 => self.camera_flags = flags_at(camera),
+            6 => self.player_flags = flags_at(player),
             _ => {}
         }
     }
 
-    pub fn flags_at(&self, zones: &[CullZone], p: [f32; 3]) -> u16 {
-        self.near.iter().filter(|&&i| zones[i].contains(p)).fold(0, |f, &i| f | zones[i].flags)
-    }
-
     pub fn no_heli_searchlight(&self) -> bool {
-        self.player_flags & crate::kv!(23 int) != 0
+        self.player_flags & 0x08 != 0
     }
 
     pub fn cars_stop_following(&self) -> bool {
-        self.player_flags & crate::kv!(54 int) != 0
+        self.player_flags & 0x10 != 0
     }
 }
 
@@ -318,22 +296,6 @@ pub struct AttributeZone {
     pub flags: u8,
 }
 
-impl AttributeZone {
-    #[allow(clippy::too_many_arguments)]
-    pub fn new(centre: [f32; 2], a: [f32; 2], z_low: f32, b: [f32; 2], z_high: f32, value: f32, bytes: [f32; 3], flags: u8) -> AttributeZone {
-        AttributeZone {
-            corner: [short(centre[0] - a[0] - b[0]), short(centre[1] - a[1] - b[1])],
-            axis_a: [short(a[0] * 2.0), short(a[1] * 2.0)],
-            axis_b: [short(b[0] * 2.0), short(b[1] * 2.0)],
-            z_low: short(z_low),
-            z_high: short(z_high),
-            value,
-            bytes: bytes.map(|v| byte(v * crate::kv!(26))),
-            flags,
-        }
-    }
-}
-
 #[derive(Clone, Debug, Default)]
 pub struct TextIpls {
     pub map_zones: MapZones,
@@ -344,9 +306,7 @@ pub struct TextIpls {
     pub path_nodes: u32,
 }
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn MAX_OCCLUDERS() -> usize { crate::kv!(794 int) }
+pub const MAX_OCCLUDERS: usize = 4000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum IplLine {
@@ -436,57 +396,57 @@ pub fn ipl_calls(file: &[u8]) -> Vec<IplCall> {
         match kind {
             IplLine::Inst => {
                 let s = sscanf(memory, b"%s %d %f %f %f %f %f %f %f %d %d %f");
-                if s.count != crate::kv!(55 int) && s.count != crate::kv!(113 int) {
+                if s.count != 12 && s.count != 11 {
                     return;
                 }
                 let name = text(&s, 0);
-                let last = if s.count == crate::kv!(55 int) { b(&s, crate::kv!(113 int)) } else { (-1.0f32).to_bits() };
-                let record = [b(&s, 2), b(&s, crate::kv!(0 int)), b(&s, crate::kv!(1 int)), b(&s, crate::kv!(2 int)), b(&s, crate::kv!(6 int)), b(&s, crate::kv!(22 int)), b(&s, crate::kv!(23 int)), crate::map::hash_bytes(&name, 0),
-                              int(&s, 1), int(&s, crate::kv!(104 int)), s.int(crate::kv!(81 int)).map_or(u32::MAX, |v| v as u32), last];
+                let last = if s.count == 12 { b(&s, 11) } else { (-1.0f32).to_bits() };
+                let record = [b(&s, 2), b(&s, 3), b(&s, 4), b(&s, 5), b(&s, 6), b(&s, 7), b(&s, 8), crate::map::hash_bytes(&name, 0),
+                              int(&s, 1), int(&s, 9), s.int(10).map_or(u32::MAX, |v| v as u32), last];
                 out.push(IplCall::Instance { name, record });
             }
             IplLine::Zone => {
                 let s = sscanf(memory, b"%s %d %f %f %f %f %f %f %d %s");
-                if s.count == crate::kv!(81 int) {
-                    out.push(IplCall::Zone { name: text(&s, 0), corners: std::array::from_fn(|k| f(&s, 2 + k)), label: text(&s, crate::kv!(104 int)) });
+                if s.count == 10 {
+                    out.push(IplCall::Zone { name: text(&s, 0), corners: std::array::from_fn(|k| f(&s, 2 + k)), label: text(&s, 9) });
                 }
             }
             IplLine::Grge => {
                 let s = sscanf(memory, b"%f %f %f %f %f %f %f %f %d %d %s");
-                if s.count == crate::kv!(113 int) {
-                    out.push(IplCall::Garage { floats: std::array::from_fn(|k| f(&s, k)), a: int(&s, crate::kv!(104 int)), name: text(&s, crate::kv!(81 int)), b: int(&s, crate::kv!(23 int)) });
+                if s.count == 11 {
+                    out.push(IplCall::Garage { floats: std::array::from_fn(|k| f(&s, k)), a: int(&s, 9), name: text(&s, 10), b: int(&s, 8) });
                 }
             }
             IplLine::Cars => {
                 let s = sscanf(memory, b"%f %f %f %f %f %f %d %d %d %d %d %d %d %d");
-                if s.count == crate::kv!(56 int) {
-                    out.push(IplCall::CarGenerator(std::array::from_fn(|k| if k < crate::kv!(6 int) { b(&s, k) } else { int(&s, k) })));
+                if s.count == 14 {
+                    out.push(IplCall::CarGenerator(std::array::from_fn(|k| if k < 6 { b(&s, k) } else { int(&s, k) })));
                 }
             }
             IplLine::Tcyc => {
                 let s = sscanf(memory, b"%f %f %f %f %f %f %f %f %d %d %s");
                 out.push(IplCall::TimeCycleBox {
                     min: [f(&s, 0), f(&s, 1), f(&s, 2)],
-                    max: [f(&s, crate::kv!(0 int)), f(&s, crate::kv!(1 int)), f(&s, crate::kv!(2 int))],
-                    hash: crate::map::hash_bytes(&text(&s, crate::kv!(81 int)), 0),
-                    a: f(&s, crate::kv!(6 int)),
-                    b: f(&s, crate::kv!(22 int)),
-                    c: int(&s, crate::kv!(23 int)),
-                    d: int(&s, crate::kv!(104 int)),
+                    max: [f(&s, 3), f(&s, 4), f(&s, 5)],
+                    hash: crate::map::hash_bytes(&text(&s, 10), 0),
+                    a: f(&s, 6),
+                    b: f(&s, 7),
+                    c: int(&s, 8),
+                    d: int(&s, 9),
                 });
             }
             IplLine::Lodm => {
                 let s = sscanf(memory, b"%f %f %f %f %f %f %d %d %d %d %d %d %d %d %d %d %d");
-                if s.count < crate::kv!(22 int) {
+                if s.count < 7 {
                     return;
                 }
-                let head = int(&s, crate::kv!(6 int));
-                let n = ((head & crate::kv!(198 int)) as usize).min(crate::kv!(81 int));
+                let head = int(&s, 6);
+                let n = ((head & 0xF) as usize).min(10);
                 out.push(IplCall::LodGroup {
                     min: [f(&s, 0), f(&s, 1), f(&s, 2)],
-                    max: [f(&s, crate::kv!(0 int)), f(&s, crate::kv!(1 int)), f(&s, crate::kv!(2 int))],
-                    instances: (0..n).map(|k| int(&s, crate::kv!(22 int) + k)).collect(),
-                    byte: head >> crate::kv!(107 int),
+                    max: [f(&s, 3), f(&s, 4), f(&s, 5)],
+                    instances: (0..n).map(|k| int(&s, 7 + k)).collect(),
+                    byte: head >> 24,
                 });
             }
             IplLine::Slow => {
@@ -495,10 +455,10 @@ pub fn ipl_calls(file: &[u8]) -> Vec<IplCall> {
             }
             IplLine::MloPlus => {
                 let s = sscanf(memory, b"%s %d %d %d %f %f %f %f %f %f %f %d %d");
-                let record = [b(&s, crate::kv!(1 int)), b(&s, crate::kv!(2 int)), b(&s, crate::kv!(6 int)), b(&s, crate::kv!(22 int)), b(&s, crate::kv!(23 int)), b(&s, crate::kv!(104 int)), b(&s, crate::kv!(81 int)),
-                              crate::map::hash_bytes(&text(&s, 0), 0), int(&s, 1), int(&s, crate::kv!(113 int)),
-                              s.int(crate::kv!(55 int)).map_or(u32::MAX, |v| v as u32), (-1.0f32).to_bits()];
-                out.push(IplCall::MloInstance { instance: int(&s, 2), record, d: int(&s, crate::kv!(0 int)) });
+                let record = [b(&s, 4), b(&s, 5), b(&s, 6), b(&s, 7), b(&s, 8), b(&s, 9), b(&s, 10),
+                              crate::map::hash_bytes(&text(&s, 0), 0), int(&s, 1), int(&s, 11),
+                              s.int(12).map_or(u32::MAX, |v| v as u32), (-1.0f32).to_bits()];
+                out.push(IplCall::MloInstance { instance: int(&s, 2), record, d: int(&s, 3) });
             }
             _ => {}
         }
@@ -525,8 +485,8 @@ impl TextIpls {
         let mut v = [0f32; 6];
         let [a, b, c, d, e, f] = &mut v;
         let n = scan_after(l, &["%s"], &mut [Field::D(&mut kind), Field::F(a), Field::F(b), Field::F(c), Field::F(d), Field::F(e), Field::F(f), Field::D(&mut area)]);
-        if n == crate::kv!(104 int) {
-            self.map_zones.add([v[0], v[1], v[2]], [v[crate::kv!(0 int)], v[crate::kv!(1 int)], v[crate::kv!(2 int)]], area);
+        if n == 9 {
+            self.map_zones.add([v[0], v[1], v[2]], [v[3], v[4], v[5]], area);
         }
     }
 
@@ -550,19 +510,19 @@ impl TextIpls {
         if zeros == 1 {
             self.flat_occluders += 1;
         }
-        if self.occluders.len() >= MAX_OCCLUDERS() {
+        if self.occluders.len() >= MAX_OCCLUDERS {
             return;
         }
-        let at_least_one = |v: f32| short(v * crate::kv!(84)).max(1);
-        let angle = rot_degrees * crate::kv!(561);
+        let at_least_one = |v: f32| short(v * crate::kv!(58)).max(1);
+        let angle = rot_degrees * crate::kv!(267);
         self.occluders.push(Occluder {
-            pos: [short(pos[0] * crate::kv!(84)), short(pos[1] * crate::kv!(84)), short(pos[2] * crate::kv!(84))],
+            pos: [short(pos[0] * crate::kv!(58)), short(pos[1] * crate::kv!(58)), short(pos[2] * crate::kv!(58))],
             radius: at_least_one((w * w + l * l + h * h).sqrt()),
             length: at_least_one(l),
             width: at_least_one(w),
             height: at_least_one(h),
-            cos: short((angle as f64).cos() as f32 * crate::kv!(811)),
-            sin: short((angle as f64).sin() as f32 * crate::kv!(811)),
+            cos: short((angle as f64).cos() as f32 * crate::kv!(333)),
+            sin: short((angle as f64).sin() as f32 * crate::kv!(333)),
             flag,
         });
     }
@@ -576,10 +536,19 @@ impl TextIpls {
                           Field::F(zh), Field::D(&mut flags), Field::F(x0), Field::F(x1), Field::F(x2), Field::F(x3)])
         };
         let [cx, cy, _, ax, ay, zl, bx, by, zh, f10, f11, f12, f13] = v;
-        if n == crate::kv!(56 int) {
-            self.attribute_zones.push(AttributeZone::new([cx, cy], [ax, ay], zl, [bx, by], zh, f13, [f10, f11, f12], flags as u8));
+        let corner = [short(cx - ax - bx), short(cy - ay - by)];
+        let (axis_a, axis_b) = ([short(ax * 2.0), short(ay * 2.0)], [short(bx * 2.0), short(by * 2.0)]);
+        if n == 14 {
+            let byte = |v: f32| (v * crate::kv!(21)).trunc() as i64 as u8;
+            self.attribute_zones.push(AttributeZone {
+                corner, axis_a, axis_b, z_low: short(zl), z_high: short(zh), value: f13,
+                bytes: [byte(f10), byte(f11), byte(f12)], flags: flags as u8,
+            });
             return;
         }
-        self.cull_zones.extend(CullZone::new([cx, cy], [ax, ay], zl, [bx, by], zh, flags as u32));
+        let flags = (flags as u32 & 0xFFFF) as u16 & 0xF77F;
+        if flags != 0 {
+            self.cull_zones.push(CullZone { corner, axis_a, axis_b, z_low: short(zl), z_high: short(zh), flags });
+        }
     }
 }

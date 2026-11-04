@@ -425,7 +425,7 @@ pub struct Impulse {
 }
 impl Default for Impulse {
     fn default() -> Impulse {
-        Impulse { part_index: 0, hit_point: None, impulse: Vec3::new(0.0, -delirium_data::kv!(79), 0.0), equalize_amount: 0.0 }
+        Impulse { part_index: 0, hit_point: None, impulse: Vec3::new(0.0, -delirium_data::kv!(52), 0.0), equalize_amount: 0.0 }
     }
 }
 
@@ -438,7 +438,7 @@ pub struct BodyRelax {
 }
 impl Default for BodyRelax {
     fn default() -> BodyRelax {
-        BodyRelax { mask: None, hold_pose: false, relaxation: delirium_data::kv!(79), damping: None }
+        BodyRelax { mask: None, hold_pose: false, relaxation: delirium_data::kv!(52), damping: None }
     }
 }
 
@@ -465,7 +465,7 @@ pub struct HeadLookMsg {
 }
 impl Default for HeadLookMsg {
     fn default() -> HeadLookMsg {
-        HeadLookMsg { pos: Vec3::ZERO, vel: Vec3::ZERO, stiffness: delirium_data::kv!(31), damping: 1.0, always_look: false, always_eyes_horizontal: true }
+        HeadLookMsg { pos: Vec3::ZERO, vel: Vec3::ZERO, stiffness: delirium_data::kv!(20), damping: 1.0, always_look: false, always_eyes_horizontal: true }
     }
 }
 
@@ -477,7 +477,7 @@ pub struct Lean {
 }
 impl Default for Lean {
     fn default() -> Lean {
-        Lean { lean_amount: delirium_data::kv!(60), apply_as_force: false, dir: Vec3::Z }
+        Lean { lean_amount: delirium_data::kv!(34), apply_as_force: false, dir: Vec3::Z }
     }
 }
 
@@ -489,7 +489,7 @@ pub struct LeanTo {
 }
 impl Default for LeanTo {
     fn default() -> LeanTo {
-        LeanTo { lean_amount: delirium_data::kv!(60), apply_as_force: false, pos: Vec3::ZERO }
+        LeanTo { lean_amount: delirium_data::kv!(34), apply_as_force: false, pos: Vec3::ZERO }
     }
 }
 
@@ -501,7 +501,7 @@ pub struct LeanTowards {
 }
 impl Default for LeanTowards {
     fn default() -> LeanTowards {
-        LeanTowards { lean_amount: delirium_data::kv!(60), apply_as_force: false, offset: Vec3::ZERO }
+        LeanTowards { lean_amount: delirium_data::kv!(34), apply_as_force: false, offset: Vec3::ZERO }
     }
 }
 
@@ -513,7 +513,7 @@ pub struct Stiffness {
 }
 impl Default for Stiffness {
     fn default() -> Stiffness {
-        Stiffness { body_stiffness: delirium_data::kv!(21), damping: 1.0, mask: "fb".into() }
+        Stiffness { body_stiffness: delirium_data::kv!(16), damping: 1.0, mask: "fb".into() }
     }
 }
 
@@ -544,7 +544,7 @@ pub struct StayUpright {
 }
 impl Default for StayUpright {
     fn default() -> StayUpright {
-        StayUpright { stiffness: delirium_data::kv!(5), damping_scale: 0.5 }
+        StayUpright { stiffness: delirium_data::kv!(2), damping_scale: 0.5 }
     }
 }
 
@@ -595,19 +595,6 @@ pub fn find(name: &str) -> Option<&'static Message> {
 }
 
 pub fn send(a: &mut Agent, build: &Build, world: &Collision, st: &mut State, msg: &str, params: &[(&str, Value)]) -> Result<usize, Error> {
-    if a.overrides.iter().any(|(m, ..)| *m == msg) {
-        let over = std::mem::take(&mut a.overrides);
-        let mut ps = params.to_vec();
-        for (_, k, v) in over.iter().filter(|(m, ..)| *m == msg) {
-            match ps.iter_mut().find(|(n, _)| n == k) {
-                Some(slot) => slot.1 = v.clone(),
-                None => ps.push((k, v.clone())),
-            }
-        }
-        let r = send(a, build, world, st, msg, &ps);
-        a.overrides = over;
-        return r;
-    }
     if let Some(r) = a.extras.send(msg, params) {
         return r;
     }
@@ -644,15 +631,15 @@ pub fn send(a: &mut Agent, build: &Build, world: &Collision, st: &mut State, msg
     let on = start == Some(true);
     match msg {
         "activePose" => a.active_pose(st.active_pose.mask.as_deref()),
-        "incomingTransforms" => if let Some(s) = start { a.incoming_state = if s { 2 } else { delirium_data::kv!(1 int) } },
+        "incomingTransforms" => if let Some(s) = start { a.incoming_state = if s { 2 } else { 4 } },
         "applyImpulse" => { let p = &st.apply_impulse; a.doll.equalized_impulse(p.part_index.max(0) as usize, p.impulse, p.hit_point, p.equalize_amount); }
         "bodyRelax" => { let p = &st.body_relax; a.body_relax_full(p.relaxation, p.damping, p.mask.as_deref(), p.hold_pose); }
         "configureBalance" => a.configure_balance(st.configure_balance.clone()),
         "configureBalanceReset" => { st.configure_balance = Default::default(); a.configure_balance(Default::default()); }
         "defineAttachedObject" => { let p = &st.define_attached_object; if p.part_index >= 0 { a.define_attached_object(p.part_index as usize, p.world_pos, p.object_mass); } }
         "leanInDirection" => { let p = &st.lean_in_direction; a.lean_in_direction(p.dir, p.lean_amount, f32::INFINITY, p.apply_as_force); }
-        "leanToPosition" => { let p = &st.lean_to_position; a.lean_to(crate::nmdbm::LeanMode::Pos(p.pos), p.lean_amount, p.apply_as_force); }
-        "leanTowardsObject" => { let p = &st.lean_towards_object; a.lean_to(crate::nmdbm::LeanMode::Object(p.offset, -1), p.lean_amount, p.apply_as_force); }
+        "leanToPosition" => { let p = &st.lean_to_position; a.lean_in_direction(p.pos - a.doll.com().0, p.lean_amount, f32::INFINITY, p.apply_as_force); }
+        "leanTowardsObject" => { let p = &st.lean_towards_object; a.lean_in_direction(p.offset - a.doll.com().0, p.lean_amount, f32::INFINITY, p.apply_as_force); }
         "setStiffness" => { let p = &st.set_stiffness; a.set_stiffness_mask(p.body_stiffness, p.damping, &p.mask); }
         "shotRelax" => a.shot_relax(st.shot_relax.relax_period),
         "stopAllBehaviours" => a.stop_all_behaviours(),
@@ -675,10 +662,7 @@ pub fn send(a: &mut Agent, build: &Build, world: &Collision, st: &mut State, msg
         "pedalLegs" => if on { a.pedal_legs(st.pedal_legs.clone()) } else { a.stop_pedal() },
         "pointArm" => a.point_arm(on.then_some(st.point_arm)),
         "rollDownStairs" => if on { a.roll_down_stairs(st.roll_down_stairs.clone()) } else { a.stop_roll_down_stairs() },
-        "shot" => if on {
-            a.shot_start(st.shot);
-            a.nm_hit_hold = params.iter().any(|(n, _)| *n == "bodyPart");
-        },
+        "shot" => if on { a.shot_start(st.shot) },
         "upperBodyFlinch" => if on { a.upper_body_flinch(build, st.upper_body_flinch.clone()); st.upper_body_flinch.new_hit = None; },
         _ => {}
     }
@@ -718,7 +702,7 @@ fn set(st: &mut State, msg: &str, name: &str, v: &Value) -> Result<(), Error> {
         ("armsWindmillAdaptive", "phase") => { let p = &mut st.arms_windmill_adaptive; p.phase = v.f()?; }
         ("armsWindmillAdaptive", "disableOnImpact") => { let p = &mut st.arms_windmill_adaptive; p.disable_on_impact = v.b()?; }
         ("armsWindmillAdaptive", "period") => { let p = &mut st.arms_windmill_adaptive; p.period = v.f()?; }
-        ("armsWindmillAdaptive", "armStiffness") => { let p = &mut st.arms_windmill_adaptive; p.arm_stiffness = v.f()?; p.body_stiffness = p.arm_stiffness; }
+        ("armsWindmillAdaptive", "armStiffness") => { let p = &mut st.arms_windmill_adaptive; p.arm_stiffness = v.f()?; }
         ("bodyBalance", "bodyStiffness") => { let p = &mut st.body_balance; p.body_stiffness = v.f()?; }
         ("bodyBalance", "headLookAtVelProb") => { let p = &mut st.body_balance; p.head_look_at_vel_prob = v.f()?; }
         ("bodyBalance", "armsOutStraightenElbows") => { let p = &mut st.body_balance; p.arms_out_straighten_elbows = v.f()?; }
@@ -832,7 +816,7 @@ fn set(st: &mut State, msg: &str, name: &str, v: &Value) -> Result<(), Error> {
         ("grab", "useRight") => { let p = &mut st.grab; p.use_right = v.b()?; }
         ("grab", "pos1") => { let p = &mut st.grab; p.pos[0] = v.v()?; }
         ("grab", "pos2") => { let p = &mut st.grab; p.pos[1] = v.v()?; }
-        ("grab", "pos4") => { let p = &mut st.grab; p.pos[delirium_data::kv!(0 int)] = v.v()?; }
+        ("grab", "pos4") => { let p = &mut st.grab; p.pos[3] = v.v()?; }
         ("grab", "surfaceGrab") => { let p = &mut st.grab; p.surface_grab = v.b()?; }
         ("grab", "oneSideReachAngle") => { let p = &mut st.grab; p.one_side_reach_angle = v.f()?; }
         ("grab", "normalL") => { let p = &mut st.grab; p.normal_l = v.v()?; }
@@ -1092,7 +1076,7 @@ pub fn get(st: &State, msg: &str, name: &str) -> Option<Value> {
         ("defineAttachedObject", "partIndex") => { let p = &st.define_attached_object; Value::Int(p.part_index) }
         ("defineAttachedObject", "worldPos") => { let p = &st.define_attached_object; Value::Vec3(p.world_pos) }
         ("defineAttachedObject", "objectMass") => { let p = &st.define_attached_object; Value::Float(p.object_mass) }
-        ("fallOverWall", "bodyTwist") => { let p = &st.fall_over_wall; Value::Float(p.twist_max / delirium_data::kv!(189)) }
+        ("fallOverWall", "bodyTwist") => { let p = &st.fall_over_wall; Value::Float(p.twist_max / delirium_data::kv!(122)) }
         ("fallOverWall", "useSpecifiedPoint") => { let p = &st.fall_over_wall; Value::Bool(p.use_specified_point) }
         ("fallOverWall", "maxDistanceFromPelToHitPoint") => { let p = &st.fall_over_wall; Value::Float(p.max_distance_from_pel_to_hit_point) }
         ("fallOverWall", "fallOverEdge") => { let p = &st.fall_over_wall; Value::Vec3(p.fall_over_edge) }
@@ -1111,7 +1095,7 @@ pub fn get(st: &State, msg: &str, name: &str) -> Option<Value> {
         ("grab", "useRight") => { let p = &st.grab; Value::Bool(p.use_right) }
         ("grab", "pos1") => { let p = &st.grab; Value::Vec3(p.pos[0]) }
         ("grab", "pos2") => { let p = &st.grab; Value::Vec3(p.pos[1]) }
-        ("grab", "pos4") => { let p = &st.grab; Value::Vec3(p.pos[delirium_data::kv!(0 int)]) }
+        ("grab", "pos4") => { let p = &st.grab; Value::Vec3(p.pos[3]) }
         ("grab", "surfaceGrab") => { let p = &st.grab; Value::Bool(p.surface_grab) }
         ("grab", "oneSideReachAngle") => { let p = &st.grab; Value::Float(p.one_side_reach_angle) }
         ("grab", "normalL") => { let p = &st.grab; Value::Vec3(p.normal_l) }

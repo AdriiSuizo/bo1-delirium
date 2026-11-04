@@ -5,29 +5,10 @@ use delirium_data::rng::Rand;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Kind {
     Building,
-    Vehicle { player_driver: bool, train: Option<Train> },
+    Vehicle { player_driver: bool },
     Ped { player: bool, ragdoll: bool },
     Object,
     Other,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Train {
-    pub axes: [Vec3; 3],
-    pub place: Vec3,
-    pub vel: Vec3,
-    pub size: Option<Vec3>,
-}
-
-impl Train {
-    fn hurt(&self, place: Vec3, inv_mass: f32, impulse: f32) -> Option<f32> {
-        let v = self.vel;
-        let size = self.size.filter(|_| v.z.fma(v.z, v.x.fma(v.x, v.y * v.y)) > delirium_data::kv!(25))?;
-        let d = place - self.place;
-        let (x, y) = (self.axes[0].dot(d), self.axes[1].dot(d));
-        let f = self.axes[1];
-        (y + 1.0 > size.y * 0.5 && x.abs() < size.x * 0.5).then(|| inv_mass * f.x.fma(v.x, f.z.fma(v.z, f.y * v.y)) * impulse * delirium_data::kv!(26))
-    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -38,7 +19,7 @@ pub struct Thing<E> {
 
 impl<E> Thing<E> {
     fn playerish(&self) -> bool {
-        matches!(self.kind, Kind::Vehicle { player_driver: true, .. } | Kind::Ped { player: true, .. })
+        matches!(self.kind, Kind::Vehicle { player_driver: true } | Kind::Ped { player: true, .. })
     }
 }
 
@@ -137,7 +118,7 @@ pub fn pain_line(health: f32, state: i32, pick: i32, has_line: bool, rand: &mut 
         return Speech::Muted;
     }
     if !(0..=2).contains(&pick) {
-        rand.int_in_range(0, delirium_data::kv!(0 int));
+        rand.int_in_range(0, 3);
     }
     if has_line { Speech::Said } else { Speech::NoLine }
 }
@@ -153,36 +134,26 @@ pub fn shocked_line(health: f32, state: i32, has_line: bool) -> Speech {
 }
 
 pub fn damage<E: Copy>(ped: &Ped<E>, imp: &Impact<E>, rand: &mut Rand) -> Option<(f32, u32)> {
-    damage_prop(ped, imp, rand).0
-}
-
-pub fn damage_prop<E: Copy>(ped: &Ped<E>, imp: &Impact<E>, rand: &mut Rand) -> (Option<(f32, u32)>, bool) {
     let kind = imp.other.map(|o| o.kind);
     let car = matches!(kind, Some(Kind::Vehicle { .. }));
-    let mut prop = false;
     if car && ped.woke {
-        let r = rand.float_in_range(0.0, 1.0);
-        prop = if imp.impulse > delirium_data::kv!(27) { r * 2.0 } else { r } > delirium_data::kv!(28);
+        rand.next();
     }
-    let cut = if ped.player_cut { delirium_data::kv!(29) } else { 1.0 };
-    let fall = if ped.tough { delirium_data::kv!(30) } else { delirium_data::kv!(31) };
+    let cut = if ped.player_cut { delirium_data::kv!(18) } else { 1.0 };
+    let fall = if ped.tough { delirium_data::kv!(19) } else { delirium_data::kv!(20) };
     let amount = if ped.drop.is_some_and(|d| d > fall) && !(ped.vz < 0.0) {
-        ped.health * delirium_data::kv!(26)
+        ped.health * delirium_data::kv!(21)
     } else {
         let k = match kind {
             Some(Kind::Ped { ragdoll: false, .. }) => None,
-            Some(Kind::Ped { ragdoll: true, .. }) => Some(delirium_data::kv!(31)),
-            None | Some(Kind::Building) if matches!(imp.component, 2 | 3 | 5 | 6) => Some(delirium_data::kv!(32)),
-            _ => Some(delirium_data::kv!(33)),
+            Some(Kind::Ped { ragdoll: true, .. }) => Some(delirium_data::kv!(20)),
+            None | Some(Kind::Building) if matches!(imp.component, 2 | 3 | 5 | 6) => Some(delirium_data::kv!(22)),
+            _ => Some(delirium_data::kv!(23)),
         };
-        let f = k.map_or(0.0, |k| (-((delirium_data::kv!(34 f64) * imp.dt as f64) as f32)).fma(k, ped.inv_mass * imp.impulse));
-        cut * if f < 0.0 { 0.0 } else { f * if car { delirium_data::kv!(35) } else { delirium_data::kv!(5) } }
+        let f = k.map_or(0.0, |k| (-((delirium_data::kv!(24 f64) * imp.dt as f64) as f32)).fma(k, ped.inv_mass * imp.impulse));
+        cut * if f < 0.0 { 0.0 } else { f * if car { delirium_data::kv!(25) } else { delirium_data::kv!(2) } }
     };
-    let amount = match kind {
-        Some(Kind::Vehicle { train: Some(t), .. }) => t.hurt(ped.place, ped.inv_mass, imp.impulse).unwrap_or(amount),
-        _ => amount,
-    };
-    ((amount > 0.0 || ped.woke).then_some((amount, if car { delirium_data::kv!(36 int) } else { delirium_data::kv!(37 int) })), prop)
+    (amount > 0.0 || ped.woke).then_some((amount, if car { 50 } else { 54 }))
 }
 
 pub fn react<E: Copy + PartialEq>(ped: &Ped<E>, imp: &Impact<E>, around: &Around<E>, amount: f32, dying: bool, health: f32,
@@ -200,12 +171,12 @@ pub fn react<E: Copy + PartialEq>(ped: &Ped<E>, imp: &Impact<E>, around: &Around
             return Some(Made { task: Task::Die(k), min: 0, max: 0, wrap: None, say: None });
         }
         if ped.quick_relax {
-            return made(Task::Relax { a: delirium_data::kv!(38), b: delirium_data::kv!(18) }, delirium_data::kv!(39 int), delirium_data::kv!(40 int), None);
+            return made(Task::Relax { a: delirium_data::kv!(26), b: delirium_data::kv!(13) }, 250, 500, None);
         }
         if imp.other.is_some_and(|o| o.playerish()) {
-            return made(Task::RollUp { roll: rand.int_in_range(delirium_data::kv!(41 int), delirium_data::kv!(42 int)) }, delirium_data::kv!(43 int), delirium_data::kv!(44 int), None);
+            return made(Task::RollUp { roll: rand.int_in_range(1000, 3000) }, 2000, 60000, None);
         }
-        return made(relax, delirium_data::kv!(43 int), delirium_data::kv!(44 int), None);
+        return made(relax, 2000, 60000, None);
     }
     if !ped.woke {
         return None;
@@ -223,54 +194,54 @@ pub fn react<E: Copy + PartialEq>(ped: &Ped<E>, imp: &Impact<E>, around: &Around
             d.x.fma(d.x, d.z.fma(d.z, d.y * d.y))
         };
         let d = d2(ped.place, pl.place);
-        if pl.in_car && d < delirium_data::kv!(38) {
+        if pl.in_car && d < delirium_data::kv!(26) {
             if let Some(t) = probe() {
                 (who, hard) = (Some(t), true);
             }
         }
-        if who.is_none() && pl.thing.id != ped.id && d < delirium_data::kv!(45) {
+        if who.is_none() && pl.thing.id != ped.id && d < delirium_data::kv!(27) {
             (who, hard) = (Some(pl.thing), false);
         }
     }
     let who = who.or(other);
-    let weak = ped.agility < delirium_data::kv!(0 int) || health < if ped.player || ped.mission { delirium_data::kv!(46) } else { delirium_data::kv!(47) };
-    if let Some(b) = around.blend.filter(|b| b.state != delirium_data::kv!(1 int)) {
+    let weak = ped.agility < 3 || health < if ped.player || ped.mission { delirium_data::kv!(28) } else { delirium_data::kv!(29) };
+    if let Some(b) = around.blend.filter(|b| b.state != 4) {
         let (go, roll) = match (b.phase, b.id, b.group) {
             (None, ..) => (true, false),
             (_, 98, _) => (false, false),
             (Some(p), _, 3 | 4) => (true, p >= 0.5),
-            (Some(p), _, 5 | 6) => (if p < 0.5 { true } else { p < delirium_data::kv!(20) && !who.is_some_and(|w| w.playerish()) }, p >= delirium_data::kv!(9)),
+            (Some(p), _, 5 | 6) => (if p < 0.5 { true } else { p < delirium_data::kv!(15) && !who.is_some_and(|w| w.playerish()) }, p >= delirium_data::kv!(4)),
             _ => (true, false),
         };
         if go {
             return if roll {
-                made(Task::RollUp { roll: rand.int_in_range(delirium_data::kv!(41 int), delirium_data::kv!(42 int)) }, delirium_data::kv!(43 int), delirium_data::kv!(44 int), Some(2))
+                made(Task::RollUp { roll: rand.int_in_range(1000, 3000) }, 2000, 60000, Some(2))
             } else {
-                made(relax, delirium_data::kv!(43 int), delirium_data::kv!(44 int), None)
+                made(relax, 2000, 60000, None)
             };
         }
     }
     if let (Some([a, b]), Some(w)) = (around.sit, who.filter(|w| matches!(w.kind, Kind::Ped { .. }))) {
-        return made(Task::Sit { a, b, with: w.id, at: ped.place }, delirium_data::kv!(43 int), delirium_data::kv!(44 int), None);
+        return made(Task::Sit { a, b, with: w.id, at: ped.place }, 2000, 60000, None);
     }
     if hard {
         let w = who.unwrap().id;
-        return if imp.impulse > delirium_data::kv!(48) {
-            made(Task::RollUp { roll: rand.int_in_range(delirium_data::kv!(41 int), delirium_data::kv!(43 int)) }, delirium_data::kv!(43 int), delirium_data::kv!(44 int), None)
+        return if imp.impulse > delirium_data::kv!(30) {
+            made(Task::RollUp { roll: rand.int_in_range(1000, 2000) }, 2000, 60000, None)
         } else {
-            made(Task::Brace { with: w, weak }, delirium_data::kv!(41 int), delirium_data::kv!(44 int), None)
+            made(Task::Brace { with: w, weak }, 1000, 60000, None)
         };
     }
-    let point = who.is_none().then(|| ped.place - Vec3::new(ped.vel.x, ped.vel.y, 0.0) * delirium_data::kv!(5));
+    let point = who.is_none().then(|| ped.place - Vec3::new(ped.vel.x, ped.vel.y, 0.0) * delirium_data::kv!(2));
     let say = if ped.player {
         Some(1)
-    } else if who.is_some_and(|w| matches!(w.kind, Kind::Ped { player: true, .. })) && rand.next() < delirium_data::kv!(49 int) {
-        Some(if rand.next() < delirium_data::kv!(49 int) { 2 } else { delirium_data::kv!(0 int) })
+    } else if who.is_some_and(|w| matches!(w.kind, Kind::Ped { player: true, .. })) && rand.next() < 16383 {
+        Some(if rand.next() < 16383 { 2 } else { 3 })
     } else {
         None
     };
     let set = crate::nm::balance_set(ped.agility, health, ped.player || ped.mission, ped.gun);
-    made(Task::Balance { with: who.map(|w| w.id), point, set }, delirium_data::kv!(43 int), delirium_data::kv!(44 int), say)
+    made(Task::Balance { with: who.map(|w| w.id), point, set }, 2000, 60000, say)
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -320,19 +291,19 @@ impl<E: Copy + PartialEq> ContactRecord<E> {
         let old = self.strongest;
         if m2 > old * old || old == 0.0 {
             self.other = c.other;
-            self.strongest = if delirium_data::kv!(50 f32) - mag >= 0.0 { delirium_data::kv!(50) } else { mag };
+            self.strongest = if delirium_data::kv!(31 f32) - mag >= 0.0 { delirium_data::kv!(31) } else { mag };
             self.normal = c.normal;
             self.point = c.point;
             self.component = c.component;
             self.extra = c.extra;
             self.sum += self.strongest;
-        } else if m2 > ((delirium_data::kv!(51 f32) * delirium_data::kv!(51)) * mass) * mass {
+        } else if m2 > ((delirium_data::kv!(32 f32) * delirium_data::kv!(32)) * mass) * mass {
             self.sum = mag + self.sum;
         }
         let other = c.other?;
         if gate.flagged {
             self.stamp = stamp;
-            if !self.touched.contains(&other) && self.touched.len() < delirium_data::kv!(6 int) {
+            if !self.touched.contains(&other) && self.touched.len() < 6 {
                 self.touched.push(other);
             }
         }
@@ -347,12 +318,12 @@ impl<E: Copy + PartialEq> ContactRecord<E> {
     }
 
     pub fn consume(&mut self, state: u32, dt: f32, thing: impl FnOnce(E) -> Thing<E>) -> Option<Impact<E>> {
-        if state <= delirium_data::kv!(0 int) {
+        if state <= 3 {
             return None;
         }
         let imp = if self.strongest > 0.0 && self.sum > 0.0 {
             Impact { impulse: self.sum, dt, component: self.component, other: self.other.map(thing) }
-        } else if state == delirium_data::kv!(1 int) {
+        } else if state == 4 {
             Impact { impulse: 0.0, dt, component: 0, other: None }
         } else {
             return None;

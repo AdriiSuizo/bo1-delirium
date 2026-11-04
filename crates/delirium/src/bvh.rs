@@ -2,9 +2,7 @@ use crate::prelude::*;
 use crate::{vm4, Fma, Vd};
 pub use delirium_data::bounds::Bvh;
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn CAP() -> usize { delirium_data::kv!(52 int) }
+pub const CAP: usize = 0x2000;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Obb {
@@ -14,7 +12,7 @@ pub struct Obb {
 }
 
 fn quant(b: &Bvh, p: Vec3) -> [u16; 3] {
-    std::array::from_fn(|i| (((p[i] - b.origin[i]) * b.scale[i] + 0.5) as i32).clamp(0, delirium_data::kv!(53 int)) as u16)
+    std::array::from_fn(|i| (((p[i] - b.origin[i]) * b.scale[i] + 0.5) as i32).clamp(0, 65535) as u16)
 }
 
 pub fn query_box(b: &Bvh, q: &Obb) -> ([u16; 3], [u16; 3]) {
@@ -30,27 +28,27 @@ fn be16(d: &[u8], at: usize) -> Option<u16> {
 }
 
 fn meets(d: &[u8], at: usize, lo: [u16; 3], hi: [u16; 3]) -> bool {
-    (0..delirium_data::kv!(0 int)).all(|i| {
-        let (nl, nh) = (be16(d, at + i * 2).unwrap_or(u16::MAX), be16(d, at + delirium_data::kv!(6 int) + i * 2).unwrap_or(0));
+    (0..3).all(|i| {
+        let (nl, nh) = (be16(d, at + i * 2).unwrap_or(u16::MAX), be16(d, at + 6 + i * 2).unwrap_or(0));
         nl <= hi[i] && lo[i] <= nh
     })
 }
 
 pub fn walk(b: &Bvh, lo: [u16; 3], hi: [u16; 3]) -> Vec<u32> {
     let mut out = vec![];
-    for s in 0..b.subs.len() / delirium_data::kv!(54 int) {
-        let h = s * delirium_data::kv!(54 int);
+    for s in 0..b.subs.len() / 16 {
+        let h = s * 16;
         if !meets(&b.subs, h, lo, hi) {
             continue;
         }
-        let (mut i, end) = (be16(&b.subs, h + delirium_data::kv!(55 int)).unwrap_or(0) as usize, be16(&b.subs, h + delirium_data::kv!(56 int)).unwrap_or(0) as usize);
+        let (mut i, end) = (be16(&b.subs, h + 12).unwrap_or(0) as usize, be16(&b.subs, h + 14).unwrap_or(0) as usize);
         while i < end {
-            let n = i * delirium_data::kv!(54 int);
-            let Some(count) = b.nodes.get(n + delirium_data::kv!(56 int)).copied() else { break };
+            let n = i * 16;
+            let Some(count) = b.nodes.get(n + 14).copied() else { break };
             let step = if meets(&b.nodes, n, lo, hi) {
-                let first = be16(&b.nodes, n + delirium_data::kv!(55 int)).unwrap_or(0) as u32;
+                let first = be16(&b.nodes, n + 12).unwrap_or(0) as u32;
                 for j in 0..count as u32 {
-                    if out.len() < CAP() {
+                    if out.len() < CAP {
                         out.push(first + j);
                     }
                 }
@@ -58,7 +56,7 @@ pub fn walk(b: &Bvh, lo: [u16; 3], hi: [u16; 3]) -> Vec<u32> {
             } else if count != 0 {
                 1
             } else {
-                be16(&b.nodes, n + delirium_data::kv!(55 int)).unwrap_or(1).max(1) as usize
+                be16(&b.nodes, n + 12).unwrap_or(1).max(1) as usize
             };
             i += step;
         }

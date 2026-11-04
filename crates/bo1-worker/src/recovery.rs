@@ -333,7 +333,7 @@ impl Recovery {
         let feet = frames[3].translation.z.min(frames[6].translation.z);
         let trunk = frames[10].translation - frames[0].translation;
         let up = frames[12].translation.z - feet > 1.25 && trunk.normalize_or(Vec3::Z).z > 0.8;
-        let supported = a.doll.support_mask != 0;
+        let supported = a.doll.touch.iter().any(|t| t & 0x28 == 0x20);
         if self.rise.is_none() {
             self.down = if eligible && !up && supported && a.doll.com().1.length() < 0.8 {
                 self.down + dt

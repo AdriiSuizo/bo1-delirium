@@ -6,15 +6,9 @@ use crate::nmrs::{Character, ANKLE, CLAVICLE, ELBOW, HIP, KNEE, NECK, SHOULDER, 
 use crate::nmshot::Ctx;
 use bevy_math::Quat;
 
-#[allow(non_snake_case)]
-#[inline]
-fn CHEST() -> usize { delirium_data::kv!(81 int) }
-#[allow(non_snake_case)]
-#[inline]
-fn HANDS() -> &'static [usize; 2] { static V: std::sync::OnceLock<[usize; 2]> = std::sync::OnceLock::new(); let f = || [delirium_data::kv!(54 int), delirium_data::kv!(127 int)]; if delirium_data::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
-#[allow(non_snake_case)]
-#[inline]
-fn FEET() -> &'static [usize; 2] { static V: std::sync::OnceLock<[usize; 2]> = std::sync::OnceLock::new(); let f = || [delirium_data::kv!(0 int), delirium_data::kv!(6 int)]; if delirium_data::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+const CHEST: usize = 10;
+const HANDS: [usize; 2] = [16, 20];
+const FEET: [usize; 2] = [3, 6];
 
 pub static MESSAGES: [Message; 15] = [
     Message { name: "yanked", params: &[
@@ -332,7 +326,7 @@ fn weight(c: &Ctx) -> f32 {
 
 fn facing(c: &Ctx) -> Vec3 {
     let up = c.ch.up.normalize_or_zero();
-    let f = (pos(c, (*CLAVICLE())[0] + 1) - pos(c, (*CLAVICLE())[1] + 1)).cross(up);
+    let f = (pos(c, CLAVICLE[0] + 1) - pos(c, CLAVICLE[1] + 1)).cross(up);
     (f - up * f.dot(up)).normalize_or_zero()
 }
 
@@ -345,7 +339,7 @@ fn parse_pose(s: &str) -> Vec<(usize, [f32; 3])> {
     s.split(';').filter_map(|e| {
         let (j, a) = e.split_once(':')?;
         let mut a = a.split(',').map(|x| x.trim().parse::<f32>().unwrap_or(0.0));
-        Some((j.trim().parse().ok().filter(|&j| j < delirium_data::kv!(127 int))?, [a.next()?, a.next().unwrap_or(0.0), a.next().unwrap_or(0.0)]))
+        Some((j.trim().parse().ok().filter(|&j| j < 20)?, [a.next()?, a.next().unwrap_or(0.0), a.next().unwrap_or(0.0)]))
     }).collect()
 }
 
@@ -386,25 +380,25 @@ impl Yanked {
         let _ = p.f("headLookAtVelProb", 0.0)?;
         Ok(Yanked {
             point: p.v("point", Vec3::ZERO)?,
-            part: p.i("part", CHEST() as i32)?.clamp(0, delirium_data::kv!(127 int)) as usize,
+            part: p.i("part", CHEST as i32)?.clamp(0, 20) as usize,
             force: p.f("force", 1.0)?,
-            pull: p.f("pull", delirium_data::kv!(60))?,
-            arm: [p.f("armStiffnessStart", delirium_data::kv!(5))?, p.f("armDampingStart", delirium_data::kv!(78))?, p.f("armStiffness", delirium_data::kv!(117))?, p.f("armDamping", 1.0)?],
-            spine: [p.f("spineStiffnessStart", delirium_data::kv!(5))?, p.f("spineDampingStart", delirium_data::kv!(78))?, p.f("spineStiffness", delirium_data::kv!(117))?,
+            pull: p.f("pull", delirium_data::kv!(34))?,
+            arm: [p.f("armStiffnessStart", delirium_data::kv!(2))?, p.f("armDampingStart", delirium_data::kv!(49))?, p.f("armStiffness", delirium_data::kv!(74))?, p.f("armDamping", 1.0)?],
+            spine: [p.f("spineStiffnessStart", delirium_data::kv!(2))?, p.f("spineDampingStart", delirium_data::kv!(49))?, p.f("spineStiffness", delirium_data::kv!(74))?,
                     p.f("spineDamping", 1.0)?],
-            start_time: p.f("timeAtStartValues", delirium_data::kv!(116))?,
-            ramp_from: p.f("rampTimeFromStartValues", delirium_data::kv!(78))?,
-            time_end: p.f("timeStartEnd", delirium_data::kv!(5))?,
+            start_time: p.f("timeAtStartValues", delirium_data::kv!(60))?,
+            ramp_from: p.f("rampTimeFromStartValues", delirium_data::kv!(49))?,
+            time_end: p.f("timeStartEnd", delirium_data::kv!(2))?,
             ramp_to: p.f("rampTimeToEndValues", 1.0)?,
-            legs: (p.f("lowerBodyStiffness", delirium_data::kv!(21))?, p.f("lowerBodyStiffnessEnd", delirium_data::kv!(65))?),
-            pitch: (p.f("hipPitchForward", delirium_data::kv!(119))?, p.f("hipPitchBack", 1.0)?),
-            bend: p.f("spineBend", delirium_data::kv!(74))?,
-            thresh: p.f("comVelRDSThresh", delirium_data::kv!(84))?,
-            hula: (p.f("hulaPeriod", delirium_data::kv!(17))?, p.f("hipAmplitude", 1.0)?, p.f("spineAmplitude", 1.0)?),
-            relax: (p.f("minRelaxPeriod", delirium_data::kv!(24))?, p.f("maxRelaxPeriod", delirium_data::kv!(12))?),
+            legs: (p.f("lowerBodyStiffness", delirium_data::kv!(16))?, p.f("lowerBodyStiffnessEnd", delirium_data::kv!(37))?),
+            pitch: (p.f("hipPitchForward", delirium_data::kv!(63))?, p.f("hipPitchBack", 1.0)?),
+            bend: p.f("spineBend", delirium_data::kv!(46))?,
+            thresh: p.f("comVelRDSThresh", delirium_data::kv!(58))?,
+            hula: (p.f("hulaPeriod", delirium_data::kv!(12))?, p.f("hipAmplitude", 1.0)?, p.f("spineAmplitude", 1.0)?),
+            relax: (p.f("minRelaxPeriod", delirium_data::kv!(17))?, p.f("maxRelaxPeriod", delirium_data::kv!(7))?),
             roll: p.f("rollHelp", 0.5)?,
-            ground: [p.f("groundLegStiffness", delirium_data::kv!(117))?, p.f("groundLegDamping", 1.0)?, p.f("groundArmStiffness", delirium_data::kv!(117))?,
-                     p.f("groundArmDamping", 1.0)?, p.f("groundSpineStiffness", delirium_data::kv!(117))?, p.f("groundSpineDamping", 1.0)?],
+            ground: [p.f("groundLegStiffness", delirium_data::kv!(74))?, p.f("groundLegDamping", 1.0)?, p.f("groundArmStiffness", delirium_data::kv!(74))?,
+                     p.f("groundArmDamping", 1.0)?, p.f("groundSpineStiffness", delirium_data::kv!(74))?, p.f("groundSpineDamping", 1.0)?],
             head: p.b("useHeadLook", true)?,
             head_pos: p.v("headLookPos", Vec3::ZERO)?,
             head_index: p.i("headLookInstanceIndex", -1)?,
@@ -427,14 +421,14 @@ impl Yanked {
 }
 
 fn ramp(a: f32, b: f32, t: f32, t0: f32, time: f32) -> f32 {
-    a + (b - a) * ((t - t0) / time.max(delirium_data::kv!(134))).clamp(0.0, 1.0)
+    a + (b - a) * ((t - t0) / time.max(delirium_data::kv!(75))).clamp(0.0, 1.0)
 }
 
 impl Extra for Yanked {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
         if self.t == 0.0 {
             if self.point == Vec3::ZERO {
-                self.point = pos(c, CHEST()) + facing(c) * 2.0;
+                self.point = pos(c, CHEST) + facing(c) * 2.0;
             }
             if self.head_pos == Vec3::ZERO {
                 self.head_pos = self.point;
@@ -442,8 +436,8 @@ impl Extra for Yanked {
             self.out.push("bodyBalance start=true".into());
             if self.head {
                 let h = self.head_pos;
-                self.out.push(format!("headLook start=true instanceIndex={} pos={},{},{} stiffness={} damping=1", self.head_index,
-                                      h.x, h.y, h.z, delirium_data::kv!(117)));
+                self.out.push(format!("headLook start=true instanceIndex={} pos={},{},{} stiffness=11 damping=1", self.head_index,
+                                      h.x, h.y, h.z));
             }
             self.out.push("#say yanked pulled".into());
             self.next_relax = self.relax.1;
@@ -454,21 +448,21 @@ impl Extra for Yanked {
         let to = self.point - pos(c, self.part);
         let dir = Vec3::new(to.x, to.y, 0.0).normalize_or_zero();
         if t < self.pull && self.force > 0.0 {
-            spring(c, self.part, self.point, w * delirium_data::kv!(5), w, w * self.force);
+            spring(c, self.part, self.point, w * delirium_data::kv!(2), w, w * self.force);
         }
-        let feet = pos(c, (*FEET())[0]).z.min(pos(c, (*FEET())[1]).z);
-        if !self.down && (c.vel.length() > self.thresh || c.com.z - feet < delirium_data::kv!(10)) {
+        let feet = pos(c, FEET[0]).z.min(pos(c, FEET[1]).z);
+        if !self.down && (c.vel.length() > self.thresh || c.com.z - feet < delirium_data::kv!(5)) {
             self.down = true;
             self.out.push("#say yanked ground".into());
         }
         let speed = c.vel.length();
-        self.still = if speed < delirium_data::kv!(24) { self.still + dt } else { 0.0 };
+        self.still = if speed < delirium_data::kv!(17) { self.still + dt } else { 0.0 };
         if self.down {
             let g = self.ground;
             c.ch.set_stiffness(g[0], g[1], "lb", None);
-            c.ch.set_stiffness(g[2], g[delirium_data::kv!(0 int)], "ua", None);
-            c.ch.set_stiffness(g[delirium_data::kv!(1 int)], g[delirium_data::kv!(2 int)], "uk", None);
-            c.out.torque(0, Vec3::Z.cross(dir) * (w * self.roll * delirium_data::kv!(78)));
+            c.ch.set_stiffness(g[2], g[3], "ua", None);
+            c.ch.set_stiffness(g[4], g[5], "uk", None);
+            c.out.torque(0, Vec3::Z.cross(dir) * (w * self.roll * delirium_data::kv!(49)));
             if self.still > 1.0 {
                 self.end("settled");
             }
@@ -476,7 +470,7 @@ impl Extra for Yanked {
         }
         let k = |v: &[f32; 4]| {
             let up = ramp(v[0], v[2], t, self.start_time, self.ramp_from);
-            (up, ramp(v[1], v[delirium_data::kv!(0 int)], t, self.start_time, self.ramp_from))
+            (up, ramp(v[1], v[3], t, self.start_time, self.ramp_from))
         };
         let ((ak, ad), (sk, sd)) = (k(&self.arm), k(&self.spine));
         let lk = ramp(self.legs.0, self.legs.1, t, self.time_end, self.ramp_to);
@@ -485,19 +479,19 @@ impl Extra for Yanked {
             let r = c.ch.random();
             self.next_relax = self.relax.0 + (self.relax.1 - self.relax.0) * r;
         }
-        let relax = if self.next_relax < delirium_data::kv!(9) { delirium_data::kv!(135) } else { 1.0 };
+        let relax = if self.next_relax < delirium_data::kv!(4) { delirium_data::kv!(76) } else { 1.0 };
         c.ch.set_stiffness(ak * relax, ad, "ua", None);
         c.ch.set_stiffness(sk * relax, sd, "uk", None);
         c.ch.set_stiffness(lk, 1.0, "lb", None);
         let along = dir.dot(facing(c));
         let fade = if t < self.pull { 1.0 } else { ramp(1.0, 0.0, t, self.pull, 1.0) };
         let pitch = if along > 0.0 { self.pitch.0 } else { self.pitch.1 } * along * fade;
-        let sway = (t / self.hula.0.max(delirium_data::kv!(68)) * std::f32::consts::TAU).sin() * fade;
-        c.ch.set_relative((*SPINE())[0], 0, 0.5 * pitch);
-        c.ch.set_relative((*SPINE())[0], 1, delirium_data::kv!(24) * self.hula.1 * sway);
-        for &j in &(*SPINE())[1..] {
-            c.ch.set_relative(j, 0, -delirium_data::kv!(17) * self.bend * along * fade);
-            c.ch.set_relative(j, 1, -delirium_data::kv!(24) * self.hula.2 * sway);
+        let sway = (t / self.hula.0.max(delirium_data::kv!(40)) * std::f32::consts::TAU).sin() * fade;
+        c.ch.set_relative(SPINE[0], 0, 0.5 * pitch);
+        c.ch.set_relative(SPINE[0], 1, delirium_data::kv!(17) * self.hula.1 * sway);
+        for &j in &SPINE[1..] {
+            c.ch.set_relative(j, 0, -delirium_data::kv!(12) * self.bend * along * fade);
+            c.ch.set_relative(j, 1, -delirium_data::kv!(17) * self.hula.2 * sway);
         }
         if t > self.time_end + self.ramp_to && self.still > 0.5 {
             self.end("recovered");
@@ -538,19 +532,19 @@ impl Dragged {
     fn new(p: &mut P) -> Result<Dragged, Error> {
         let _ = (p.i("ropeAttachedToInstance", -1)?, p.b("ropeTaut", false)?);
         Ok(Dragged {
-            arm: [p.f("armStiffness", delirium_data::kv!(117))?, p.f("armDamping", 1.0)?, p.f("armMuscleStiffness", 1.0)?],
-            radius_tol: p.f("radiusTolerance", delirium_data::kv!(17))?,
-            length_tol: p.f("lengthTolerance", delirium_data::kv!(78))?,
+            arm: [p.f("armStiffness", delirium_data::kv!(74))?, p.f("armDamping", 1.0)?, p.f("armMuscleStiffness", 1.0)?],
+            radius_tol: p.f("radiusTolerance", delirium_data::kv!(12))?,
+            length_tol: p.f("lengthTolerance", delirium_data::kv!(49))?,
             anchor: p.v("ropePos", Vec3::ZERO)?,
-            part: p.i("ropedBodyPart", -1)?.clamp(-1, delirium_data::kv!(127 int)),
+            part: p.i("ropedBodyPart", -1)?.clamp(-1, 20),
             player: p.b("playerControl", false)?,
             want: [p.b("grabLeft", true)?, p.b("grabRight", true)?],
-            reach: p.f("reach", delirium_data::kv!(74))?,
+            reach: p.f("reach", delirium_data::kv!(46))?,
             twist: p.f("armTwist", 0.0)?,
             dir: p.v("direction", Vec3::ZERO)?,
-            speed: p.f("speed", delirium_data::kv!(136))?,
-            delay: p.f("delay", delirium_data::kv!(74))?,
-            force: p.f("force", delirium_data::kv!(119))?,
+            speed: p.f("speed", delirium_data::kv!(50))?,
+            delay: p.f("delay", delirium_data::kv!(46))?,
+            force: p.f("force", delirium_data::kv!(63))?,
             length: 0.0,
             grabbed: [None; 2],
             pulled: false,
@@ -562,7 +556,7 @@ impl Dragged {
 
 impl Extra for Dragged {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
-        let chest = pos(c, CHEST());
+        let chest = pos(c, CHEST);
         if self.t == 0.0 {
             self.out.push("bodyBalance start=true".into());
             if self.dir == Vec3::ZERO {
@@ -570,10 +564,10 @@ impl Extra for Dragged {
             }
             self.dir = Vec3::new(self.dir.x, self.dir.y, 0.0).normalize_or(Vec3::NEG_Y);
             if self.anchor == Vec3::ZERO {
-                self.anchor = chest + self.dir * 2.0 - Vec3::Z * delirium_data::kv!(60);
+                self.anchor = chest + self.dir * 2.0 - Vec3::Z * delirium_data::kv!(34);
             }
             self.length = match self.part {
-                -1 => (self.anchor - chest).length() - delirium_data::kv!(24),
+                -1 => (self.anchor - chest).length() - delirium_data::kv!(17),
                 k => (self.anchor - pos(c, k as usize)).length(),
             };
         }
@@ -590,24 +584,24 @@ impl Extra for Dragged {
             let over = (self.anchor - pos(c, k)).length() - self.length - self.length_tol;
             if over > 0.0 {
                 taut = true;
-                spring(c, k, self.anchor, w * delirium_data::kv!(5), w, cap);
+                spring(c, k, self.anchor, w * delirium_data::kv!(2), w, cap);
             }
         }
         if self.pulled {
-            c.ch.set_stiffness(delirium_data::kv!(5), delirium_data::kv!(119), "fb", None);
+            c.ch.set_stiffness(delirium_data::kv!(2), delirium_data::kv!(63), "fb", None);
         }
         for i in 0..2 {
             if !if self.player { self.want[i] } else { self.part < 0 } {
                 continue;
             }
-            let (l, hand) = (crate::nmshot::limb(i), (*HANDS())[i]);
+            let (l, hand) = (crate::nmshot::limb(i), HANDS[i]);
             match self.grabbed[i] {
                 Some(s) => {
                     let to = along(s);
                     if (to - pos(c, hand)).length() > self.length_tol {
                         taut = true;
                     }
-                    spring(c, hand, to, w * delirium_data::kv!(35), w, cap * 0.5);
+                    spring(c, hand, to, w * delirium_data::kv!(25), w, cap * 0.5);
                     c.ch.eff[l.e[1]].set_stiffness(self.arm[0], self.arm[1], Some(self.arm[2]));
                     c.ch.eff[l.e[2]].set_stiffness(self.arm[0], self.arm[1], Some(self.arm[2]));
                 }
@@ -623,7 +617,7 @@ impl Extra for Dragged {
                     let target = chest + (to - chest).clamp_length_max(self.reach);
                     c.ch.eff[l.e[1]].set_stiffness(self.arm[0], self.arm[1], Some(self.arm[2]));
                     c.ch.eff[l.e[2]].set_stiffness(self.arm[0], self.arm[1], Some(self.arm[2]));
-                    crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[delirium_data::kv!(0 int)], target, self.twist, 0.0,
+                    crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[3], target, self.twist, 0.0,
                                           1.0 - 2.0 * i as f32, 1.0, Vec3::ZERO, None);
                 }
             }
@@ -663,39 +657,39 @@ impl Dangle {
     }
 
     fn wait(c: &mut Ctx) -> f32 {
-        1.0 + delirium_data::kv!(5) * c.ch.random()
+        1.0 + delirium_data::kv!(2) * c.ch.random()
     }
 }
 
 impl Extra for Dangle {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
         if self.point == Vec3::ZERO {
-            self.point = pos(c, (*NECK())[1] + 1) + Vec3::Z * 1.0;
+            self.point = pos(c, NECK[1] + 1) + Vec3::Z * 1.0;
             self.out.push("bodyBalance start=false".into());
         }
         self.t += dt;
         let w = weight(c);
         if self.hold {
-            for (i, k) in (*HANDS()).into_iter().enumerate() {
-                let at = self.point + Vec3::Z.cross(facing(c)) * if i == 0 { delirium_data::kv!(9) } else { -delirium_data::kv!(9) };
-                spring(c, k, at, w * 2.0, w * delirium_data::kv!(24), w * delirium_data::kv!(24));
+            for (i, k) in HANDS.into_iter().enumerate() {
+                let at = self.point + Vec3::Z.cross(facing(c)) * if i == 0 { delirium_data::kv!(4) } else { -delirium_data::kv!(4) };
+                spring(c, k, at, w * 2.0, w * delirium_data::kv!(17), w * delirium_data::kv!(17));
             }
-            spring(c, CHEST(), self.point - Vec3::Z * delirium_data::kv!(18), w * delirium_data::kv!(35), w * delirium_data::kv!(12), w * delirium_data::kv!(136));
+            spring(c, CHEST, self.point - Vec3::Z * delirium_data::kv!(13), w * delirium_data::kv!(25), w * delirium_data::kv!(7), w * delirium_data::kv!(50));
         }
         for i in 0..2 {
-            for (j, s) in [((*CLAVICLE())[i], delirium_data::kv!(137)), ((*SHOULDER())[i], delirium_data::kv!(65)), ((*ELBOW())[i], delirium_data::kv!(32)), (crate::nmshot::limb(i).e[delirium_data::kv!(0 int)], delirium_data::kv!(35))] {
-                c.ch.eff[j].set_stiffness(s, s / delirium_data::kv!(31), None);
+            for (j, s) in [(CLAVICLE[i], delirium_data::kv!(77)), (SHOULDER[i], delirium_data::kv!(37)), (ELBOW[i], delirium_data::kv!(22)), (crate::nmshot::limb(i).e[3], delirium_data::kv!(25))] {
+                c.ch.eff[j].set_stiffness(s, s / delirium_data::kv!(20), None);
             }
         }
-        c.ch.set_stiffness(delirium_data::kv!(5), delirium_data::kv!(24), "us", None);
-        c.ch.set_stiffness(delirium_data::kv!(5), delirium_data::kv!(24), "lb", None);
+        c.ch.set_stiffness(delirium_data::kv!(2), delirium_data::kv!(17), "us", None);
+        c.ch.set_stiffness(delirium_data::kv!(2), delirium_data::kv!(17), "lb", None);
         self.hang.1 -= dt;
         if self.hang.1 < 0.0 {
             self.hang = (!self.hang.0, Self::wait(c));
         }
         if self.hang.0 {
-            let s = (self.t * delirium_data::kv!(33)).sin() * delirium_data::kv!(116);
-            for j in (*HIP()) {
+            let s = (self.t * delirium_data::kv!(23)).sin() * delirium_data::kv!(60);
+            for j in HIP {
                 c.ch.set_relative(j, 0, s);
             }
         }
@@ -710,18 +704,18 @@ impl Extra for Dangle {
         self.reach -= dt;
         if self.reach < 0.0 {
             self.reaching = !self.reaching;
-            self.reach = if self.reaching { 1.0 } else { Self::wait(c) * (1.0 + delirium_data::kv!(5) * (1.0 - self.freq)) };
+            self.reach = if self.reaching { 1.0 } else { Self::wait(c) * (1.0 + delirium_data::kv!(2) * (1.0 - self.freq)) };
             let p = self.point;
             self.out.push(match self.reaching {
-                true => format!("headLook start=true pos={},{},{} stiffness={} damping=1", p.x, p.y, p.z, delirium_data::kv!(117)),
+                true => format!("headLook start=true pos={},{},{} stiffness=11 damping=1", p.x, p.y, p.z),
                 false => "headLook start=false".into(),
             });
         }
         if self.reaching {
             for i in 0..2 {
                 let l = crate::nmshot::limb(i);
-                let at = self.point + Vec3::Z * delirium_data::kv!(9);
-                crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[delirium_data::kv!(0 int)], at, 0.0, 0.0, 1.0 - 2.0 * i as f32, 1.0,
+                let at = self.point + Vec3::Z * delirium_data::kv!(4);
+                crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[3], at, 0.0, 0.0, 1.0 - 2.0 * i as f32, 1.0,
                                       Vec3::ZERO, None);
             }
         }
@@ -737,18 +731,18 @@ pub struct Carried { point: Vec3, hold: bool, s: [f32; 6] }
 impl Carried {
     fn new(p: &mut P) -> Result<Carried, Error> {
         Ok(Carried { point: p.v("point", Vec3::ZERO)?, hold: p.b("hold", true)?,
-                     s: [p.f("trunkStiffness", delirium_data::kv!(64))?, p.f("legStiffness", 2.0)?, p.f("armStiffness", delirium_data::kv!(12))?, p.f("clavicleStiffness", delirium_data::kv!(84))?,
-                         p.f("neckStiffness", delirium_data::kv!(32))?, p.f("stillLegStiffness", delirium_data::kv!(84))?] })
+                     s: [p.f("trunkStiffness", delirium_data::kv!(36))?, p.f("legStiffness", 2.0)?, p.f("armStiffness", delirium_data::kv!(7))?, p.f("clavicleStiffness", delirium_data::kv!(58))?,
+                         p.f("neckStiffness", delirium_data::kv!(22))?, p.f("stillLegStiffness", delirium_data::kv!(58))?] })
     }
 }
 
 impl Extra for Carried {
     fn tick(&mut self, c: &mut Ctx, _dt: f32) {
         if self.point == Vec3::ZERO {
-            self.point = pos(c, 0) + Vec3::Z * delirium_data::kv!(119);
+            self.point = pos(c, 0) + Vec3::Z * delirium_data::kv!(63);
         }
         let [trunk, leg, arm, clav, neck, still_leg] = self.s;
-        let still = c.b.part(0).v.length() < delirium_data::kv!(24);
+        let still = c.b.part(0).v.length() < delirium_data::kv!(17);
         c.ch.set_stiffness(trunk, 0.5, "us", None);
         c.ch.set_stiffness(if still { still_leg } else { leg }, 0.5, "ll", None);
         c.ch.set_stiffness(still_leg, 0.5, "lr", None);
@@ -757,7 +751,7 @@ impl Extra for Carried {
         c.ch.set_stiffness(neck, 1.0, "un", None);
         if self.hold {
             let w = weight(c);
-            spring(c, 0, self.point, w * delirium_data::kv!(38), w * delirium_data::kv!(64), w * 2.0);
+            spring(c, 0, self.point, w * delirium_data::kv!(26), w * delirium_data::kv!(36), w * 2.0);
         }
     }
 }
@@ -776,9 +770,9 @@ pub struct Buoyancy {
 
 impl Buoyancy {
     fn new(p: &mut P) -> Result<Buoyancy, Error> {
-        Ok(Buoyancy { buoyancy: p.f("buoyancy", delirium_data::kv!(138))?, chest: p.f("chestBuoyancy", 0.5)?, damping: p.f("damping", delirium_data::kv!(5))?,
+        Ok(Buoyancy { buoyancy: p.f("buoyancy", delirium_data::kv!(78))?, chest: p.f("chestBuoyancy", 0.5)?, damping: p.f("damping", delirium_data::kv!(2))?,
                       point: p.v("surfacePoint", Vec3::ZERO)?, normal: p.v("surfaceNormal", Vec3::Z)?.normalize_or(Vec3::Z),
-                      righting: p.b("righting", true)?, strength: p.f("rightingStrength", delirium_data::kv!(24))?, time: p.f("rightingTime", 2.0)?,
+                      righting: p.b("righting", true)?, strength: p.f("rightingStrength", delirium_data::kv!(17))?, time: p.f("rightingTime", 2.0)?,
                       t: 0.0 })
     }
 }
@@ -786,16 +780,16 @@ impl Buoyancy {
 impl Extra for Buoyancy {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
         if self.point == Vec3::ZERO {
-            self.point = pos(c, CHEST());
+            self.point = pos(c, CHEST);
         }
         let n = self.normal;
         let mut wet = false;
-        for k in 0..delirium_data::kv!(111 int) {
+        for k in 0..21 {
             let (p, m) = (c.b.part(k), c.b.doll.part_mass(k));
-            let under = ((self.point - p.m.d).dot(n) / delirium_data::kv!(60)).clamp(0.0, 1.0);
+            let under = ((self.point - p.m.d).dot(n) / delirium_data::kv!(34)).clamp(0.0, 1.0);
             if under > 0.0 {
                 wet = true;
-                let chest = if k == CHEST() { self.chest * weight(c) * delirium_data::kv!(78) } else { 0.0 };
+                let chest = if k == CHEST { self.chest * weight(c) * delirium_data::kv!(49) } else { 0.0 };
                 c.out.force(k, (n * (m * crate::ragdoll::GRAVITY() * self.buoyancy + chest) - p.v * (m * self.damping)) * under);
             }
         }
@@ -803,13 +797,13 @@ impl Extra for Buoyancy {
             return;
         }
         self.t += dt;
-        c.ch.set_stiffness(delirium_data::kv!(35), delirium_data::kv!(20), "fb", None);
+        c.ch.set_stiffness(delirium_data::kv!(25), delirium_data::kv!(15), "fb", None);
         if self.righting && self.t < self.time {
-            let spine = (pos(c, CHEST()) - pos(c, 0)).normalize_or_zero();
-            let front = (pos(c, (*CLAVICLE())[0] + 1) - pos(c, (*CLAVICLE())[1] + 1)).cross(spine).normalize_or_zero();
-            let ease = 1.0 - self.t / self.time.max(delirium_data::kv!(51));
+            let spine = (pos(c, CHEST) - pos(c, 0)).normalize_or_zero();
+            let front = (pos(c, CLAVICLE[0] + 1) - pos(c, CLAVICLE[1] + 1)).cross(spine).normalize_or_zero();
+            let ease = 1.0 - self.t / self.time.max(delirium_data::kv!(32));
             let tq = front.cross(n) * (self.strength * weight(c) * ease);
-            c.out.torque(CHEST(), tq);
+            c.out.torque(CHEST, tq);
             c.out.torque(0, tq);
         }
     }
@@ -830,7 +824,7 @@ const REGIONS: [(&str, &str); 5] = [("LeftArm", "ul"), ("RightArm", "ur"), ("Spi
 
 impl AnimPose {
     fn new(p: &mut P) -> Result<AnimPose, Error> {
-        let global = [p.f("stiffness", delirium_data::kv!(21))?, p.f("damping", 1.0)?, p.f("muscleStiffness", -1.0)?, p.f("gravityCompensation", 0.0)?];
+        let global = [p.f("stiffness", delirium_data::kv!(16))?, p.f("damping", 1.0)?, p.f("muscleStiffness", -1.0)?, p.f("gravityCompensation", 0.0)?];
         let mut regions = [[-1.0; 4]; 5];
         for (r, (name, _)) in regions.iter_mut().zip(REGIONS) {
             for (x, what) in r.iter_mut().zip(["stiffness", "damping", "muscleStiffness", "gravComp"]) {
@@ -863,22 +857,22 @@ impl Extra for AnimPose {
             }
         }
         let mut skip = vec![];
-        for (o, joints) in self.over.iter().zip([&(*NECK())[..], &Character::mask("ul"), &Character::mask("ur")]) {
+        for (o, joints) in self.over.iter().zip([&NECK[..], &Character::mask("ul"), &Character::mask("ur")]) {
             if *o {
                 skip.extend_from_slice(joints);
             }
         }
-        let connected = [self.connected[0], self.connected[1], false, self.connected[2], self.connected[delirium_data::kv!(0 int)]];
+        let connected = [self.connected[0], self.connected[1], false, self.connected[2], self.connected[3]];
         for (i, (_, m)) in REGIONS.iter().enumerate() {
-            let v: Vec<f32> = (0..delirium_data::kv!(1 int)).map(|k| if self.regions[i][k] < 0.0 { self.global[k] } else { self.regions[i][k] }).collect();
+            let v: Vec<f32> = (0..4).map(|k| if self.regions[i][k] < 0.0 { self.global[k] } else { self.regions[i][k] }).collect();
             let s = if connected[i] { v[0] * 0.5 } else { v[0] };
             for j in Character::mask(m) {
                 if skip.contains(&j) || !mine.contains(&j) {
                     continue;
                 }
-                let ms = if (*WRIST()).contains(&j) || (*ANKLE()).contains(&j) { Some(delirium_data::kv!(139)) } else { (v[2] >= 0.0).then_some(v[2]) };
+                let ms = if WRIST.contains(&j) || ANKLE.contains(&j) { Some(delirium_data::kv!(79)) } else { (v[2] >= 0.0).then_some(v[2]) };
                 c.ch.eff[j].set_stiffness(s, v[1], ms);
-                c.ch.eff[j].oppose_gravity = v[delirium_data::kv!(0 int)];
+                c.ch.eff[j].oppose_gravity = v[3];
             }
         }
         for &(j, a) in &self.pose {
@@ -887,9 +881,9 @@ impl Extra for AnimPose {
             }
         }
         if self.plane != Vec3::ZERO {
-            for k in 0..delirium_data::kv!(111 int) {
+            for k in 0..21 {
                 let v = c.b.part(k).v.dot(self.plane);
-                c.out.force(k, self.plane * (-v * c.b.doll.part_mass(k) * delirium_data::kv!(31)));
+                c.out.force(k, self.plane * (-v * c.b.doll.part_mass(k) * delirium_data::kv!(20)));
             }
         }
     }
@@ -918,9 +912,9 @@ impl ArmsWindmill {
     fn new(p: &mut P) -> Result<ArmsWindmill, Error> {
         let mut circle = |side: &str, y: f32| -> Result<Circle, Error> {
             Ok(Circle { normal: p.v(&format!("{side}Normal"), Vec3::new(0.0, y, 0.0))?.normalize_or(Vec3::Y),
-                        centre: p.v(&format!("{side}Centre"), Vec3::new(delirium_data::kv!(9), delirium_data::kv!(17) * y, delirium_data::kv!(68)))?,
-                        part: p.i(&format!("{side}PartID"), CHEST() as i32)?.clamp(0, delirium_data::kv!(127 int)) as usize,
-                        r1: p.f(&format!("{side}Radius1"), delirium_data::kv!(10))?, r2: p.f(&format!("{side}Radius2"), delirium_data::kv!(10))?,
+                        centre: p.v(&format!("{side}Centre"), Vec3::new(delirium_data::kv!(4), delirium_data::kv!(12) * y, delirium_data::kv!(40)))?,
+                        part: p.i(&format!("{side}PartID"), CHEST as i32)?.clamp(0, 20) as usize,
+                        r1: p.f(&format!("{side}Radius1"), delirium_data::kv!(5))?, r2: p.f(&format!("{side}Radius2"), delirium_data::kv!(5))?,
                         speed: p.f(&format!("{side}Speed"), 1.0)? })
         };
         let arm = [circle("left", 1.0)?, circle("right", -1.0)?];
@@ -931,11 +925,11 @@ impl ArmsWindmill {
             arm,
             deltas: [p.f("radius1Delta", 0.0)?, p.f("radius2Delta", 0.0)?, p.f("speedDelta", 0.0)?, p.f("shoulderStiffnessDelta", 0.0)?,
                      p.f("elbowStiffnessDelta", 0.0)?],
-            gains: [p.f("shoulderStiffness", delirium_data::kv!(21))?, p.f("shoulderDamping", 1.0)?, p.f("elbowStiffness", delirium_data::kv!(21))?, p.f("elbowDamping", 1.0)?],
+            gains: [p.f("shoulderStiffness", delirium_data::kv!(16))?, p.f("shoulderDamping", 1.0)?, p.f("elbowStiffness", delirium_data::kv!(16))?, p.f("elbowDamping", 1.0)?],
             phase: if force_sync { 0.0 } else { phase },
             twist: p.f("IKtwist", 0.0)?,
-            spin: (p.f("angVelThreshold", delirium_data::kv!(78))?, p.f("angVelGain", 1.0)?),
-            elbow_min: [p.f("leftElbowMin", delirium_data::kv!(24))?, p.f("rightElbowMin", delirium_data::kv!(24))?],
+            spin: (p.f("angVelThreshold", delirium_data::kv!(49))?, p.f("angVelGain", 1.0)?),
+            elbow_min: [p.f("leftElbowMin", delirium_data::kv!(17))?, p.f("rightElbowMin", delirium_data::kv!(17))?],
             mirror: p.i("mirrorMode", 0)?,
             adaptive: p.b("adaptiveMode", false)?,
             use_arm: [p.b("useLeft", true)?, p.b("useRight", true)?],
@@ -953,15 +947,15 @@ impl Extra for ArmsWindmill {
             for a in &mut self.arm {
                 (a.r1, a.r2, a.speed) = (a.r1 + self.deltas[0] * dt, a.r2 + self.deltas[1] * dt, a.speed + self.deltas[2] * dt);
             }
-            self.gains[0] += self.deltas[delirium_data::kv!(0 int)] * dt;
-            self.gains[2] += self.deltas[delirium_data::kv!(1 int)] * dt;
+            self.gains[0] += self.deltas[3] * dt;
+            self.gains[2] += self.deltas[4] * dt;
         }
         let fwd = facing(c);
         let up = c.ch.up.normalize_or(Vec3::Z);
         let left = up.cross(fwd);
         let world = |v: Vec3| fwd * v.x + left * v.y + up * v.z;
         for i in 0..2 {
-            if self.disable_on_impact && c.b.doll.collided(&[(*HANDS())[i]]) {
+            if self.disable_on_impact && c.b.doll.collided(&[HANDS[i]]) {
                 self.hit[i] = true;
             }
             if !self.use_arm[i] || self.hit[i] {
@@ -972,13 +966,13 @@ impl Extra for ArmsWindmill {
             self.angle[i] += dir * a.speed * (1.0 + over * self.spin.1) * std::f32::consts::TAU * dt;
             let th = self.angle[i] - if i == 1 { self.phase } else { 0.0 };
             let n = world(a.normal).normalize_or(left);
-            let u = n.cross(if n.dot(up).abs() > delirium_data::kv!(28) { fwd } else { up }).normalize();
+            let u = n.cross(if n.dot(up).abs() > delirium_data::kv!(61) { fwd } else { up }).normalize();
             let v = n.cross(u);
             let target = pos(c, a.part) + world(a.centre) + u * (a.r1 * th.cos()) + v * (a.r2 * th.sin());
             let l = crate::nmshot::limb(i);
             c.ch.eff[l.e[1]].set_stiffness(self.gains[0], self.gains[1], None);
-            c.ch.eff[l.e[2]].set_stiffness(self.gains[2], self.gains[delirium_data::kv!(0 int)], None);
-            crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[delirium_data::kv!(0 int)], target, self.twist, 0.0, 1.0 - 2.0 * i as f32, 1.0,
+            c.ch.eff[l.e[2]].set_stiffness(self.gains[2], self.gains[3], None);
+            crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[3], target, self.twist, 0.0, 1.0 - 2.0 * i as f32, 1.0,
                                   Vec3::ZERO, None);
             let e = &mut c.ch.eff[l.e[2]].desired[0];
             *e = e.max(self.elbow_min[i]);
@@ -1001,8 +995,8 @@ pub struct Twist {
 impl Twist {
     fn new(p: &mut P) -> Result<Twist, Error> {
         Ok(Twist { pos: p.v("pos", Vec3::ZERO)?, offset: p.f("offset", 0.0)?,
-                   vel: Vec3::new(p.f("velX", 0.0)?, p.f("velY", 0.0)?, p.f("velZ", 0.0)?), excess: p.f("spineTwistExcess", delirium_data::kv!(140))?,
-                   k: (p.f("spStrength", delirium_data::kv!(21))?, p.f("spDamping", 2.0)?), clav: p.b("twistClavicles", true)?,
+                   vel: Vec3::new(p.f("velX", 0.0)?, p.f("velY", 0.0)?, p.f("velZ", 0.0)?), excess: p.f("spineTwistExcess", delirium_data::kv!(39))?,
+                   k: (p.f("spStrength", delirium_data::kv!(16))?, p.f("spDamping", 2.0)?), clav: p.b("twistClavicles", true)?,
                    always: p.b("allwaysTwist", false)?, twisting: None, out: vec![] })
     }
 }
@@ -1010,13 +1004,13 @@ impl Twist {
 impl Extra for Twist {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
         if self.pos == Vec3::ZERO {
-            self.pos = pos(c, CHEST()) + Vec3::Z.cross(facing(c)) * delirium_data::kv!(12) - facing(c) * 0.5;
+            self.pos = pos(c, CHEST) + Vec3::Z.cross(facing(c)) * delirium_data::kv!(7) - facing(c) * 0.5;
         }
         self.pos += self.vel * dt;
         let p = c.b.part(0);
-        let n = (self.pos + (self.vel - p.v) * delirium_data::kv!(78) - p.m.d).normalize_or_zero();
+        let n = (self.pos + (self.vel - p.v) * delirium_data::kv!(49) - p.m.d).normalize_or_zero();
         let twist = p.m.b.dot(n).atan2(-p.m.c.dot(n)) + self.offset;
-        let on = self.always || twist.abs() < delirium_data::kv!(20) * std::f32::consts::PI;
+        let on = self.always || twist.abs() < delirium_data::kv!(15) * std::f32::consts::PI;
         if self.twisting != Some(on) {
             self.twisting = Some(on);
             self.out.push(format!("#say spineTwist {}", if on { "twisting" } else { "stopped" }));
@@ -1025,19 +1019,19 @@ impl Extra for Twist {
             return;
         }
         c.ch.set_stiffness(self.k.0, self.k.1, "us", None);
-        let range = (*SPINE()).map(|j| {
+        let range = SPINE.map(|j| {
             let l = c.ch.limits(j);
-            (l[delirium_data::kv!(1 int)] * (1.0 + self.excess), l[delirium_data::kv!(2 int)] * (1.0 + self.excess))
+            (l[4] * (1.0 + self.excess), l[5] * (1.0 + self.excess))
         });
         let sum = range.iter().fold((0.0, 0.0), |s, r| (s.0 + r.0, s.1 + r.1));
-        let up = (pos(c, CHEST()) - pos(c, 0)).normalize_or_zero().z.abs();
+        let up = (pos(c, CHEST) - pos(c, 0)).normalize_or_zero().z.abs();
         let x = (up * twist).clamp(sum.0, sum.1);
-        for (k, j) in (*SPINE()).into_iter().enumerate() {
+        for (k, j) in SPINE.into_iter().enumerate() {
             c.ch.eff[j].desired[2] = if x >= 0.0 { range[k].1 / sum.1 } else { range[k].0 / sum.0 } * x;
         }
         if self.clav {
-            c.ch.eff[(*CLAVICLE())[1]].desired[0] = x;
-            c.ch.eff[(*CLAVICLE())[0]].desired[0] = -x;
+            c.ch.eff[CLAVICLE[1]].desired[0] = x;
+            c.ch.eff[CLAVICLE[0]].desired[0] = -x;
         }
     }
 
@@ -1050,17 +1044,17 @@ pub struct Wave { side: usize, time: f32, rate: f32, size: f32, t: f32, out: Vec
 
 impl Wave {
     fn new(p: &mut P) -> Result<Wave, Error> {
-        Ok(Wave { side: p.b("right", true)? as usize, time: p.f("time", delirium_data::kv!(141))?, rate: p.f("rate", 2.0)?, size: p.f("size", delirium_data::kv!(142))?,
+        Ok(Wave { side: p.b("right", true)? as usize, time: p.f("time", delirium_data::kv!(80))?, rate: p.f("rate", 2.0)?, size: p.f("size", delirium_data::kv!(81))?,
                   t: 0.0, out: vec![] })
     }
 }
 
 #[allow(non_snake_case)]
 #[inline]
-fn WAVE_UP() -> f32 { delirium_data::kv!(24) }
+fn WAVE_UP() -> f32 { delirium_data::kv!(17) }
 #[allow(non_snake_case)]
 #[inline]
-fn WAVE_DOWN() -> f32 { delirium_data::kv!(24) }
+fn WAVE_DOWN() -> f32 { delirium_data::kv!(17) }
 
 impl Extra for Wave {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
@@ -1075,12 +1069,12 @@ impl Extra for Wave {
         let shoulder = pos(c, l.p[0]);
         let to = if self.t < WAVE_UP() + self.time {
             let sway = (self.t * self.rate * std::f32::consts::TAU).sin() * self.size * ((self.t / WAVE_UP()).min(1.0));
-            shoulder + out * (delirium_data::kv!(140) + sway) + Vec3::Z * delirium_data::kv!(10) * (self.t / WAVE_UP()).min(1.0) + f * delirium_data::kv!(68)
+            shoulder + out * (delirium_data::kv!(39) + sway) + Vec3::Z * delirium_data::kv!(5) * (self.t / WAVE_UP()).min(1.0) + f * delirium_data::kv!(40)
         } else {
-            shoulder + out * delirium_data::kv!(8)
+            shoulder + out * delirium_data::kv!(3)
         };
-        c.ch.set_stiffness(delirium_data::kv!(21), 1.0, ["ul", "ur"][i], None);
-        crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[delirium_data::kv!(0 int)], to, 0.0, 0.0, 1.0 - 2.0 * i as f32, 1.0, Vec3::ZERO, None);
+        c.ch.set_stiffness(delirium_data::kv!(16), 1.0, ["ul", "ur"][i], None);
+        crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[3], to, 0.0, 0.0, 1.0 - 2.0 * i as f32, 1.0, Vec3::ZERO, None);
     }
 
     fn lines(&mut self) -> Vec<String> {
@@ -1096,14 +1090,14 @@ pub struct Breathe { s: f32, joints: Vec<usize>, scale: f32, t: f32, last: f32, 
 
 #[allow(non_snake_case)]
 #[inline]
-fn BREATH() -> f32 { delirium_data::kv!(84) }
+fn BREATH() -> f32 { delirium_data::kv!(58) }
 #[allow(non_snake_case)]
 #[inline]
-fn BREATH_LEAN() -> f32 { delirium_data::kv!(131) }
+fn BREATH_LEAN() -> f32 { delirium_data::kv!(71) }
 
 impl Breathe {
     fn new(p: &mut P) -> Result<Breathe, Error> {
-        Ok(Breathe { s: p.f("stiffness", delirium_data::kv!(31))?, joints: Character::mask(&p.s("effectorMask", "us")?), scale: p.f("breathingScale", 1.0)?,
+        Ok(Breathe { s: p.f("stiffness", delirium_data::kv!(20))?, joints: Character::mask(&p.s("effectorMask", "us")?), scale: p.f("breathingScale", 1.0)?,
                      t: 0.0, last: 0.0, wrote: vec![] })
     }
 }
@@ -1119,7 +1113,7 @@ impl Extra for Breathe {
             *d += if *d == *w { lean - self.last } else { lean };
             *w = *d;
         }
-        c.ch.eff[(*NECK())[0]].set_stiffness(self.s * delirium_data::kv!(28), 1.0, None);
+        c.ch.eff[NECK[0]].set_stiffness(self.s * delirium_data::kv!(61), 1.0, None);
         self.last = lean;
     }
 }
@@ -1128,7 +1122,7 @@ pub struct SoftKeyframe { follow: f32, most: f32, slower: bool, yaw: f32, target
 
 impl SoftKeyframe {
     fn new(p: &mut P) -> Result<SoftKeyframe, Error> {
-        let (follow, most, slower, yaw, target) = (p.f("followMultiplier", delirium_data::kv!(31))?, p.f("maxAcceleration", delirium_data::kv!(25))?,
+        let (follow, most, slower, yaw, target) = (p.f("followMultiplier", delirium_data::kv!(20))?, p.f("maxAcceleration", delirium_data::kv!(82))?,
                                                    p.b("goSlowerWhenWeaker", true)?, p.f("yawOffset", 0.0)?, p.v("targetPosition", Vec3::ZERO)?);
         let parts = Character::mask(&p.s("mask", "fb")?).into_iter().map(|j| j + 1).collect();
         Ok(SoftKeyframe { follow, most, slower, yaw, target, parts, pose: vec![] })
@@ -1147,7 +1141,7 @@ impl Extra for SoftKeyframe {
             let gap = anchor + turn * off - pos(c, k);
             let mut a = (gap * self.follow - (c.b.part(k).v - v0) * 2.0 * self.follow.max(0.0).sqrt()).clamp_length_max(self.most);
             if self.slower {
-                a *= (c.ch.eff[k - 1].strength.max(0.0).sqrt() / delirium_data::kv!(21)).min(1.0);
+                a *= (c.ch.eff[k - 1].strength.max(0.0).sqrt() / delirium_data::kv!(16)).min(1.0);
             }
             c.out.force(k, a * c.b.doll.part_mass(k));
         }
@@ -1157,13 +1151,13 @@ impl Extra for SoftKeyframe {
 fn aim(c: &mut Ctx, i: usize, at: Vec3, s: f32, d: f32) {
     let shoulder = pos(c, crate::nmshot::limb(i).p[0]);
     let dir = if at == Vec3::ZERO { facing(c) } else { (at - shoulder).normalize_or(facing(c)) };
-    reach(c, i, shoulder + dir * delirium_data::kv!(132), s, d);
+    reach(c, i, shoulder + dir * delirium_data::kv!(72), s, d);
 }
 
 fn reach(c: &mut Ctx, i: usize, at: Vec3, s: f32, d: f32) {
     let l = crate::nmshot::limb(i);
     c.ch.set_stiffness(s, d, ["ul", "ur"][i], None);
-    crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[delirium_data::kv!(0 int)], at, 0.0, 0.0, 1.0 - 2.0 * i as f32, 1.0, Vec3::ZERO, None);
+    crate::nmdbm::limb_ik(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[3], at, 0.0, 0.0, 1.0 - 2.0 * i as f32, 1.0, Vec3::ZERO, None);
 }
 
 fn v3(p: Vec3) -> String {
@@ -1205,37 +1199,37 @@ impl SplitBody {
         let soft_parts = if p.s("softConstraintMask", "")?.is_empty() { vec![] } else { parts(p.s("softConstraintMask", "")?) };
         let _ = p.s("collisionMask", "fb")?;
         let grav = Character::mask(&p.s("gravityCompensationMask", "ub")?);
-        let (s, ctrl) = ((p.f("stiffness", delirium_data::kv!(21))?, p.f("damping", 1.0)?), (p.f("controllerStiffness", delirium_data::kv!(126))?, p.f("controllerDamping", 1.0)?));
+        let (s, ctrl) = ((p.f("stiffness", delirium_data::kv!(16))?, p.f("damping", 1.0)?), (p.f("controllerStiffness", delirium_data::kv!(67))?, p.f("controllerDamping", 1.0)?));
         let weapon = [p.i("leftHandWeaponIndex", -1)?, p.i("rightHandWeaponIndex", 0)?];
         let status = [p.i("leftHandStatus", 2)?, p.i("rightHandStatus", 1)?];
         let gun = (0..2).find(|&i| status[i] == 1 && weapon[i] >= 0);
         let support = gun.and_then(|g| (status[1 - g] == 2).then_some(1 - g));
         let (constrain, orient, limits) = (p.b("constrainHands", true)?, p.b("controlHandOrientation", true)?, p.b("adjustJointLimits", true)?);
         let stable = p.b("handStable", false)?.then_some(()).map(|()| (0.0, 0.0));
-        let stable_g = (p.f("handStableStiff", delirium_data::kv!(126))?, p.f("handStableDamp", 1.0)?);
+        let stable_g = (p.f("handStableStiff", delirium_data::kv!(67))?, p.f("handStableDamp", 1.0)?);
         let recoil = p.b("recoilRelax", true)?;
-        let recoil_g = (p.f("recoilRelaxAmount", 0.5)?, p.f("recoilRelaxTime", delirium_data::kv!(24))?);
+        let recoil_g = (p.f("recoilRelaxAmount", 0.5)?, p.f("recoilRelaxTime", delirium_data::kv!(17))?);
         let breathe = Breathe { s: s.0, joints: Character::mask("us"), scale: p.f("breathingScale", 1.0)?, t: 0.0, last: 0.0, wrote: vec![] };
         let _ = p.b("fireWeapon", false)?;
-        Ok(SplitBody { aim, pose_mask, hard, soft: SoftKeyframe { follow: delirium_data::kv!(31), most: delirium_data::kv!(25), slower: true, yaw: 0.0, target: Vec3::ZERO, parts: soft_parts, pose: vec![] },
+        Ok(SplitBody { aim, pose_mask, hard, soft: SoftKeyframe { follow: delirium_data::kv!(20), most: delirium_data::kv!(82), slower: true, yaw: 0.0, target: Vec3::ZERO, parts: soft_parts, pose: vec![] },
                        grav, s, ctrl, gun, support, constrain, orient, limits, stable: stable.map(|_| stable_g), recoil: recoil.then_some(recoil_g),
                        breathe, pose: vec![], hold: vec![], turn: Quat::IDENTITY, relax: 0.0, kick: false, cons: vec![], start: vec![], t: 0.0 })
     }
 
     fn hand(i: usize) -> usize {
-        crate::nmshot::limb(i).p[delirium_data::kv!(0 int)]
+        crate::nmshot::limb(i).p[3]
     }
 }
 
 #[allow(non_snake_case)]
 #[inline]
-fn GRIP_ON() -> f32 { delirium_data::kv!(116) }
+fn GRIP_ON() -> f32 { delirium_data::kv!(60) }
 #[allow(non_snake_case)]
 #[inline]
-fn GRIP_W() -> f32 { delirium_data::kv!(38) }
+fn GRIP_W() -> f32 { delirium_data::kv!(26) }
 #[allow(non_snake_case)]
 #[inline]
-fn GRIP_MOST() -> f32 { delirium_data::kv!(15) }
+fn GRIP_MOST() -> f32 { delirium_data::kv!(10) }
 
 impl Extra for SplitBody {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
@@ -1250,7 +1244,7 @@ impl Extra for SplitBody {
         }
         self.t += dt;
         let give = match self.recoil {
-            Some((amount, time)) if self.relax > 0.0 => 1.0 - amount * (self.relax / time.max(delirium_data::kv!(134))),
+            Some((amount, time)) if self.relax > 0.0 => 1.0 - amount * (self.relax / time.max(delirium_data::kv!(75))),
             _ => 1.0,
         };
         self.relax = (self.relax - dt).max(0.0);
@@ -1265,15 +1259,15 @@ impl Extra for SplitBody {
         let Some(g) = self.gun else { return };
         aim(c, g, self.aim, self.ctrl.0 * give, self.ctrl.1);
         if self.limits {
-            for e in (*ELBOW()) {
+            for e in ELBOW {
                 let at = c.ch.eff[e].desired[0];
-                let mut l = crate::nmrs::SoftLimit { stiffness: delirium_data::kv!(15), damping: 1.0, enabled: true, ..Default::default() };
-                l.set_limit(at + delirium_data::kv!(9) * at.signum(), at.signum(), false);
+                let mut l = crate::nmrs::SoftLimit { stiffness: delirium_data::kv!(10), damping: 1.0, enabled: true, ..Default::default() };
+                l.set_limit(at + delirium_data::kv!(4) * at.signum(), at.signum(), false);
                 c.ch.eff[e].soft[0] = l;
             }
         }
         if let Some((s, d)) = self.stable {
-            c.ch.eff[(*WRIST())[g]].set_stiffness(s * give, d, None);
+            c.ch.eff[WRIST[g]].set_stiffness(s * give, d, None);
         }
         let gh = Self::hand(g);
         if std::mem::take(&mut self.kick) {
@@ -1282,7 +1276,7 @@ impl Extra for SplitBody {
         }
         if let (Some(h), true) = (self.support, self.constrain) {
             let across = Vec3::Z.cross(facing(c)) * if h == 0 { 1.0 } else { -1.0 };
-            let grip = f[gh].translation + across * delirium_data::kv!(112) - Vec3::Z * delirium_data::kv!(131);
+            let grip = f[gh].translation + across * delirium_data::kv!(57) - Vec3::Z * delirium_data::kv!(71);
             let on = (self.t / GRIP_ON()).min(1.0);
             let hand = Self::hand(h);
             let to = self.start[h].lerp(grip, on);
@@ -1294,8 +1288,8 @@ impl Extra for SplitBody {
             c.out.force(gh, -pull);
             if self.orient {
                 let to = f[hand].rotation.slerp(f[gh].rotation * self.turn, on);
-                let i = m * delirium_data::kv!(143);
-                let twist = (short_turn(to * f[hand].rotation.inverse()) * (i * w * w) - (a.w - b.w) * (2.0 * i * w)).clamp_length_max(GRIP_MOST() * delirium_data::kv!(68));
+                let i = m * delirium_data::kv!(83);
+                let twist = (short_turn(to * f[hand].rotation.inverse()) * (i * w * w) - (a.w - b.w) * (2.0 * i * w)).clamp_length_max(GRIP_MOST() * delirium_data::kv!(40));
                 c.out.torque(hand, twist);
                 c.out.torque(gh, -twist);
             }
@@ -1315,7 +1309,7 @@ impl Extra for SplitBody {
 
     fn stop(&mut self, c: &mut Ctx) {
         if self.limits {
-            for e in (*ELBOW()) {
+            for e in ELBOW {
                 c.ch.eff[e].soft[0].set_enabled(false);
             }
         }
@@ -1358,18 +1352,18 @@ impl ShootDodge {
         }
         let _ = (p.i("collisionIndex", -1)?, p.f("collisionTime", 0.0)?, p.f("supportedHeightThreshold", 0.0)?);
         let _ = (p.b("armAnimTask", false)?, p.i("leftArmAnimTaskParent", -1)?, p.i("rightArmAnimTaskParent", -1)?);
-        let ends = (p.f("collisionTimeThreshold", delirium_data::kv!(60))?, p.f("collisionAccelThreshold", delirium_data::kv!(11))?, p.f("collisionVelThreshold", 2.0)?);
+        let ends = (p.f("collisionTimeThreshold", delirium_data::kv!(34))?, p.f("collisionAccelThreshold", delirium_data::kv!(6))?, p.f("collisionVelThreshold", 2.0)?);
         Ok(ShootDodge {
             targets, valid, ends, reaction: p.i("collisionReaction", 0)?,
-            trunk: (p.f("trunkStiffness", delirium_data::kv!(21))?, p.f("trunkDamping", 1.0)?),
-            legs: (p.f("legStiffness", delirium_data::kv!(31))?, p.f("legDamping", 1.0)?, p.f("legTaper", delirium_data::kv!(20))?),
-            aiming: (p.f("aimingArmStiffness", delirium_data::kv!(126))?, p.f("aimingArmDamping", 1.0)?),
-            loose: (p.f("notAimingArmStiffness", delirium_data::kv!(35))?, p.f("notAimingArmDamping", delirium_data::kv!(74))?, p.f("notAimingArmTaper", delirium_data::kv!(74))?),
-            head: (p.f("headStiffness", delirium_data::kv!(31))?, p.f("headDamping", 1.0)?),
-            wrist_ms: p.f("wristMuscleStiffness", delirium_data::kv!(31))?,
-            ori: (p.f("oriStiff", delirium_data::kv!(27))?, p.f("oriDamp", delirium_data::kv!(65))?, p.f("oriSplit", 0.5)?.clamp(0.0, 1.0)),
-            noise: p.f("legNoiseScale", delirium_data::kv!(68))?,
-            breathe: Breathe { s: delirium_data::kv!(21), joints: Character::mask("us"), scale: p.f("breathingScale", 1.0)?, t: 0.0, last: 0.0, wrote: vec![] },
+            trunk: (p.f("trunkStiffness", delirium_data::kv!(16))?, p.f("trunkDamping", 1.0)?),
+            legs: (p.f("legStiffness", delirium_data::kv!(20))?, p.f("legDamping", 1.0)?, p.f("legTaper", delirium_data::kv!(15))?),
+            aiming: (p.f("aimingArmStiffness", delirium_data::kv!(67))?, p.f("aimingArmDamping", 1.0)?),
+            loose: (p.f("notAimingArmStiffness", delirium_data::kv!(25))?, p.f("notAimingArmDamping", delirium_data::kv!(46))?, p.f("notAimingArmTaper", delirium_data::kv!(46))?),
+            head: (p.f("headStiffness", delirium_data::kv!(20))?, p.f("headDamping", 1.0)?),
+            wrist_ms: p.f("wristMuscleStiffness", delirium_data::kv!(20))?,
+            ori: (p.f("oriStiff", delirium_data::kv!(55))?, p.f("oriDamp", delirium_data::kv!(37))?, p.f("oriSplit", 0.5)?.clamp(0.0, 1.0)),
+            noise: p.f("legNoiseScale", delirium_data::kv!(40))?,
+            breathe: Breathe { s: delirium_data::kv!(16), joints: Character::mask("us"), scale: p.f("breathingScale", 1.0)?, t: 0.0, last: 0.0, wrote: vec![] },
             state: if p.i("state", 0)? == 1 { SD_HOLD } else { SD_ENTER },
             t: 0.0, touching: 0.0, last_vel: None, attitude: Quat::IDENTITY, leg_pose: vec![], done: false, out: vec![],
         })
@@ -1390,7 +1384,7 @@ impl Extra for ShootDodge {
         if self.state == SD_ENTER || self.leg_pose.is_empty() {
             self.attitude = f[0].rotation;
             self.leg_pose = Character::mask("lb").into_iter().map(|j| (j, c.ch.actual(j, f))).collect();
-            let look = self.aiming_arm().map_or(pos(c, delirium_data::kv!(55 int)) + facing(c) * delirium_data::kv!(64), |i| self.targets[i]);
+            let look = self.aiming_arm().map_or(pos(c, 12) + facing(c) * delirium_data::kv!(36), |i| self.targets[i]);
             self.out.push(format!("headLook start=true pos={},{},{} stiffness={} damping={}", look.x, look.y, look.z, self.head.0, self.head.1));
             self.out.push("#say shootDodge hold".into());
             self.state = SD_HOLD;
@@ -1399,30 +1393,30 @@ impl Extra for ShootDodge {
         c.ch.set_stiffness(self.head.0, self.head.1, "un", None);
         let (ls, ld, lt) = self.legs;
         for (k, (j, a)) in self.leg_pose.iter().enumerate() {
-            let down = [(*HIP()), (*KNEE()), (*ANKLE())].iter().position(|set| set.contains(j)).unwrap_or(0) as i32;
+            let down = [HIP, KNEE, ANKLE].iter().position(|set| set.contains(j)).unwrap_or(0) as i32;
             c.ch.eff[*j].set_stiffness(ls * lt.powi(down), ld, None);
-            let drift = self.noise * (self.t * delirium_data::kv!(66) + k as f32 * delirium_data::kv!(144)).sin();
+            let drift = self.noise * (self.t * delirium_data::kv!(38) + k as f32 * delirium_data::kv!(84)).sin();
             c.ch.eff[*j].desired = [a[0] + drift, a[1], a[2]];
         }
         let arm = self.aiming_arm();
         for i in 0..2 {
             if Some(i) == arm {
                 aim(c, i, self.targets[i], self.aiming.0, self.aiming.1);
-                c.ch.eff[(*WRIST())[i]].muscle_stiffness = self.wrist_ms;
+                c.ch.eff[WRIST[i]].muscle_stiffness = self.wrist_ms;
             } else {
                 let (s, d, taper) = self.loose;
-                for (n, &j) in [(*CLAVICLE())[i], (*SHOULDER())[i], (*ELBOW())[i], (*WRIST())[i]].iter().enumerate() {
+                for (n, &j) in [CLAVICLE[i], SHOULDER[i], ELBOW[i], WRIST[i]].iter().enumerate() {
                     c.ch.eff[j].set_stiffness(s * taper.powi(n.saturating_sub(1) as i32), d, None);
                 }
             }
         }
-        for (k, share) in [(0, self.ori.2), (delirium_data::kv!(81 int), 1.0 - self.ori.2)] {
+        for (k, share) in [(0, self.ori.2), (10, 1.0 - self.ori.2)] {
             let err = short_turn(self.attitude * f[0].rotation.inverse());
-            let t = (err * self.ori.0 - c.b.part(0).w * self.ori.1) * (c.b.doll.part_mass(k) * delirium_data::kv!(78) * share);
+            let t = (err * self.ori.0 - c.b.part(0).w * self.ori.1) * (c.b.doll.part_mass(k) * delirium_data::kv!(49) * share);
             c.out.torque(k, t);
         }
         self.breathe.tick(c, dt);
-        let touching = c.b.doll.collided(&(0..delirium_data::kv!(111 int)).collect::<Vec<_>>());
+        let touching = c.b.doll.collided(&(0..21).collect::<Vec<_>>());
         self.touching = if touching { self.touching + dt } else { 0.0 };
         let (accel, lost) = self.last_vel.map_or((0.0, 0.0), |v: Vec3| ((c.vel - v).length() / dt, v.length() - c.vel.length()));
         self.last_vel = Some(c.vel);
@@ -1475,29 +1469,29 @@ impl ArmHang {
 impl Extra for ArmHang {
     fn tick(&mut self, c: &mut Ctx, dt: f32) {
         if self.start.is_empty() {
-            self.start = (*HANDS()).iter().map(|&k| pos(c, k)).collect();
+            self.start = HANDS.iter().map(|&k| pos(c, k)).collect();
             self.across = Vec3::Z.cross(facing(c));
             if self.anchor == Vec3::ZERO {
                 self.anchor = (self.start[0] + self.start[1]) * 0.5;
             }
             let to = v3(if self.target == Vec3::ZERO { self.anchor } else { self.target });
             self.out.extend(["bodyBalance start=false".into(), format!("pointArm start=true useLeftArm=false target={to}"),
-                             format!("headLook start=true pos={to} stiffness={} damping=1", delirium_data::kv!(31)), format!("spineTwist start=true pos={to}"),
+                             format!("headLook start=true pos={to} stiffness=10 damping=1"), format!("spineTwist start=true pos={to}"),
                              "pedalLegs start=true".into()]);
         }
         self.t += dt;
         let on = (self.t / HANG_ON).min(1.0);
-        let mut pins = [0, 1].map(|i| self.anchor + self.across * (delirium_data::kv!(9) - delirium_data::kv!(24) * i as f32));
+        let mut pins = [0, 1].map(|i| self.anchor + self.across * (delirium_data::kv!(4) - delirium_data::kv!(17) * i as f32));
         if let Some((at, q)) = self.frame {
             let local = *self.local.get_or_insert_with(|| pins.map(|p| q.inverse() * (p - at)));
             pins = local.map(|l| at + q * l);
             (self.anchor, self.across) = ((pins[0] + pins[1]) * 0.5, (pins[0] - pins[1]).normalize_or(self.across));
         }
-        self.cons = (0..2).filter(|&i| !self.free[i]).map(|i| ((*HANDS())[i], Some(self.start[i].lerp(pins[i], on)), None)).collect();
+        self.cons = (0..2).filter(|&i| !self.free[i]).map(|i| (HANDS[i], Some(self.start[i].lerp(pins[i], on)), None)).collect();
         for i in (0..2).filter(|&i| !self.free[i]) {
-            reach(c, i, self.start[i].lerp(pins[i], on), delirium_data::kv!(65), delirium_data::kv!(20));
+            reach(c, i, self.start[i].lerp(pins[i], on), delirium_data::kv!(37), delirium_data::kv!(15));
         }
-        c.ch.set_stiffness(delirium_data::kv!(5), delirium_data::kv!(24), "us", None);
+        c.ch.set_stiffness(delirium_data::kv!(2), delirium_data::kv!(17), "us", None);
     }
 
     fn constraints(&self) -> Vec<(usize, Option<Vec3>, Option<Quat>)> {
@@ -1546,7 +1540,7 @@ pub struct CrushReaction {
 impl CrushReaction {
     fn new(p: &mut P) -> Result<CrushReaction, Error> {
         let mask = Character::mask(&p.s("effectorMask", "ub")?);
-        let s = (p.f("stiffness", delirium_data::kv!(21))?, p.f("damping", 1.0)?);
+        let s = (p.f("stiffness", delirium_data::kv!(16))?, p.f("damping", 1.0)?);
         let (id, use_hurt) = (p.i("obstacleID", -1)?, p.b("useInjuries", false)?);
         Ok(CrushReaction { mask, s, mode: p.i("flinchMode", 0)?, id, ob: None, use_hurt, obstacle: p.v("obstaclePosition", Vec3::ZERO)?,
                            started: false, fell: false, out: vec![] })
@@ -1555,9 +1549,9 @@ impl CrushReaction {
 
 impl Extra for CrushReaction {
     fn tick(&mut self, c: &mut Ctx, _dt: f32) {
-        let head = pos(c, (*NECK())[1] + 1);
+        let head = pos(c, NECK[1] + 1);
         if let Some(o) = self.ob {
-            let local = o.rot.inverse() * (pos(c, CHEST()) - o.centre);
+            let local = o.rot.inverse() * (pos(c, CHEST) - o.centre);
             self.obstacle = o.centre + o.rot * local.clamp(-o.half, o.half);
         }
         if !self.started {
@@ -1565,7 +1559,7 @@ impl Extra for CrushReaction {
             if self.obstacle == Vec3::ZERO {
                 self.obstacle = head + Vec3::Z;
             }
-            let look = if self.mode == 1 { self.obstacle } else { pos(c, CHEST()) + facing(c) - Vec3::Z * delirium_data::kv!(12) };
+            let look = if self.mode == 1 { self.obstacle } else { pos(c, CHEST) + facing(c) - Vec3::Z * delirium_data::kv!(7) };
             self.out.extend(["bodyBalance start=true".into(),
                              format!("upperBodyFlinch start=true useLeftArm=false useRightArm=false pos={}", v3(self.obstacle)),
                              format!("headLook start=true pos={} stiffness={} damping={}", v3(look), self.s.0, self.s.1)]);
@@ -1575,16 +1569,16 @@ impl Extra for CrushReaction {
         }
         let across = Vec3::Z.cross(facing(c));
         for i in 0..2 {
-            let arm = [(*CLAVICLE())[i], (*SHOULDER())[i], (*ELBOW())[i], (*WRIST())[i]];
+            let arm = [CLAVICLE[i], SHOULDER[i], ELBOW[i], WRIST[i]];
             if (self.use_hurt && arm.iter().any(|&j| c.ch.eff[j].injury > 0.0)) || !arm.iter().all(|j| self.mask.contains(j)) {
                 continue;
             }
             let at = if self.mode == 1 {
                 let shoulder = pos(c, crate::nmshot::limb(i).p[0]);
                 let gap = self.obstacle - shoulder;
-                shoulder + gap.normalize_or(Vec3::Z) * gap.length().min(delirium_data::kv!(119))
+                shoulder + gap.normalize_or(Vec3::Z) * gap.length().min(delirium_data::kv!(63))
             } else {
-                head + across * (delirium_data::kv!(125) - delirium_data::kv!(145) * i as f32) + Vec3::Z * delirium_data::kv!(78) + facing(c) * delirium_data::kv!(146)
+                head + across * (delirium_data::kv!(66) - delirium_data::kv!(85) * i as f32) + Vec3::Z * delirium_data::kv!(49) + facing(c) * delirium_data::kv!(86)
             };
             reach(c, i, at, self.s.0, self.s.1);
         }

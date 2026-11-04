@@ -1,5 +1,3 @@
-extern crate self as delirium_data;
-
 pub static LE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 pub(crate) fn u32_of(b: [u8; 4]) -> u32 {
@@ -10,28 +8,18 @@ pub(crate) fn u16_of(b: [u8; 2]) -> u16 {
     if LE.load(std::sync::atomic::Ordering::Relaxed) { u16::from_le_bytes(b) } else { u16::from_be_bytes(b) }
 }
 pub mod actiontable;
-pub mod aiweapon;
 pub mod anim;
 pub mod animblend;
 pub mod animgrp;
 pub mod archive_key;
-pub mod audioconfig;
-pub mod blockedspot;
 pub mod bounds;
 pub mod carscan;
-pub mod collider;
-pub mod combat;
-pub mod compositebox;
 pub mod controls;
 pub mod crt;
 pub mod csv;
 pub mod damage;
-pub mod decision;
 pub mod disc;
 pub mod estimate;
-pub mod evdamage;
-pub mod events;
-pub mod evqueue;
 pub mod fall;
 pub mod follow;
 pub mod getup;
@@ -39,11 +27,8 @@ pub mod ide;
 pub mod img;
 pub mod ipltext;
 pub mod kv;
-pub mod levelslots;
-pub mod lift;
 pub mod lodtree;
 pub mod map;
-pub mod matfix;
 pub mod mathrt;
 pub mod melee;
 pub mod melee_task;
@@ -53,22 +38,18 @@ pub mod movement;
 pub mod nm_asset;
 pub mod pad;
 pub mod ped;
-pub mod pedbodies;
 pub mod pedgroups;
 pub mod pedpersonality;
-pub mod portalgeom;
 pub mod ragdoll;
 pub mod resource;
 pub mod rng;
 pub mod route;
 pub mod rpf;
 pub mod runanim;
-pub mod scanner;
 pub mod sce;
 pub mod skeleton;
 pub mod staticcount;
 pub mod stfs;
-pub mod stuck;
 pub mod suspension;
 pub mod taskparams;
 pub mod tasks;
@@ -76,14 +57,10 @@ pub mod textfmt;
 pub mod textlines;
 pub mod transmission;
 pub mod tyre;
-pub mod tyrefx;
-pub mod vecunit;
 pub mod vehicles;
 pub mod weaponinfoload;
-pub mod weaponnatives;
 pub mod weapons;
-pub mod weaponselect;
 pub mod wheelstep;
 pub mod xex;
 
-pub mod bo1_kv;
+pub mod disc_kv;

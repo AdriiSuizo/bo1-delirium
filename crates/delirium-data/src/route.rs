@@ -4,17 +4,13 @@ use crate::mathrt;
 use crate::movement::Mover;
 use crate::tasks::{kind, End, Task, Timer, ABORT_LEAVE};
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn MAX_POINTS() -> usize { crate::kv!(23 int) }
+pub const MAX_POINTS: usize = 8;
 pub const LEG_END: u32 = 1302;
-#[allow(non_snake_case)]
-#[inline]
-pub fn MAX_BUMPS() -> i32 { crate::kv!(276 int) }
+pub const MAX_BUMPS: i32 = 30;
 pub const ARRIVE: f32 = 0.5;
 #[allow(non_snake_case)]
 #[inline]
-pub fn SLOW() -> f32 { crate::kv!(64) }
+pub fn SLOW() -> f32 { crate::kv!(36) }
 
 pub type Point = [f32; 3];
 
@@ -52,7 +48,7 @@ impl Route {
     }
 
     pub fn extend(&mut self, p: Point) {
-        if self.points.len() < MAX_POINTS() {
+        if self.points.len() < MAX_POINTS {
             self.points.push(p);
         }
     }
@@ -112,7 +108,7 @@ fn unit_len(d: Point) -> (Point, f32) {
 const CORNER_ANGLE: f32 = std::f32::consts::FRAC_PI_8;
 #[allow(non_snake_case)]
 #[inline]
-fn CORNER_FLOOR() -> f32 { crate::kv!(138) }
+fn CORNER_FLOOR() -> f32 { crate::kv!(78) }
 
 fn clamp01(v: f32) -> f32 {
     let v = if v >= 0.0 { v } else { 0.0 };
@@ -123,7 +119,7 @@ pub fn corner_pace(asked: f32, ped: Point, target: Point, next: Point, held: boo
     if held || !(asked > 1.0) {
         return asked;
     }
-    let (base, limit) = if asked > 2.0 { (2.0, crate::kv!(84)) } else { (crate::kv!(12), crate::kv!(5)) };
+    let (base, limit) = if asked > 2.0 { (2.0, crate::kv!(58)) } else { (crate::kv!(7), crate::kv!(2)) };
     let (ahead, dist) = unit_len([target[0] - ped[0], target[1] - ped[1], 0.0]);
     if !(dist < limit) {
         return asked;
@@ -152,7 +148,7 @@ pub fn slowed(ratio: f32, slow: f32, max: f32, d2: f32) -> f32 {
     } else if d2 < max * max {
         clamp01((d2.sqrt() - slow) / (max - slow)) + 2.0
     } else {
-        crate::kv!(5)
+        crate::kv!(2)
     };
     if to - ratio >= 0.0 { ratio } else { to }
 }
@@ -222,7 +218,7 @@ impl Arrive {
     }
 
     pub fn set_state(&mut self, sides: u32, prev: Point) {
-        (self.sides, self.prev) = (sides & crate::kv!(198 int), prev);
+        (self.sides, self.prev) = (sides & 0xF, prev);
     }
 
     pub fn state(&self) -> (u32, Point) {
@@ -236,11 +232,11 @@ impl Arrive {
             self.sides |= 2;
         }
         if pos[1] < target[1] {
-            self.sides |= crate::kv!(1 int);
+            self.sides |= 4;
         } else if pos[1] > target[1] {
-            self.sides |= crate::kv!(23 int);
+            self.sides |= 8;
         }
-        (pos[2] - target[2]).abs() < self.tolerance && self.sides == crate::kv!(198 int)
+        (pos[2] - target[2]).abs() < self.tolerance && self.sides == 0xF
     }
 
     pub fn test(&mut self, look: &Look, target: Point) -> bool {
@@ -255,7 +251,7 @@ impl Arrive {
         let to = sub(target, self.prev);
         let passed = to[1].mul_add(d[1], to[0] * d[0]) < 0.0;
         self.prev = pos;
-        let tol = if look.floor && !(self.tolerance - crate::kv!(84) >= 0.0) { crate::kv!(84) } else { self.tolerance };
+        let tol = if look.floor && !(self.tolerance - crate::kv!(58) >= 0.0) { crate::kv!(58) } else { self.tolerance };
         if within && !self.held && dz < tol && (!self.past || passed) && !look.blocked {
             return true;
         }
@@ -280,7 +276,7 @@ pub struct SlowStep {
 
 #[allow(clippy::too_many_arguments)]
 pub fn slow_step(ratio: f32, slow: f32, ped: Point, target: Point, radius: f32, ran: bool, stopped: bool, blocked: bool) -> SlowStep {
-    let max = if ratio == crate::kv!(5) { SLOW_MAX() } else { RUN_MAX() };
+    let max = if ratio == crate::kv!(2) { SLOW_MAX() } else { RUN_MAX() };
     let (dx, dy) = (ped[0] - target[0], ped[1] - target[1]);
     let d2 = dy.mul_add(dy, dx * dx);
     let sub = slowed(ratio, slow, max, d2);
@@ -292,10 +288,10 @@ pub fn slow_step(ratio: f32, slow: f32, ped: Point, target: Point, radius: f32, 
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn SLOW_MAX() -> f32 { crate::kv!(31) }
+pub fn SLOW_MAX() -> f32 { crate::kv!(20) }
 #[allow(non_snake_case)]
 #[inline]
-fn RUN_MAX() -> f32 { crate::kv!(3) }
+fn RUN_MAX() -> f32 { crate::kv!(0) }
 
 #[derive(Clone, Debug)]
 pub struct GoToPoint {
@@ -353,14 +349,6 @@ impl<P: Walker> Task<P> for GoToPoint {
 
     fn mover(&mut self) -> Option<&mut Mover> {
         Some(&mut self.mover)
-    }
-
-    fn move_target(&self) -> Option<[f32; 3]> {
-        Some(self.target)
-    }
-
-    fn move_ratio(&self) -> Option<f32> {
-        Some(self.mover.mbr())
     }
 }
 
@@ -526,7 +514,7 @@ pub struct Course {
 impl Course {
     #[allow(non_snake_case)]
     #[inline]
-    pub fn SCRIPT() -> &'static Course { static V: std::sync::OnceLock<Course> = std::sync::OnceLock::new(); let f = || Course { arrive: ARRIVE, slow: SLOW(), radius: -1.0, past: false, smooth: true, stand: true, index: 0 }; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+    pub fn SCRIPT() -> Course { Course { arrive: ARRIVE, slow: SLOW(), radius: -1.0, past: false, smooth: true, stand: true, index: 0 } }
 }
 
 impl FollowPointRoute {
@@ -596,7 +584,7 @@ impl FollowPointRoute {
             return kind::MOVE_GO_TO_POINT_ON_ROUTE;
         }
         if i + 1 == n {
-            return kind::MOVE_GO_TO_POINT + if self.stand { crate::kv!(0 int) } else { 0 };
+            return kind::MOVE_GO_TO_POINT + if self.stand { 3 } else { 0 };
         }
         if i == n {
             self.counter += 1;
@@ -634,20 +622,18 @@ impl FollowPointRoute {
                 };
                 Some(Box::new(GoToPointAndStandStill::new(mbr, self.last_radius, slow, at(self.index))))
             }
-            kind::MOVE_STAND_STILL => Some(Box::new(MoveStand::new(STAND_MS(), false))),
+            kind::MOVE_STAND_STILL => Some(Box::new(MoveStand::new(STAND_MS, false))),
             kind::MOVE_NONE => Some(Box::new(MoveNone::default())),
             _ => None,
         }
     }
 }
 
-#[allow(non_snake_case)]
-#[inline]
-fn STAND_MS() -> i32 { crate::kv!(62 int) }
+const STAND_MS: i32 = 20000;
 
 impl<P: Walker> Task<P> for FollowPointRoute {
     fn kind(&self) -> u32 {
-        kind::FOLLOW_POINT_ROUTE()
+        kind::FOLLOW_POINT_ROUTE
     }
 
     fn simple(&self) -> bool {
@@ -682,7 +668,7 @@ impl<P: Walker> Task<P> for FollowPointRoute {
     }
 
     fn control(&mut self, ped: &mut P, _: &dyn Task<P>) -> Option<Box<dyn Task<P>>> {
-        if ped.bumps() > MAX_BUMPS() || self.route.is_empty() {
+        if ped.bumps() > MAX_BUMPS || self.route.is_empty() {
             return Some(Box::new(End));
         }
         if self.changed {

@@ -26,7 +26,7 @@ impl Set {
 
 pub fn start(set: &Set) -> Vec<Msg> {
     use Value::{Bool as B, Float as F};
-    let (k, spin) = (set.push[delirium_data::kv!(0 int)], set.roll[delirium_data::kv!(113 int)]);
+    let (k, spin) = (set.push[3], set.roll[11]);
     vec![("catchFall", vec![("start", B(true)), ("legsStiffness", F(k)), ("armsStiffness", F(k)), ("torsoStiffness", F(k)),
                             ("zAxisSpinReduction", F(spin))])]
 }
@@ -35,22 +35,22 @@ pub fn roll_up(set: &Set, v0: Vec3) -> Vec<Msg> {
     use Value::{Bool as B, Float as F};
     let r = &set.roll;
     let mut rds = vec![("start", B(true))];
-    rds.extend([(0, "stiffness"), (1, "damping"), (delirium_data::kv!(0 int), "asymmetry"), (2, "forcemag"), (delirium_data::kv!(1 int), "m_useArmToSlowDown")].map(|(i, k)| (k, F(r[i]))));
+    rds.extend([(0, "stiffness"), (1, "damping"), (3, "asymmetry"), (2, "forcemag"), (4, "m_useArmToSlowDown")].map(|(i, k)| (k, F(r[i]))));
     rds.extend([("useZeroPose", B(set.flags[0])), ("spinWhenInAir", B(set.flags[1]))]);
     rds.extend(["m_legPush", "armReachLength", "m_armReachAmount", "stiffnessDecayTime", "stiffnessDecayTarget", "asymmetricalLegs",
-                "zAxisSpinReduction"].into_iter().zip(&r[delirium_data::kv!(2 int)..]).map(|(k, x)| (k, F(*x))));
+                "zAxisSpinReduction"].into_iter().zip(&r[5..]).map(|(k, x)| (k, F(*x))));
     let d = v0.with_z(0.0);
-    if d.x.mul_add(d.x, d.y * d.y) > delirium_data::kv!(51) {
+    if d.x.mul_add(d.x, d.y * d.y) > delirium_data::kv!(32) {
         rds.extend([("useCustomRollDir", B(true)), ("customRollDir", Value::Vec3(d * crate::estimate::vrsqrtefp(d.vd(d))))]);
     }
     vec![("catchFall", vec![("start", B(false))]), ("rollDownStairs", rds),
-         ("pedalLegs", vec![("start", B(true)), ("adaptivePedal4Dragging", B(true)), ("angSpeedMultiplier4Dragging", F(delirium_data::kv!(119))),
-                            ("backPedal", B(false)), ("legStiffness", F(delirium_data::kv!(65))), ("radius", F(delirium_data::kv!(116))), ("pedalOffset", F(delirium_data::kv!(78))),
-                            ("speedAsymmetry", F(0.5)), ("angularSpeed", F(delirium_data::kv!(64)))])]
+         ("pedalLegs", vec![("start", B(true)), ("adaptivePedal4Dragging", B(true)), ("angSpeedMultiplier4Dragging", F(delirium_data::kv!(63))),
+                            ("backPedal", B(false)), ("legStiffness", F(delirium_data::kv!(37))), ("radius", F(delirium_data::kv!(60))), ("pedalOffset", F(delirium_data::kv!(49))),
+                            ("speedAsymmetry", F(0.5)), ("angularSpeed", F(delirium_data::kv!(36)))])]
 }
 
 pub fn push(set: &Set, v: Vec3, v0: Vec3, rolled: bool) -> Option<Vec3> {
-    if v0 == Vec3::ZERO || v.x.mul_add(v.x, v.y.mul_add(v.y, v.z * v.z)) <= delirium_data::kv!(38) {
+    if v0 == Vec3::ZERO || v.x.mul_add(v.x, v.y.mul_add(v.y, v.z * v.z)) <= delirium_data::kv!(26) {
         return None;
     }
     let a = (v.max(Vec3::ZERO).min(v0) * crate::gjk::recip(set.push[1])).min(Vec3::ONE) * set.push[0];

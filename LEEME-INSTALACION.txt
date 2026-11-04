@@ -1,4 +1,4 @@
-BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 2
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 3
 
 INSTALACIÓN
 
@@ -19,13 +19,17 @@ COMPATIBILIDAD
 Probado con Plutonium T5 r5369 y BO1 Steam 7.0.152 CL 966072.
 ISO de GTA IV base Xbox 360. Perfiles comprobados para Media ID 4A53F9F6 y 6AC07221.
 El modo probado es Zombies de un jugador en LAN, en Kino der Toten.
-El levantamiento sigue siendo experimental en 0.6.0 y puede quedarse incompleto.
+Esta beta recupera el núcleo de Delirium de Steam Beta 5 para el equilibrio y el levantamiento.
+La preparación sigue utilizando la caché del disco compatible con Delirium 0.6.0.
 Si una futura actualización de T5 cambia las firmas del juego, el lanzador rechaza el arranque.
 
 CONTROLES DE PRUEBA
 
-Flecha abajo o cruceta abajo alterna el modo dios y suma 10.000 puntos.
-La primera pulsación por partida solicita el salto a ronda 10.
+Cruceta o flechas del teclado
+- Abajo alterna modo dios, suma 100.000 puntos y solicita ronda 20 si estás por debajo.
+- Arriba elimina los zombis vivos y pausa las apariciones de la ronda. Otra pulsación reanuda la ronda.
+- Izquierda genera cinco zombis de prueba sin reanudar la ronda.
+- Derecha alterna si los zombis pueden perseguirte.
 
 CACHÉ Y REGISTROS
 

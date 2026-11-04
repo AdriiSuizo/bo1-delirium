@@ -1,49 +1,28 @@
-use crate::estimate::fneg;
 use crate::animblend::{self, Player};
 use crate::mathrt;
 use crate::rng::Rand;
 
 pub const TASK: u32 = 2117;
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn RAGDOLL_TRANS() -> i32 { crate::kv!(0 int) }
-#[allow(non_snake_case)]
-#[inline]
-pub fn RAGDOLL_TRANS_BACK() -> i32 { crate::kv!(1 int) }
+pub const RAGDOLL_TRANS: i32 = 3;
+pub const RAGDOLL_TRANS_BACK: i32 = 4;
 pub const GET_UP: i32 = 5;
 pub const GET_UP_BACK: i32 = 6;
 
 pub mod id {
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn INJ_FRONT_TO_DEFAULT() -> i32 { crate::kv!(347 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn INJ_LSIDE_TO_DEFAULT() -> i32 { crate::kv!(472 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn INJ_RSIDE_TO_DEFAULT() -> i32 { crate::kv!(305 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn PREACHER_TRANS() -> i32 { crate::kv!(284 int) }
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn SEATED_TRANS() -> i32 { crate::kv!(285 int) }
+    pub const INJ_FRONT_TO_DEFAULT: i32 = 0x5C;
+    pub const INJ_LSIDE_TO_DEFAULT: i32 = 0x5D;
+    pub const INJ_RSIDE_TO_DEFAULT: i32 = 0x5E;
+    pub const PREACHER_TRANS: i32 = 0x5F;
+    pub const SEATED_TRANS: i32 = 0x60;
     pub const RECOVER_ABDOMEN: i32 = 0x61;
     pub const RECOVER_BALANCE: i32 = 0x62;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn INJ_BACK_TO_DEFAULT() -> i32 { crate::kv!(294 int) }
+    pub const INJ_BACK_TO_DEFAULT: i32 = 0x63;
     pub const GET_UP_FAST: i32 = 0x64;
     pub const GET_UP_INJURED: i32 = 0x65;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn GET_UP_NORMAL() -> i32 { crate::kv!(353 int) }
+    pub const GET_UP_NORMAL: i32 = 0x66;
     pub const GET_UP_SLOW: i32 = 0x67;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn MOVE_IDLE() -> i32 { crate::kv!(198 int) }
+    pub const MOVE_IDLE: i32 = 0xF;
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -55,61 +34,51 @@ pub struct ClipDef {
     pub flags: u32,
 }
 
-#[allow(non_snake_case)]
-#[inline]
-fn TRANS() -> u32 { crate::kv!(786 int) }
-#[allow(non_snake_case)]
-#[inline]
-fn UP() -> u32 { crate::kv!(787 int) }
-#[allow(non_snake_case)]
-#[inline]
-pub fn IDLE_FLAGS() -> u32 { crate::kv!(788 int) }
+const TRANS: u32 = 0x4100_C600;
+const UP: u32 = 0x0100_8600;
+pub const IDLE_FLAGS: u32 = 0x4000_0020;
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn CLIPS() -> &'static [ClipDef; 19] { static V: std::sync::OnceLock<[ClipDef; 19]> = std::sync::OnceLock::new(); let f = || [
-    ClipDef { group: RAGDOLL_TRANS(), id: id::INJ_FRONT_TO_DEFAULT(), dict: "ragdoll_trans", clip: "inj_front_to_default", flags: TRANS() },
-    ClipDef { group: RAGDOLL_TRANS(), id: id::INJ_LSIDE_TO_DEFAULT(), dict: "ragdoll_trans", clip: "inj_lside_to_default", flags: TRANS() },
-    ClipDef { group: RAGDOLL_TRANS(), id: id::INJ_RSIDE_TO_DEFAULT(), dict: "ragdoll_trans", clip: "inj_rside_to_default", flags: TRANS() },
-    ClipDef { group: RAGDOLL_TRANS(), id: id::PREACHER_TRANS(), dict: "ragdoll_trans", clip: "preacher_trans", flags: TRANS() },
-    ClipDef { group: RAGDOLL_TRANS(), id: id::SEATED_TRANS(), dict: "ragdoll_trans", clip: "seated_trans", flags: TRANS() },
-    ClipDef { group: RAGDOLL_TRANS(), id: id::RECOVER_ABDOMEN, dict: "ragdoll_trans", clip: "recover_abdomen", flags: TRANS() },
-    ClipDef { group: RAGDOLL_TRANS(), id: id::RECOVER_BALANCE, dict: "ragdoll_trans", clip: "recover_balance", flags: TRANS() },
-    ClipDef { group: RAGDOLL_TRANS_BACK(), id: id::INJ_BACK_TO_DEFAULT(), dict: "ragdoll_trans_back", clip: "inj_back_to_default", flags: crate::kv!(789 int) },
-    ClipDef { group: GET_UP, id: id::GET_UP_FAST, dict: "get_up", clip: "get_up_fast", flags: UP() },
-    ClipDef { group: GET_UP, id: id::GET_UP_INJURED, dict: "get_up", clip: "get_up_injured", flags: UP() },
-    ClipDef { group: GET_UP, id: id::GET_UP_NORMAL(), dict: "get_up", clip: "get_up_normal", flags: UP() },
-    ClipDef { group: GET_UP, id: id::GET_UP_SLOW, dict: "get_up", clip: "get_up_slow", flags: UP() },
-    ClipDef { group: GET_UP_BACK, id: id::GET_UP_FAST, dict: "get_up_back", clip: "get_up_fast", flags: UP() },
-    ClipDef { group: GET_UP_BACK, id: id::GET_UP_NORMAL(), dict: "get_up_back", clip: "get_up_normal", flags: UP() },
-    ClipDef { group: GET_UP_BACK, id: id::GET_UP_SLOW, dict: "get_up_back", clip: "get_up_slow", flags: UP() },
-    ClipDef { group: crate::kv!(418 int), id: crate::kv!(417 int), dict: "injured", clip: "inj_default_to_rside", flags: crate::kv!(790 int) },
-    ClipDef { group: crate::kv!(418 int), id: crate::kv!(323 int), dict: "injured", clip: "inj_rside_idle", flags: crate::kv!(791 int) },
-    ClipDef { group: crate::kv!(418 int), id: crate::kv!(366 int), dict: "injured", clip: "inj_default_to_back", flags: crate::kv!(790 int) },
-    ClipDef { group: crate::kv!(418 int), id: crate::kv!(404 int), dict: "injured", clip: "inj_back_idle", flags: crate::kv!(791 int) },
-]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+pub const CLIPS: [ClipDef; 19] = [
+    ClipDef { group: RAGDOLL_TRANS, id: id::INJ_FRONT_TO_DEFAULT, dict: "ragdoll_trans", clip: "inj_front_to_default", flags: TRANS },
+    ClipDef { group: RAGDOLL_TRANS, id: id::INJ_LSIDE_TO_DEFAULT, dict: "ragdoll_trans", clip: "inj_lside_to_default", flags: TRANS },
+    ClipDef { group: RAGDOLL_TRANS, id: id::INJ_RSIDE_TO_DEFAULT, dict: "ragdoll_trans", clip: "inj_rside_to_default", flags: TRANS },
+    ClipDef { group: RAGDOLL_TRANS, id: id::PREACHER_TRANS, dict: "ragdoll_trans", clip: "preacher_trans", flags: TRANS },
+    ClipDef { group: RAGDOLL_TRANS, id: id::SEATED_TRANS, dict: "ragdoll_trans", clip: "seated_trans", flags: TRANS },
+    ClipDef { group: RAGDOLL_TRANS, id: id::RECOVER_ABDOMEN, dict: "ragdoll_trans", clip: "recover_abdomen", flags: TRANS },
+    ClipDef { group: RAGDOLL_TRANS, id: id::RECOVER_BALANCE, dict: "ragdoll_trans", clip: "recover_balance", flags: TRANS },
+    ClipDef { group: RAGDOLL_TRANS_BACK, id: id::INJ_BACK_TO_DEFAULT, dict: "ragdoll_trans_back", clip: "inj_back_to_default", flags: 0x4000_4600 },
+    ClipDef { group: GET_UP, id: id::GET_UP_FAST, dict: "get_up", clip: "get_up_fast", flags: UP },
+    ClipDef { group: GET_UP, id: id::GET_UP_INJURED, dict: "get_up", clip: "get_up_injured", flags: UP },
+    ClipDef { group: GET_UP, id: id::GET_UP_NORMAL, dict: "get_up", clip: "get_up_normal", flags: UP },
+    ClipDef { group: GET_UP, id: id::GET_UP_SLOW, dict: "get_up", clip: "get_up_slow", flags: UP },
+    ClipDef { group: GET_UP_BACK, id: id::GET_UP_FAST, dict: "get_up_back", clip: "get_up_fast", flags: UP },
+    ClipDef { group: GET_UP_BACK, id: id::GET_UP_NORMAL, dict: "get_up_back", clip: "get_up_normal", flags: UP },
+    ClipDef { group: GET_UP_BACK, id: id::GET_UP_SLOW, dict: "get_up_back", clip: "get_up_slow", flags: UP },
+    ClipDef { group: 43, id: 0xA7, dict: "injured", clip: "inj_default_to_rside", flags: 0x4000_C600 },
+    ClipDef { group: 43, id: 0xA8, dict: "injured", clip: "inj_rside_idle", flags: 0x4000_4020 },
+    ClipDef { group: 43, id: 0xA9, dict: "injured", clip: "inj_default_to_back", flags: 0x4000_C600 },
+    ClipDef { group: 43, id: 0xAA, dict: "injured", clip: "inj_back_idle", flags: 0x4000_4020 },
+];
 
 pub fn clip_def(group: i32, id: i32) -> Option<&'static ClipDef> {
-    (*CLIPS()).iter().find(|c| c.group == group && c.id == id)
+    CLIPS.iter().find(|c| c.group == group && c.id == id)
 }
 
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn SKELETON_BONES() -> &'static [usize; 2] { static V: std::sync::OnceLock<[usize; 2]> = std::sync::OnceLock::new(); let f = || [crate::kv!(358 int), crate::kv!(281 int)]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+pub const SKELETON_BONES: [usize; 2] = [0x50, 0x5A];
 
 #[allow(non_snake_case)]
 #[inline]
-fn PI() -> f32 { crate::kv!(770 f32) }
+fn PI() -> f32 { crate::kv!(317 f32) }
 #[allow(non_snake_case)]
 #[inline]
-fn QUARTER_PI() -> f32 { crate::kv!(769 f32) }
+fn QUARTER_PI() -> f32 { crate::kv!(316 f32) }
 #[allow(non_snake_case)]
 #[inline]
-fn TWO_PI() -> f32 { crate::kv!(614 f32) }
+fn TWO_PI() -> f32 { crate::kv!(284 f32) }
 #[allow(non_snake_case)]
 #[inline]
-fn HALF_PI() -> f32 { crate::kv!(792 f32) }
+fn HALF_PI() -> f32 { crate::kv!(326 f32) }
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct PointSet {
@@ -135,7 +104,7 @@ impl PointSet {
         let inv = 1.0f32 / self.total;
         for (p, &w) in self.points.iter().zip(&self.weights) {
             let s = w * inv;
-            for k in 0..crate::kv!(1 int) {
+            for k in 0..4 {
                 out[k] = p[k].mul_add(s, out[k]);
             }
         }
@@ -185,7 +154,7 @@ pub fn fit(a: &PointSet, b: &PointSet) -> (f32, Fit) {
     let sin = mathrt::sin(theta as f64) as f32;
     let (f30, f29, f31) = (cos * cbx, sin * cby, sin * cbx);
     let x = (cax - f30) - f29;
-    let y = fneg(cos.mul_add(cby, -(f31 + cay)));
+    let y = -cos.mul_add(cby, -(f31 + cay));
     let z = ca[2] - cb[2];
     let fit = Fit { at: [x, y, z], yaw };
 
@@ -231,9 +200,7 @@ pub struct After {
 pub mod after {
     pub const SHOT: u32 = 0x83B;
     pub const HIGH_FALL: u32 = 0x83C;
-    #[allow(non_snake_case)]
-    #[inline]
-    pub fn BALANCE() -> u32 { crate::kv!(793 int) }
+    pub const BALANCE: u32 = 0x83D;
     pub const EXPLOSION: u32 = 0x83E;
 }
 
@@ -246,16 +213,15 @@ pub struct Made {
     pub delay: i32,
     pub named_clip: Option<(u32, u32)>,
     pub vehicle: bool,
-    pub offset: [f32; 3],
 }
 
 impl Made {
     pub fn plain(state: i32, want: i32) -> Made {
-        Made { state, group: -1, id: -1, want, delay: 0, named_clip: None, vehicle: false, offset: [0.0; 3] }
+        Made { state, group: -1, id: -1, want, delay: 0, named_clip: None, vehicle: false }
     }
 
-    pub fn scripted(dictionary: u32, clip: u32, vehicle: bool, offset: [f32; 3]) -> Made {
-        Made { named_clip: Some((dictionary, clip)), vehicle, offset, ..Made::plain(crate::kv!(104 int), -1) }
+    pub fn scripted(dictionary: u32, clip: u32, vehicle: bool) -> Made {
+        Made { named_clip: Some((dictionary, clip)), vehicle, ..Made::plain(9, -1) }
     }
 }
 
@@ -264,30 +230,30 @@ pub fn made(a: &After, rand: &mut Rand) -> Made {
     if let Some((byte, packed)) = a.wish.filter(|w| w.0 != 0) {
         state = byte;
         if byte == 1 {
-            id = packed >> crate::kv!(54 int);
+            id = packed >> 16;
             group = packed as i16 as i32;
         }
     }
-    let mut want = id::GET_UP_NORMAL();
+    let mut want = id::GET_UP_NORMAL;
     if a.player {
         want = id::GET_UP_FAST;
-        if a.wanted && !a.network && a.health < crate::kv!(582) && matches!(a.prev, after::EXPLOSION | after::HIGH_FALL) {
-            want = id::GET_UP_NORMAL();
+        if a.wanted && !a.network && a.health < crate::kv!(327) && matches!(a.prev, after::EXPLOSION | after::HIGH_FALL) {
+            want = id::GET_UP_NORMAL;
         }
     } else if a.prev != 0 {
-        if a.health < crate::kv!(26) {
+        if a.health < crate::kv!(21) {
             want = id::GET_UP_INJURED;
-        } else if matches!(a.prev, after::SHOT | after::EXPLOSION) || a.health < crate::kv!(243) || a.severity > crate::kv!(25) {
+        } else if matches!(a.prev, after::SHOT | after::EXPLOSION) || a.health < crate::kv!(168) || a.severity > crate::kv!(82) {
             want = id::GET_UP_SLOW;
-        } else if a.agility > crate::kv!(0 int) && a.prev == after::BALANCE() && rand.float_in_range(0.0, 1.0) > 0.5 {
+        } else if a.agility > 3 && a.prev == after::BALANCE && rand.float_in_range(0.0, 1.0) > 0.5 {
             want = id::GET_UP_FAST;
         }
     }
     let mut delay = 0;
-    if a.severity > crate::kv!(25) && !a.player {
-        delay = if a.agility < crate::kv!(0 int) { rand.int_in_range(crate::kv!(794 int), crate::kv!(795 int)) } else { rand.int_in_range(crate::kv!(43 int), crate::kv!(794 int)) };
+    if a.severity > crate::kv!(82) && !a.player {
+        delay = if a.agility < 3 { rand.int_in_range(4000, 6000) } else { rand.int_in_range(2000, 4000) };
     }
-    Made { state, group, id, want, delay, named_clip: None, vehicle: false, offset: [0.0; 3] }
+    Made { state, group, id, want, delay, named_clip: None, vehicle: false }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -306,10 +272,6 @@ pub trait Ped {
     fn network(&self) -> bool {
         false
     }
-    fn wanted(&self) -> bool {
-        false
-    }
-    fn say(&mut self, _context: &'static str) {}
     fn ground_under_root(&self) -> bool;
     fn move_group(&self) -> i32;
     fn fit(&self, group: i32, id: i32) -> Option<(f32, Fit)>;
@@ -339,11 +301,6 @@ pub trait Ped {
     fn named_clip(&self, _dictionary: u32, _clip: u32) -> Option<ClipInfo> {
         None
     }
-    fn vehicle(&self) -> Option<[[f32; 4]; 4]> {
-        None
-    }
-    fn mark(&mut self) {}
-    fn attach_to_vehicle(&mut self, _offset: [f32; 3]) {}
     fn local_player(&self) -> bool {
         self.is_player()
     }
@@ -379,7 +336,7 @@ pub trait Ped {
     }
     fn land(&mut self) {}
     fn lies(&self) -> u8 {
-        crate::kv!(1 int)
+        4
     }
     fn crush(&mut self, _dt: f32) {}
     fn relax(&mut self);
@@ -420,7 +377,7 @@ impl Frame {
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn NM_FADE() -> f32 { -crate::kv!(84) }
+pub fn NM_FADE() -> f32 { -crate::kv!(58) }
 
 #[derive(Clone, Debug)]
 pub struct Blender {
@@ -464,7 +421,7 @@ impl Blender {
                 if o.player.weight <= 0.0 {
                     o.player.set_blend(-1.0);
                 } else if out >= 0.0 || speed > o.player.blend_speed() {
-                    o.player.set_blend(-(if speed < crate::kv!(68) { crate::kv!(68) } else { speed }));
+                    o.player.set_blend(-(if speed < crate::kv!(40) { crate::kv!(40) } else { speed }));
                 }
                 o.player.remove_blended_out = true;
             }
@@ -475,9 +432,9 @@ impl Blender {
         p.weight = if others { 0.0 } else { 1.0 };
         p.active = true;
         p.playing = true;
-        p.loops = info.flags & crate::kv!(7 int) != 0;
-        p.blend_out_at_end = info.flags & crate::kv!(708 int) != 0;
-        p.remove_blended_out = info.flags & crate::kv!(672 int) != 0;
+        p.loops = info.flags & 0x20 != 0;
+        p.blend_out_at_end = info.flags & 0x8000 != 0;
+        p.remove_blended_out = info.flags & 0x4000 != 0;
         p.set_blend(speed);
         self.players.push(Playing { group, id, player: p, mine: true });
         true
@@ -510,7 +467,7 @@ impl Blender {
     }
 
     pub fn follow(&mut self, ped: &dyn Ped, group: i32, id: i32) -> bool {
-        self.play(ped, crate::kv!(65), group, id)
+        self.play(ped, crate::kv!(37), group, id)
     }
 
     pub fn mover_weights(&self, clip: impl Fn(&Playing) -> Option<(u32, bool)>) -> Vec<f32> {
@@ -520,7 +477,7 @@ impl Blender {
                 clip: p.player.duration.is_some() && clip(p).is_some(),
                 layer: p.player.priority as i32,
                 weight: p.player.weight,
-                flags: flags & !animblend::OWN_CHANNEL() | if p.player.own_channel { animblend::OWN_CHANNEL() } else { 0 },
+                flags: flags & !animblend::OWN_CHANNEL | if p.player.own_channel { animblend::OWN_CHANNEL } else { 0 },
                 mover_track,
             }
         }).collect();
@@ -542,7 +499,7 @@ pub fn response_gives_way(kind: u32) -> bool {
 }
 
 pub fn urgent(event: u32, response8: u32, response12: u32) -> bool {
-    event == crate::kv!(300 int) || response_gives_way(if response8 != 0 { response8 } else { response12 })
+    event == 120 || response_gives_way(if response8 != 0 { response8 } else { response12 })
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -586,16 +543,15 @@ pub struct BlendFromNm {
     pub switched: bool,
     pub named_clip: Option<(u32, u32)>,
     pub vehicle: bool,
-    pub offset: [f32; 3],
 }
 
 impl BlendFromNm {
     pub fn new(m: &Made) -> Self {
         BlendFromNm {
-            ended: false, done: false, relaxed: false, timer: crate::kv!(43 int), waited: 0, delay: m.delay, state: m.state,
+            ended: false, done: false, relaxed: false, timer: 2000, waited: 0, delay: m.delay, state: m.state,
             id: m.id, group: m.group, want: m.want, no_clip: false, follow_up: false,
             named: m.group != -1 && m.id != -1, has_end: false, end_phase: 1.0, blend_out_at: 0.0,
-            blender: Blender::new(1.0), placed: None, switched: false, named_clip: m.named_clip, vehicle: m.vehicle, offset: m.offset,
+            blender: Blender::new(1.0), placed: None, switched: false, named_clip: m.named_clip, vehicle: m.vehicle,
         }
     }
 
@@ -605,15 +561,15 @@ impl BlendFromNm {
 
     pub fn remade(&self) -> BlendFromNm {
         match self.named_clip.filter(|&(d, c)| d != u32::MAX && c != 0) {
-            Some((d, c)) => BlendFromNm::new(&Made::scripted(d, c, self.vehicle, self.offset)),
-            None => BlendFromNm::new(&Made { state: self.state, group: self.group, id: self.id, want: self.want, delay: self.delay, named_clip: None, vehicle: false, offset: [0.0; 3] }),
+            Some((d, c)) => BlendFromNm::new(&Made::scripted(d, c, self.vehicle)),
+            None => BlendFromNm::new(&Made { state: self.state, group: self.group, id: self.id, want: self.want, delay: self.delay, named_clip: None, vehicle: false }),
         }
     }
 
     fn play_named(&mut self, ped: &dyn Ped) -> bool {
-        let flags = if self.vehicle { crate::kv!(672 int) } else { crate::kv!(796 int) };
+        let flags = if self.vehicle { 0x4000 } else { 0xC000 };
         self.named_clip.and_then(|(d, c)| ped.named_clip(d, c))
-            .is_some_and(|info| self.blender.play_info(ClipInfo { flags, ..info }, crate::kv!(82), -1, -1))
+            .is_some_and(|info| self.blender.play_info(ClipInfo { flags, ..info }, crate::kv!(53), -1, -1))
     }
 
     pub fn player(&self) -> Option<&Playing> {
@@ -646,7 +602,7 @@ impl BlendFromNm {
             return true;
         }
         if self.delay != 0 && player {
-            let ms = (ped.dt() * crate::kv!(82)) as i32;
+            let ms = (ped.dt() * crate::kv!(53)) as i32;
             if self.delay > ms {
                 self.delay -= ms;
             } else {
@@ -664,8 +620,8 @@ impl BlendFromNm {
         let blend = {
             let p = self.player().expect("a player").player.clone();
             if p.loops {
-                if self.blender.frame.weight < crate::kv!(51) {
-                    self.blender.forget(-crate::kv!(65), false);
+                if self.blender.frame.weight < crate::kv!(32) {
+                    self.blender.forget(-crate::kv!(37), false);
                     self.done = true;
                     return true;
                 }
@@ -690,32 +646,29 @@ impl BlendFromNm {
 
     fn start(&mut self, ped: &mut dyn Ped) {
         self.follow_up = false;
-        if self.group != RAGDOLL_TRANS() && self.group != RAGDOLL_TRANS_BACK() {
+        if self.group != RAGDOLL_TRANS && self.group != RAGDOLL_TRANS_BACK {
             return;
         }
-        self.group = if self.group == RAGDOLL_TRANS_BACK() { GET_UP_BACK } else { GET_UP };
-        self.id = if self.want != -1 { self.want } else { id::GET_UP_NORMAL() };
+        self.group = if self.group == RAGDOLL_TRANS_BACK { GET_UP_BACK } else { GET_UP };
+        self.id = if self.want != -1 { self.want } else { id::GET_UP_NORMAL };
         loop {
             if ped.clip(self.group, self.id).is_some() {
                 break;
             }
             self.id = match self.id {
                 id::GET_UP_INJURED => id::GET_UP_SLOW,
-                id::GET_UP_SLOW => id::GET_UP_NORMAL(),
+                id::GET_UP_SLOW => id::GET_UP_NORMAL,
                 _ => return,
             };
         }
-        if ped.is_player() && ped.wanted() {
-            ped.say("GENERIC_CURSE");
-        }
-        if !self.blender.play(ped, crate::kv!(65), self.group, self.id) {
+        if !self.blender.play(ped, crate::kv!(37), self.group, self.id) {
             return;
         }
         let duration = ped.clip(self.group, self.id).map_or(0.0, |c| c.duration);
-        self.blend_out_at = duration - if ped.is_player() { crate::kv!(10) } else { crate::kv!(24) };
+        self.blend_out_at = duration - if ped.is_player() { crate::kv!(5) } else { crate::kv!(17) };
         if ped.is_player() && self.id == id::GET_UP_FAST && ped.network() {
             if let Some(p) = self.player_mut() {
-                p.player.rate = crate::kv!(138);
+                p.player.rate = crate::kv!(78);
             }
         }
     }
@@ -731,19 +684,19 @@ impl BlendFromNm {
             return false;
         }
         if let Some(p) = self.player_mut() {
-            p.player.set_blend(-crate::kv!(65));
+            p.player.set_blend(-crate::kv!(37));
             p.player.remove_blended_out = true;
             p.player.blend_out_at_end = true;
             p.mine = false;
         }
-        self.blender.frame.rate = -crate::kv!(65);
+        self.blender.frame.rate = -crate::kv!(37);
         self.ended = true;
         true
     }
 
     fn look(&mut self, ped: &mut dyn Ped) {
-        self.timer += (ped.dt() * crate::kv!(82)) as i32;
-        let limit = if ped.is_player() { crate::kv!(43 int) - crate::kv!(797 int) } else { crate::kv!(43 int) };
+        self.timer += (ped.dt() * crate::kv!(53)) as i32;
+        let limit = if ped.is_player() { 2000 - 0x6A4 } else { 2000 };
         if self.timer <= limit {
             return;
         }
@@ -758,16 +711,16 @@ impl BlendFromNm {
         if !self.vehicle && let Some(h) = ped.ground_fit(at.at) {
             at.at = [h[0], h[1], h[2] + 1.0];
         }
-        if picked.is_some() && (self.id == id::MOVE_IDLE() || self.id == id::RECOVER_BALANCE) {
+        if picked.is_some() && (self.id == id::MOVE_IDLE || self.id == id::RECOVER_BALANCE) {
             self.id = -1;
         }
         if !self.vehicle && ped.blocked(&at) {
             let radius = if ped.near_player() {
-                if self.waited > 0 { crate::kv!(140) } else { crate::kv!(17) }
-            } else if self.id == id::SEATED_TRANS() {
-                if self.waited > 0 { crate::kv!(20) } else { 0.5 }
+                if self.waited > 0 { crate::kv!(39) } else { crate::kv!(12) }
+            } else if self.id == id::SEATED_TRANS {
+                if self.waited > 0 { crate::kv!(15) } else { 0.5 }
             } else {
-                crate::kv!(60)
+                crate::kv!(34)
             };
             let base = at;
             let mut found = false;
@@ -783,8 +736,8 @@ impl BlendFromNm {
                 a += QUARTER_PI();
             }
             if !found {
-                self.waited += crate::kv!(43 int);
-                let limit = if ped.network() { crate::kv!(42 int) } else { crate::kv!(795 int) };
+                self.waited += 2000;
+                let limit = if ped.network() { 3000 } else { 6000 };
                 if !(ped.near_player() && self.waited > limit) {
                     if !self.relaxed {
                         ped.relax();
@@ -793,7 +746,7 @@ impl BlendFromNm {
                     return;
                 }
                 let flags = stand_flags(ped);
-                if let Some(spot) = ped.stand_where_he_can(at.at, flags).or_else(|| ped.node_place(at.at, crate::kv!(79))) {
+                if let Some(spot) = ped.stand_where_he_can(at.at, flags).or_else(|| ped.node_place(at.at, crate::kv!(52))) {
                     at.at = spot;
                 }
                 ped.gave_up();
@@ -806,17 +759,17 @@ impl BlendFromNm {
         self.blender.frame = Frame { weight: 1.0, rate: NM_FADE(), vel: [0.0; 2] };
         self.placed = Some(at);
         if self.id != -1 && self.group != -1 {
-            if self.blender.play(ped, crate::kv!(82), self.group, self.id) {
-                if (self.group == RAGDOLL_TRANS() && self.id != id::RECOVER_ABDOMEN && self.id != id::SEATED_TRANS()) || self.group == RAGDOLL_TRANS_BACK() {
+            if self.blender.play(ped, crate::kv!(53), self.group, self.id) {
+                if (self.group == RAGDOLL_TRANS && self.id != id::RECOVER_ABDOMEN && self.id != id::SEATED_TRANS) || self.group == RAGDOLL_TRANS_BACK {
                     self.follow_up = true;
                 }
                 let want = self.want;
                 let network_player = want == id::GET_UP_FAST && ped.network() && ped.is_player();
                 if let Some(p) = self.player_mut() {
                     match want {
-                        id::GET_UP_FAST => p.player.rate = if network_player { crate::kv!(136) } else { crate::kv!(138) },
+                        id::GET_UP_FAST => p.player.rate = if network_player { crate::kv!(50) } else { crate::kv!(78) },
                         id::GET_UP_INJURED => p.player.rate = 0.5,
-                        id::GET_UP_SLOW => p.player.rate = crate::kv!(18),
+                        id::GET_UP_SLOW => p.player.rate = crate::kv!(13),
                         _ => {}
                     }
                 }
@@ -833,36 +786,30 @@ impl BlendFromNm {
             }
             self.blender.frame.rate = 0.0;
         }
-        if self.state == crate::kv!(2 int) {
+        if self.state == 5 {
             self.follow_up = false;
         }
         self.switched = true;
         ped.leave_nm(&at);
-        if self.vehicle {
-            ped.attach_to_vehicle(self.offset);
-        }
     }
 
     fn pick(&mut self, ped: &mut dyn Ped) -> Option<Fit> {
-        if self.named_clip.is_some_and(|(d, c)| d != u32::MAX && c != 0) {
-            let m = ped.vehicle().filter(|_| self.vehicle)?;
-            ped.mark();
-            let m = vehicle_matrix(m, self.offset);
-            return Some(Fit { at: [m[crate::kv!(0 int)][0], m[crate::kv!(0 int)][1], m[crate::kv!(0 int)][2]], yaw: mathrt::atan2(-(m[1][0] as f64), m[1][1] as f64) as f32 });
+        if self.named_clip.is_some_and(|(d, c)| d != u32::MAX && c != 0 && ped.named_clip(d, c).is_some()) {
+            return None;
         }
         let list: Vec<(i32, i32)> = if self.named {
             vec![(self.group, self.id)]
-        } else if self.state == crate::kv!(2 int) {
-            vec![(crate::kv!(418 int), crate::kv!(323 int)), (crate::kv!(418 int), crate::kv!(404 int)), (RAGDOLL_TRANS(), id::INJ_LSIDE_TO_DEFAULT())]
+        } else if self.state == 5 {
+            vec![(43, 0xA8), (43, 0xAA), (RAGDOLL_TRANS, id::INJ_LSIDE_TO_DEFAULT)]
         } else {
             let mut l = vec![];
             if !ped.ground_under_root() {
-                l.extend([(RAGDOLL_TRANS(), id::RECOVER_ABDOMEN), (RAGDOLL_TRANS(), id::RECOVER_BALANCE)]);
+                l.extend([(RAGDOLL_TRANS, id::RECOVER_ABDOMEN), (RAGDOLL_TRANS, id::RECOVER_BALANCE)]);
             }
-            l.push((ped.move_group(), id::MOVE_IDLE()));
-            l.extend([id::INJ_FRONT_TO_DEFAULT(), id::INJ_LSIDE_TO_DEFAULT(), id::INJ_RSIDE_TO_DEFAULT(), id::PREACHER_TRANS(), id::SEATED_TRANS()]
-                .map(|i| (RAGDOLL_TRANS(), i)));
-            l.push((RAGDOLL_TRANS_BACK(), id::INJ_BACK_TO_DEFAULT()));
+            l.push((ped.move_group(), id::MOVE_IDLE));
+            l.extend([id::INJ_FRONT_TO_DEFAULT, id::INJ_LSIDE_TO_DEFAULT, id::INJ_RSIDE_TO_DEFAULT, id::PREACHER_TRANS, id::SEATED_TRANS]
+                .map(|i| (RAGDOLL_TRANS, i)));
+            l.push((RAGDOLL_TRANS_BACK, id::INJ_BACK_TO_DEFAULT));
             l
         };
         let (k, f) = best_fit(&list, ped)?;
@@ -880,16 +827,16 @@ impl BlendFromNm {
 }
 
 pub fn stand_flags(ped: &dyn Ped) -> u32 {
-    let mut f = if !ped.held() && !ped.stand_helper() { crate::kv!(798 int) } else { crate::kv!(799 int) };
+    let mut f = if !ped.held() && !ped.stand_helper() { 430 } else { 398 };
     if !ped.on_mover() {
-        f |= crate::kv!(253 int);
+        f |= 64;
     }
     f
 }
 
 pub fn vehicle_matrix(m: [[f32; 4]; 4], offset: [f32; 3]) -> [[f32; 4]; 4] {
     let v = [offset[0], offset[1], offset[2], 1.0];
-    let dot = |c: usize| (0..crate::kv!(1 int)).fold(0.0f64, |s, k| s + v[k] as f64 * m[k][c] as f64) as f32;
+    let dot = |c: usize| (0..4).fold(0.0f64, |s, k| s + v[k] as f64 * m[k][c] as f64) as f32;
     [m[0], m[1], m[2], [dot(0), dot(1), dot(2), v[0]]]
 }
 
@@ -900,12 +847,12 @@ pub trait NodeSearch {
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn NODE_STEP() -> &'static [f32; 3] { static V: std::sync::OnceLock<[f32; 3]> = std::sync::OnceLock::new(); let f = || [crate::kv!(187), crate::kv!(187), crate::kv!(800)]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+pub fn NODE_STEP() -> [f32; 3] { [crate::kv!(120), crate::kv!(120), crate::kv!(328)] }
 
 pub fn node_place(w: &dyn NodeSearch, at: [f32; 3], radius: f32) -> Option<[f32; 3]> {
-    (0..crate::kv!(36 int)).find_map(|n| {
+    (0..50).find_map(|n| {
         let s = w.node(at, radius, n)?;
-        let p = [s[0] as f32 * (*NODE_STEP())[0], s[1] as f32 * (*NODE_STEP())[1], s[2] as f32 * (*NODE_STEP())[2]];
+        let p = [s[0] as f32 * NODE_STEP()[0], s[1] as f32 * NODE_STEP()[1], s[2] as f32 * NODE_STEP()[2]];
         w.free(p).then_some(p)
     })
 }
@@ -926,22 +873,18 @@ pub fn stick_length(up: f32, side: f32) -> f32 {
 }
 
 pub fn get_up_rate(draw: u32) -> f32 {
-    (draw as i32 as f32 * crate::kv!(100 f32)).mul_add(crate::kv!(801 f32), crate::kv!(741 f32))
+    (draw as i32 as f32 * crate::kv!(231 f32)).mul_add(crate::kv!(329 f32), crate::kv!(296 f32))
 }
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn SIMPLE_TASK() -> u32 { crate::kv!(471 int) }
+pub const SIMPLE_TASK: u32 = 205;
 
-#[allow(non_snake_case)]
-#[inline]
-pub fn SIMPLE_CANDIDATES() -> &'static [(i32, i32); 5] { static V: std::sync::OnceLock<[(i32, i32); 5]> = std::sync::OnceLock::new(); let f = || [
-    (RAGDOLL_TRANS(), id::RECOVER_ABDOMEN),
-    (RAGDOLL_TRANS(), id::INJ_FRONT_TO_DEFAULT()),
-    (RAGDOLL_TRANS(), id::INJ_LSIDE_TO_DEFAULT()),
-    (RAGDOLL_TRANS(), id::INJ_RSIDE_TO_DEFAULT()),
-    (RAGDOLL_TRANS_BACK(), id::INJ_BACK_TO_DEFAULT()),
-]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+pub const SIMPLE_CANDIDATES: [(i32, i32); 5] = [
+    (RAGDOLL_TRANS, id::RECOVER_ABDOMEN),
+    (RAGDOLL_TRANS, id::INJ_FRONT_TO_DEFAULT),
+    (RAGDOLL_TRANS, id::INJ_LSIDE_TO_DEFAULT),
+    (RAGDOLL_TRANS, id::INJ_RSIDE_TO_DEFAULT),
+    (RAGDOLL_TRANS_BACK, id::INJ_BACK_TO_DEFAULT),
+];
 
 #[derive(Clone, Debug)]
 pub struct SimpleGetUp {
@@ -958,12 +901,12 @@ pub struct SimpleGetUp {
 
 impl SimpleGetUp {
     pub fn new(group: i32, id: i32, fit: bool) -> SimpleGetUp {
-        let (group, id) = if id == -1 || group == -1 { (GET_UP, id::GET_UP_NORMAL()) } else { (group, id) };
+        let (group, id) = if id == -1 || group == -1 { (GET_UP, id::GET_UP_NORMAL) } else { (group, id) };
         SimpleGetUp { state: 0, group, id, fit, from_back: false, has_end: false, end_phase: 1.0, blender: Blender::new(0.0), placed: None }
     }
 
     pub fn finished(&self) -> bool {
-        self.state == crate::kv!(0 int)
+        self.state == 3
     }
 
     fn wanted(&self, ped: &dyn Ped) -> i32 {
@@ -979,8 +922,8 @@ impl SimpleGetUp {
     }
 
     pub fn start_get_up(&mut self, ped: &dyn Ped, rand: &mut Rand, group: i32, id: i32) -> bool {
-        self.release(-crate::kv!(65));
-        if !self.blender.play(ped, crate::kv!(65), group, id) {
+        self.release(-crate::kv!(37));
+        if !self.blender.play(ped, crate::kv!(37), group, id) {
             return false;
         }
         if ped.in_combat() {
@@ -1000,20 +943,20 @@ impl SimpleGetUp {
     pub fn process(&mut self, ped: &dyn Ped, rand: &mut Rand) -> bool {
         match self.state {
             0 => {
-                let chosen = (self.fit && ped.has_skeleton()).then(|| best_fit(&(*SIMPLE_CANDIDATES()), ped)).flatten();
+                let chosen = (self.fit && ped.has_skeleton()).then(|| best_fit(&SIMPLE_CANDIDATES, ped)).flatten();
                 match chosen {
                     None => {
                         let id = self.wanted(ped);
                         self.start_get_up(ped, rand, self.group, id);
                         self.state = 2;
                     }
-                    Some((k, _)) if matches!((*SIMPLE_CANDIDATES())[k].1, id::RECOVER_ABDOMEN | id::RECOVER_BALANCE) => self.state = crate::kv!(0 int),
+                    Some((k, _)) if matches!(SIMPLE_CANDIDATES[k].1, id::RECOVER_ABDOMEN | id::RECOVER_BALANCE) => self.state = 3,
                     Some((k, fit)) => {
-                        let (group, id) = (*SIMPLE_CANDIDATES())[k];
-                        self.release(-crate::kv!(65));
+                        let (group, id) = SIMPLE_CANDIDATES[k];
+                        self.release(-crate::kv!(37));
                         self.placed = Some(fit);
-                        self.blender.play(ped, crate::kv!(26), group, id);
-                        if group == RAGDOLL_TRANS_BACK() {
+                        self.blender.play(ped, crate::kv!(21), group, id);
+                        if group == RAGDOLL_TRANS_BACK {
                             self.from_back = true;
                         }
                         self.state = 1;
@@ -1028,7 +971,7 @@ impl SimpleGetUp {
                 if self.group == GET_UP && self.from_back {
                     self.group = GET_UP_BACK;
                     if ped.clip(GET_UP_BACK, self.id).is_none() {
-                        self.id = id::GET_UP_NORMAL();
+                        self.id = id::GET_UP_NORMAL;
                     }
                 }
                 let id = self.wanted(ped);
@@ -1038,16 +981,16 @@ impl SimpleGetUp {
             }
             2 => {
                 let Some(phase) = self.blender.player().map(|p| p.player.phase) else {
-                    self.state = crate::kv!(0 int);
+                    self.state = 3;
                     return false;
                 };
                 if self.has_end && phase >= self.end_phase {
                     if let Some(p) = self.blender.player_mut() {
                         p.player.set_blend(-0.5);
                     }
-                    self.state = crate::kv!(0 int);
-                } else if phase >= crate::kv!(18) && ped.local_player() && ped.stick() > crate::kv!(17) {
-                    self.state = crate::kv!(0 int);
+                    self.state = 3;
+                } else if phase >= crate::kv!(13) && ped.local_player() && ped.stick() > crate::kv!(12) {
+                    self.state = 3;
                 }
                 false
             }
@@ -1062,17 +1005,17 @@ impl SimpleGetUp {
     }
 
     pub fn finish(&mut self) {
-        self.release(-crate::kv!(65));
+        self.release(-crate::kv!(37));
     }
 
     pub fn make_abortable(&mut self, urgency: u8, event: Option<Event205>) -> bool {
         let rate = match urgency {
-            2 => -crate::kv!(82),
-            1 if event.is_none_or(|e| e.priority > crate::kv!(462 int) || e.kind == crate::kv!(300 int) || e.ends_tasks || (e.kind == crate::kv!(104 int) && e.age_ms <= crate::kv!(5) * e.frame_ms)) => -crate::kv!(65),
+            2 => -crate::kv!(53),
+            1 if event.is_none_or(|e| e.priority > 0x54 || e.kind == 0x78 || e.ends_tasks || (e.kind == 9 && e.age_ms <= crate::kv!(2) * e.frame_ms)) => -crate::kv!(37),
             _ => return false,
         };
         self.release(rate);
-        self.state = crate::kv!(0 int);
+        self.state = 3;
         true
     }
 }
