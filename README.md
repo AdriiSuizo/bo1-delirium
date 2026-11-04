@@ -6,6 +6,6 @@ La primera ejecución lee una ISO propia de GTA IV de Xbox 360 situada junto a B
 
 - [Instalación, compatibilidad y controles](LEEME-INSTALACION.txt)
 - [Compilación](BUILD.txt)
-- [Beta de Plutonium](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/plutonium-v0.3.0-beta6)
+- [Beta de Plutonium](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/plutonium-v0.3.0-beta7)
 
 Integración y empaquetado con asistencia de OpenAI Codex. [Licencia](LICENSE).

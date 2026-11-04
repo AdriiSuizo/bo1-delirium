@@ -1,4 +1,4 @@
-BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 6
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 7
 
 INSTALACIÓN
 
@@ -28,6 +28,8 @@ Las referencias guían las articulaciones mientras el solver mantiene los contac
 Al recuperar el apoyo, el zombi puede devolver el control a BO1 aunque la IA esté momentáneamente quieta.
 El arranque de la carrera usa la velocidad reciente del cuerpo apoyado.
 Las colisiones entre cuerpos reutilizan los límites calculados por pieza y los cuerpos independientes se resuelven en paralelo.
+La reacción de explosión usa la salida original NMExplosion de Delirium y registra el último impacto.
+Un golpe durante el levantamiento conserva el cuerpo activo para poder recuperarse otra vez.
 La preparación sigue utilizando la caché del disco compatible con Delirium 0.6.0.
 Si una futura actualización de T5 cambia las firmas del juego, el lanzador rechaza el arranque.
 
