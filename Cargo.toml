@@ -19,3 +19,4 @@ codegen-units = 16
 repository = "https://github.com/PVCPC/delirium-physics"
 revision = "23ea7cfa2a1000d64870d2549834006d21b3e05c"
 # BO1 host adapters retain removed-part masks, sole contacts and persistent worker pools.
+balance_lifecycle_revision = "93eed4d6a0aafa2e84526730ea1f54dab48ac7d4"

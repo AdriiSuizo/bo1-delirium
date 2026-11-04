@@ -1,4 +1,4 @@
-BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 7
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 8
 
 INSTALACIÓN
 
@@ -19,7 +19,8 @@ COMPATIBILIDAD
 
 Probado con Plutonium T5 r5369 y BO1 Steam 7.0.152 CL 966072.
 ISO de GTA IV base Xbox 360. Perfiles comprobados para Media ID 4A53F9F6 y 6AC07221.
-El modo probado es Zombies de un jugador en LAN, en Kino der Toten.
+El modo verificado es Zombies de un jugador en LAN. Se han ampliado las pruebas de arranque a los diez mapas clásicos y DLC instalados.
+Kino, Five, Ascension, Call of the Dead, Shangri-La, Moon, Nacht, Verrückt, Shi No Numa y Der Riese.
 Esta beta recupera el cuerpo y el controlador de recuperación de nuestra versión de desarrollo.
 Los marcos articulares, masas y parámetros de tareas se leen de los recursos originales de la ISO.
 El esqueleto visual de BO1 se adapta a ese cuerpo.
@@ -30,6 +31,11 @@ El arranque de la carrera usa la velocidad reciente del cuerpo apoyado.
 Las colisiones entre cuerpos reutilizan los límites calculados por pieza y los cuerpos independientes se resuelven en paralelo.
 La reacción de explosión usa la salida original NMExplosion de Delirium y registra el último impacto.
 Un golpe durante el levantamiento conserva el cuerpo activo para poder recuperarse otra vez.
+Se incorpora la corrección de control de equilibrio de Delirium 0.6.0 sin sustituir el controlador de desarrollo.
+Call of the Dead conserva las piezas de colisión muy finas que antes impedían importar su mundo físico.
+Los modelos y accesorios se validan antes de sustituir su jerarquía. Los perros mantienen su comportamiento nativo.
+La gravedad física sigue la selección original de Moon. No Mans Land conserva su lógica especial de rondas.
+Las caídas, quemaduras y otros daños ambientales no reciben un impulso de bala artificial.
 La preparación sigue utilizando la caché del disco compatible con Delirium 0.6.0.
 Si una futura actualización de T5 cambia las firmas del juego, el lanzador rechaza el arranque.
 

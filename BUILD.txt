@@ -1,4 +1,4 @@
-Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 7
+Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 8
 Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
 Native game adapter and bridge:
   cmake -S native -B native-build -A Win32
@@ -30,3 +30,7 @@ Runtime base: the BO1-adapted Delirium core from Steam beta 5 (upstream revision
 The disc importer reads the existing 0.6.0 cache and supplies 384 matching legacy tuning slots. Three BO1 compatibility values remain local to the adapter.
 Custom character interface and public configuration references: SuperSloppers/large-steal-car-4
 revision 0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36.
+
+Selected upstream body-balance lifecycle correction: PVCPC/delirium-physics
+revision 93eed4d6a0aafa2e84526730ea1f54dab48ac7d4 (0.6.0).
+Native compatibility regression: ctest --test-dir native-build -C Release --output-on-failure
