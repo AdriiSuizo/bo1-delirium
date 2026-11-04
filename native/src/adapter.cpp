@@ -115,7 +115,7 @@ static void __cdecl think(void* ent){
 }
 static void* __cdecl skeleton(native::DObj* obj,uint32_t* bits){
     uint32_t all[5]{};
-    const bool actor=phys::g_world&&obj->entnum>0&&obj->entnum<=1024&&obj->numBones<=160&&(native::actor(native::entity(obj->entnum-1))||phys::actors[obj->entnum-1].active||phys::actors[obj->entnum-1].frozen);
+    const bool actor=phys::g_world&&obj->entnum>0&&obj->entnum<=1024&&obj->numBones<=160&&(native::humanoidActor(native::entity(obj->entnum-1))||phys::actors[obj->entnum-1].active||phys::actors[obj->entnum-1].frozen);
     if(actor)for(int i=0;i<obj->numBones;i++)all[i>>5]|=0x80000000u>>(i&31);
     void* result=originalSkel(obj,actor?all:bits);
     if(actor&&obj->localClient!=255){

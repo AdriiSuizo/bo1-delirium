@@ -106,26 +106,33 @@ static int findBone(const native::DObj* obj,const char* name){
     for(int m=0;m<obj->numModels;m++){auto* model=obj->models[m];for(int i=0;i<model->numBones;i++)if(alias(name,native::string(model->boneNames[i])))return offset+i;offset+=model->numBones;}
     return -1;
 }
-static bool bind(Actor& a,const native::DObj* obj){
-    if(!obj->models||!obj->numModels||obj->numBones>160)return false;
+static bool buildBinding(Actor& a,const native::DObj* obj){
+    if(!obj->models||!obj->numModels||!obj->numBones||obj->numBones>160)return false;
     a.count=obj->numBones;std::fill_n(a.parent,160,short(-1));std::fill_n(a.body,160,short(-1));std::fill_n(a.duplicate,160,short(-1));
     // Resolve shared model bones before evaluating their descendants. A facial
     // model's spine/neck/head alias the body's bones; calculating the face in
     // its own origin first gives every facial attachment a false translation.
-    if(obj->duplicates){auto* dup=reinterpret_cast<const uint8_t*>(native::string(obj->duplicates))+20;
-        for(int n=0;n<160&&dup[0];n++,dup+=2){int i=dup[0]-1,p=dup[1]-1;
-            if(i<a.count&&p>=0&&p<i)a.duplicate[i]=short(p);}}
+    if(obj->duplicates){
+        const auto* data=reinterpret_cast<const uint8_t*>(native::string(obj->duplicates));
+        if(!rig::aliases({data,obj->duplicateBytes},{a.duplicate,size_t(a.count)}))return false;
+    }
+    const auto* attachment=reinterpret_cast<const uint8_t*>(obj->models+obj->numModels);
+    std::vector<rig::ModelHierarchy> layout;layout.reserve(obj->numModels);
+    for(unsigned m=0;m<obj->numModels;++m){
+        const auto* model=obj->models[m];if(!model)return false;
+        if(model->numBones>model->numRootBones&&(!model->quats||!model->trans))return false;
+        layout.push_back({model->numBones,model->numRootBones,model->parents,attachment[m]});
+    }
+    if(!rig::hierarchy(layout,{a.duplicate,size_t(a.count)},{a.parent,size_t(a.count)}))return false;
     Vec3 base[160]{};Quat baseQ[160]{};
-    const auto* attachments=reinterpret_cast<const uint8_t*>(obj->models+obj->numModels);
     int offset=0;
     for(int m=0;m<obj->numModels;m++){
-        auto* model=obj->models[m];if(!model||!model->parents||!model->quats||!model->trans||offset+model->numBones>a.count)return false;
+        auto* model=obj->models[m];
         for(int j=0;j<model->numBones;j++){
             int i=offset+j;bool root=j<model->numRootBones;
-            a.parent[i]=short(root?(attachments[m]==255?-1:attachments[m]):i-model->parents[j-model->numRootBones]);
             Quat local=qIdentity();Vec3 localP{};
             if(!root){auto* source=model->quats+4*(j-model->numRootBones);local=qnormalize(q4(source[0]/32767.f,source[1]/32767.f,source[2]/32767.f,source[3]/32767.f));localP=*reinterpret_cast<Vec3*>(model->trans+3*(j-model->numRootBones));}
-            if(a.duplicate[i]>=0){a.parent[i]=a.duplicate[i];local=qIdentity();localP={};}
+            if(a.duplicate[i]>=0){local=qIdentity();localP={};}
             int p=a.parent[i];if(p>=i)return false;
             baseQ[i]=p>=0?qnormalize(baseQ[p]*local):local;base[i]=p>=0?base[p]+rotate(baseQ[p],localP):localP;
         }
@@ -157,6 +164,12 @@ static bool bind(Actor& a,const native::DObj* obj){
     }
     a.skin=skin(obj);a.bound=true;a.sampleTime=0;a.sampleStamp=0;a.capturedStamp=-1;
     log("Steam rig bound: entity %u object %p client %d model %s bones %d models %u pelvis %u",obj->entnum-1,obj,native::isClientObject(obj),obj->models[0]->name,a.count,obj->numModels,a.bone[0]);return true;
+}
+static bool bind(Actor& a,const native::DObj* obj){
+    // A rejected attachment/model must not leave a partly replaced live rig.
+    Actor candidate=a;
+    if(!buildBinding(candidate,obj))return false;
+    a=std::move(candidate);return true;
 }
 static bool loadApi(const std::filesystem::path& root){
     HMODULE dll=LoadLibraryExW((root/L"runtime/nm108_native_bridge.dll").c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
@@ -373,7 +386,7 @@ static void pose(native::DObj* obj){
     if(!g_world||!obj->skel.mat||!obj->entnum||obj->entnum>1024)return;
     int index=obj->entnum-1;void* ent=native::entity(index);auto& a=actors[index];
     bool client=native::isClientObject(obj);
-    if(!native::actor(ent)&&!((a.active||a.frozen)&&a.dead))return;
+    if(!native::humanoidActor(ent)&&!((a.active||a.frozen)&&a.dead))return;
     if(client&&!a.frozen){
         if(!a.bound||a.skin!=skin(obj))if(!bind(a,obj))return;
         // Shadows, attachments and hit tests can request the same completed

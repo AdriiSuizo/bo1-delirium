@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cstddef>
+#include "rig_hierarchy.hpp"
 namespace native {
 template<class T> T& at(void* p,size_t offset){return *reinterpret_cast<T*>(static_cast<unsigned char*>(p)+offset);}
 template<class T> const T& at(const void* p,size_t offset){return *reinterpret_cast<const T*>(static_cast<const unsigned char*>(p)+offset);}
@@ -43,6 +44,9 @@ static_assert(sizeof(Brush)==96&&sizeof(Leaf)==44&&sizeof(BrushNode)==20);
 static_assert(offsetof(ClipMap,triangleCount)==104&&offsetof(ClipMap,brushes)==152);
 inline void* entity(int index){return reinterpret_cast<void*>(0x1A796F8+index*0x34c);}
 inline bool actor(void* ent){return at<uint16_t>(ent,0xbe)==0x10&&at<void*>(ent,0x140)!=nullptr;}
+inline bool humanoidActor(void* ent){
+    return actor(ent)&&rig::humanoid(at<int>(at<void*>(ent,0x140),8));
+}
 inline int time(){return *reinterpret_cast<int*>(0x1c04890);}
 inline DObj* serverObject(int entity){return reinterpret_cast<DObj*(__cdecl*)(int)>(0x47e340)(entity);}
 inline DObj* clientObject(int entity){return reinterpret_cast<DObj*(__cdecl*)(int,int)>(0x501850)(entity,0);}
