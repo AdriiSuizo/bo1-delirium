@@ -29,7 +29,7 @@ fn main() {
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().collect();
     if args.get(1).is_some_and(|value| value == "--prepare-disc") {
-        let game = args.get(2).ok_or("Missing BO1 installation path")?;
+        let game = args.get(2).ok_or("Missing GTA IV Xbox 360 ISO or BO1 installation path")?;
         let cache = args.get(3).ok_or("Missing Delirium tuning cache path")?;
         return disc_setup::prepare(std::path::Path::new(game), std::path::Path::new(cache));
     }

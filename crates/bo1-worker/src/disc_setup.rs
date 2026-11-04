@@ -21,6 +21,20 @@ pub fn load(cache: &Path) -> Result<(), String> {
     Ok(())
 }
 
+fn images(source: &Path) -> Result<Vec<PathBuf>, String> {
+    if source.is_file() {
+        return Ok(vec![source.to_path_buf()]);
+    }
+    let mut result: Vec<_> = fs::read_dir(source)
+        .map_err(|e| e.to_string())?
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.is_file() && path.extension().is_some_and(|ext| ext.eq_ignore_ascii_case("iso")))
+        .collect();
+    result.sort();
+    Ok(result)
+}
+
 pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
     let dir = cache.parent().ok_or("Missing cache directory")?;
     let getup = dir.join("original-getup.motion");
@@ -44,17 +58,7 @@ pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
         return Ok(());
     }
 
-    let mut images: Vec<PathBuf> = fs::read_dir(game)
-        .map_err(|e| e.to_string())?
-        .filter_map(Result::ok)
-        .map(|entry| entry.path())
-        .filter(|path| {
-            path.extension()
-                .is_some_and(|ext| ext.eq_ignore_ascii_case("iso"))
-                && path.is_file()
-        })
-        .collect();
-    images.sort();
+    let images = images(game)?;
     if images.is_empty() {
         return Err(format!(
             "Place your GTA IV Xbox 360 ISO beside BlackOps.exe in {}",
@@ -157,6 +161,21 @@ fn write_cache(cache: &Path, data: &[u8]) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn selected_iso_can_stay_outside_the_game_directory() {
+        let root = std::env::temp_dir().join(format!("bo1-selected-disc-{}", std::process::id()));
+        fs::create_dir(&root).unwrap();
+        let selected = root.join("Disc.ISO");
+        fs::write(&selected, b"selection fixture, not a game resource").unwrap();
+        fs::write(root.join("notes.txt"), b"ignored").unwrap();
+        assert_eq!(images(&selected).unwrap(), vec![selected.clone()]);
+        assert_eq!(images(&root).unwrap(), vec![selected.clone()]);
+        assert!(images(&root.join("missing")).is_err());
+        fs::remove_file(selected).unwrap();
+        fs::remove_file(root.join("notes.txt")).unwrap();
+        fs::remove_dir(root).unwrap();
+    }
 
     #[test]
     fn changed_or_incomplete_development_data_requires_preparation() {
