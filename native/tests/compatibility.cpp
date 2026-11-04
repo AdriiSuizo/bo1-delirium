@@ -1,5 +1,6 @@
 #include "rig_hierarchy.hpp"
 #include "damage_routing.hpp"
+#include "core/brush_faces.h"
 #include <array>
 #include <cstdio>
 #include <cstdlib>
@@ -8,6 +9,18 @@ static void require(bool value, const char* message) {
     if (!value) { std::fprintf(stderr, "%s\n", message); std::exit(1); }
 }
 int main() {
+    // A thin but non-planar brush must keep all four original boundary faces.
+    const float thin[]{0,0,0, 100,0,0, 100,100,100, 0,100,100.0001220703125f};
+    std::vector<unsigned> faces;
+    require(euphoria::BrushTetraTriangles(thin,4,faces) && faces.size()==12, "thin tetrahedron lost its boundary");
+    for (unsigned k=0;k<faces.size();k+=3) {
+        auto at=[&](unsigned i){return euphoria::v3(thin[3*i],thin[3*i+1],thin[3*i+2]);};
+        unsigned opposite=0;while(opposite==faces[k]||opposite==faces[k+1]||opposite==faces[k+2])++opposite;
+        const auto normal=euphoria::cross(at(faces[k+1])-at(faces[k]),at(faces[k+2])-at(faces[k]));
+        require(euphoria::dot(normal,at(opposite)-at(faces[k]))<=0, "brush boundary faces inward");
+    }
+    const float flat[]{0,0,0, 100,0,0, 100,100,0, 0,100,0};
+    require(!euphoria::BrushTetraTriangles(flat,4,faces) && euphoria::BrushPlanarTriangles(flat,4,faces), "planar brush path changed");
     for (int cause : {0, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, -1, 99})
         require(bo1damage::route(cause) == bo1damage::Route::Environment, "environmental damage acquired a weapon impulse");
     for (int cause : {1, 2, 9})

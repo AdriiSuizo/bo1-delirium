@@ -73,6 +73,7 @@ static bool uploadMap(native::ClipMap& cm)
             for(unsigned side=0;side<b.sidesCount;++side){const auto* p=b.sides[side].plane;planes.push_back({v3(p->normal[0],p->normal[1],p->normal[2]),p->dist});}
             std::vector<unsigned> faces;
             bool recovered=BrushFaceTriangles(&b.vertices[0][0],b.vertexCount,planes.data(),unsigned(planes.size()),faces);
+            if(!recovered)recovered=BrushTetraTriangles(&b.vertices[0][0],b.vertexCount,faces);
             if(!recovered)recovered=BrushPlanarTriangles(&b.vertices[0][0],b.vertexCount,faces);
             if(recovered
                 &&g_api.add_static_mesh(g_world,&b.vertices[0][0],b.vertexCount,faces.data(),unsigned(faces.size()/3))==0){

@@ -33,6 +33,28 @@ inline bool BrushFaceTriangles(const float* vertices,unsigned count,const BrushP
     }
     return faces>=2&&!indices.empty();
 }
+// Four non-coplanar vertices define a tetrahedron even when its volume is
+// too thin for the runtime's small-hull tolerance. Double-precision side
+// tests retain the exact supplied vertices and orient every boundary outward.
+inline bool BrushTetraTriangles(const float* vertices,unsigned count,std::vector<unsigned>& indices){
+    indices.clear();if(!vertices||count!=4)return false;
+    for(unsigned i=0;i<12;++i)if(!std::isfinite(vertices[i]))return false;
+    auto side=[&](unsigned a,unsigned b,unsigned c,unsigned opposite){
+        double u[3],v[3],w[3];for(unsigned k=0;k<3;++k){
+            u[k]=double(vertices[3*b+k])-vertices[3*a+k];
+            v[k]=double(vertices[3*c+k])-vertices[3*a+k];
+            w[k]=double(vertices[3*opposite+k])-vertices[3*a+k];
+        }
+        return (u[1]*v[2]-u[2]*v[1])*w[0]+(u[2]*v[0]-u[0]*v[2])*w[1]+(u[0]*v[1]-u[1]*v[0])*w[2];
+    };
+    if(side(0,1,2,3)==0.0)return false;
+    for(unsigned opposite=0;opposite<4;++opposite){
+        unsigned face[3],n=0;for(unsigned i=0;i<4;++i)if(i!=opposite)face[n++]=i;
+        if(side(face[0],face[1],face[2],opposite)>0.0)std::swap(face[1],face[2]);
+        indices.insert(indices.end(),face,face+3);
+    }
+    return true;
+}
 inline bool BrushPlanarTriangles(const float* vertices,unsigned count,std::vector<unsigned>& indices){
     if(!vertices||count<3)return false;
     for(unsigned i=0;i<count;++i)if(!finite3(v3(vertices[3*i],vertices[3*i+1],vertices[3*i+2])))return false;
