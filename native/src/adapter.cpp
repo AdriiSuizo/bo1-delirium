@@ -36,7 +36,8 @@ static void log(const char* format,...){
 #include "native_guard.hpp"
 #include "test_controls.hpp"
 static void selftest(){
-    if(!testEnabled||controls::regression||!phys::g_world)return;
+    static const bool compatibility=[](){wchar_t value[8]{};return GetEnvironmentVariableW(L"BO1_STEAM_COMPAT_TEST",value,8)&&value[0]==L'1';}();
+    if(!testEnabled||!phys::g_world||(controls::regression&&(!compatibility||controls::testAction<7)))return;
     auto* player=native::entity(0);native::at<unsigned>(player,0x170)|=1u;
     static int target=-1,shots=0,nextShot,report,stage=0,stageTime;
     if(target<0){
@@ -52,6 +53,10 @@ static void selftest(){
     }
     if(target<0)return;
     void* ent=native::entity(target);auto& a=phys::actors[target];
+    static const bool lunarTest=[](){wchar_t value[8]{};return GetEnvironmentVariableW(L"BO1_STEAM_LOW_GRAVITY_TEST",value,8)&&value[0]==L'1';}();
+    if(lunarTest&&!shots){
+        native::at<uint16_t>(ent,0x160)=*reinterpret_cast<const uint16_t*>(0x23A5884);
+    }
     // Opt-in intact-survivor regression. Normal test/gameplay paths are unchanged.
     static const bool blastOnly=[](){wchar_t value[8]{};return GetEnvironmentVariableW(L"BO1_STEAM_BLAST_TEST",value,8)&&value[0]==L'1';}();
     if(blastOnly){
@@ -63,6 +68,15 @@ static void selftest(){
         }
         if(native::time()>=report){report=native::time()+500;log("STEAM BLAST TEST state entity %d active %d flags %u detached %04X health %d blasts %d",target,a.active,a.status.flags,a.detachedMask,native::at<int>(ent,0x184),shots);}
         return;
+    }
+    static const bool environmentTest=[](){wchar_t value[8]{};return GetEnvironmentVariableW(L"BO1_STEAM_ENVIRONMENT_TEST",value,8)&&value[0]==L'1';}();
+    static bool burned=false;
+    if(environmentTest&&!burned&&native::time()>=nextShot&&native::actor(ent)){
+        auto point=a.animation[a.bone[8]],dir=phys::normalize(point-(phys::origin(player)+phys::v3(0,0,55)));
+        const int queued=a.hits.count;const bool active=a.active;
+        reinterpret_cast<Damage>(0x5405c0)(ent,player,player,&dir.x,&point.x,20,0,17,0,0,0,0);
+        log("STEAM ENV TEST burn queued %d -> %d active %d -> %d health %d",queued,a.hits.count,active,a.active,native::at<int>(ent,0x184));
+        burned=true;nextShot=native::time()+1500;return;
     }
     if(shots<3&&native::time()>=nextShot&&native::actor(ent)){
         auto point=a.animation[a.bone[8]],dir=phys::normalize(point-(phys::origin(player)+phys::v3(0,0,55)));
@@ -89,8 +103,9 @@ static void selftest(){
     }
     if(stage==2&&native::time()>=stageTime&&native::actor(ent)){
         auto point=a.animation[a.bone[8]],dir=phys::normalize(point-(phys::origin(player)+phys::v3(0,0,55)));
-        reinterpret_cast<Damage>(0x5405c0)(ent,player,player,&dir.x,&point.x,5000,0,1,native::at<unsigned char>(player,0xd4),4,0,0);
-        log("STEAM TEST lethal native hit entity %d health %d type %u",target,native::at<int>(ent,0x184),native::at<uint16_t>(ent,0xbe));stage=3;
+        const int cause=environmentTest?12:1;
+        reinterpret_cast<Damage>(0x5405c0)(ent,player,player,&dir.x,&point.x,5000,0,cause,native::at<unsigned char>(player,0xd4),4,0,0);
+        log("STEAM TEST lethal native hit entity %d health %d type %u mod %d",target,native::at<int>(ent,0x184),native::at<uint16_t>(ent,0xbe),cause);stage=3;
     }
     if(shots&&native::time()>=report){report=native::time()+500;log("STEAM TEST state entity %d active %d frozen %d flags %u health %d type %u origin %.2f %.2f %.2f",target,a.active,a.frozen,a.status.flags,native::at<int>(ent,0x184),native::at<uint16_t>(ent,0xbe),phys::origin(ent).x,phys::origin(ent).y,phys::origin(ent).z);}
 }

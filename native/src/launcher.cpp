@@ -123,7 +123,7 @@ int wmain(int argc,wchar_t**argv) try {
     std::wstring args=L"\""+bootstrap.wstring()+L"\" t5sp \""+game.wstring()+L"\" -lan";
     args+=L" +set fs_homepath \""+home.wstring()+
         L"\" +set fs_basepath \""+game.wstring()+L"\" +set fs_game \"\" +set scr_useFastFileOnly 0 +set logfile 2 +set r_d3d9ex 1 +set com_introPlayed 1 +set com_startupIntroPlayed 1";
-    if(seconds)args+=L" +set r_fullscreen 0 +set r_customMode 1280x720 +set com_maxfps 150 +set r_vsync 0";
+    if(seconds)args+=L" +set r_fullscreen 0 +set r_customMode 1280x720 +set com_maxfps 150 +set r_vsync 0 +set com_skipMovies 1";
     args+=diagnostics?L" +set developer 1":L" +set developer 0";
     if(!map.empty())args+=L" +set fs_game mods/bo1delirium +devmap "+map;
     if (!SetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER", adapter.c_str()))

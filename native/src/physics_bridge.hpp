@@ -543,6 +543,7 @@ static void afterThink(void* ent,Vec3 before){
     if(std::isfinite(gravity)&&gravity>=0.f&&gravity<=1.f&&gravity!=a.gravityScale){
         if(!a.active||!g_api.actor_set_gravity(g_world,a.handle,gravity)){
             a.gravityScale=gravity;
+            if(testEnabled)log("STEAM GRAVITY actor %d scale %.6f",index,gravity);
         }
     }
     Vec3 intended=(origin(ent)-before)*20.f;
