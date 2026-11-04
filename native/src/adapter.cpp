@@ -52,6 +52,18 @@ static void selftest(){
     }
     if(target<0)return;
     void* ent=native::entity(target);auto& a=phys::actors[target];
+    // Opt-in intact-survivor regression. Normal test/gameplay paths are unchanged.
+    static const bool blastOnly=[](){wchar_t value[8]{};return GetEnvironmentVariableW(L"BO1_STEAM_BLAST_TEST",value,8)&&value[0]==L'1';}();
+    if(blastOnly){
+        if(shots<3&&native::time()>=nextShot&&native::actor(ent)&&(!shots||!a.active)){
+            auto point=a.animation[a.bone[8]],dir=phys::normalize(point-(phys::origin(player)+phys::v3(0,0,55)));
+            phys::hit(ent,20,&point.x,4,&dir.x,0,0,false);
+            log("STEAM BLAST TEST intact adapter explosion %d entity %d health %d detached %04X",shots,target,native::at<int>(ent,0x184),a.detachedMask);
+            ++shots;nextShot=native::time()+12000;
+        }
+        if(native::time()>=report){report=native::time()+500;log("STEAM BLAST TEST state entity %d active %d flags %u detached %04X health %d blasts %d",target,a.active,a.status.flags,a.detachedMask,native::at<int>(ent,0x184),shots);}
+        return;
+    }
     if(shots<3&&native::time()>=nextShot&&native::actor(ent)){
         auto point=a.animation[a.bone[8]],dir=phys::normalize(point-(phys::origin(player)+phys::v3(0,0,55)));
         int weapon=native::at<unsigned char>(player,0xd4);int health=native::at<int>(ent,0x184);
