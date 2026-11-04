@@ -1,4 +1,4 @@
-Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 10
+Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 11
 Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
 Native game adapter and bridge:
   cmake -S native -B native-build -A Win32
@@ -22,6 +22,12 @@ Copy BO1DeliriumSetup.exe beside BlackOps.exe as Instalar-BO1Delirium.exe.
 Copy BO1DeliriumUninstall.exe beside BlackOps.exe as Desinstalar-BO1Delirium.exe.
 The uninstaller is a standalone GUI executable; --quiet exercises the same removal without dialogs.
 Copy BO1DeliriumPlugin.dll to BO1Delirium/runtime/.
+The complete package can be extracted outside the game. Setup reads Steam libraryfolders.vdf
+and appmanifest_42700.acf, then deploys its own files into the selected BO1 installation.
+The --iso option accepts an existing Xbox 360 ISO file without copying it into BO1.
+The normal installer offers a file dialog when a disc is needed and none is beside BlackOps.exe.
+Setup creates Jugar-BO1-LAN.lnk beside BlackOps.exe and BO1 - Plutonium LAN.lnk on the Desktop.
+Both target the official bootstrapper with -lan and its required Plutonium working directory.
 The setup registers the native plugin in Plutonium/plugins and our control IWD in storage/t5/main.
 The plugin implements the public Plutonium SDK v1 lifecycle ABI (plutoniummod/plutonium-sdk 17e9a0a).
 Reference: https://github.com/plutoniummod/plutonium-sdk

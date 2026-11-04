@@ -1,14 +1,20 @@
-BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 8
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 11
 
 INSTALACIÓN
 
-1. Instala Plutonium y configura T5 Zombies con tu BO1 de Steam. Cierra Plutonium y BO1.
-2. Descomprime BO1Delirium e Instalar-BO1Delirium.exe junto a BlackOps.exe.
-3. Coloca ahí tu ISO de GTA IV base de Xbox 360.
-4. Ejecuta Instalar-BO1Delirium.exe una vez. Prepara los recursos y registra el plugin en Plutonium.
-5. Cuando termine la instalación, puedes retirar la ISO.
-6. Para jugar, abre Plutonium normalmente y elige T5 Zombies en modo LAN.
-7. En Mods, selecciona BO1 Delirium y abre un mapa de Zombies. No uses un CMD para jugar.
+Requisitos: BO1 instalado por Steam, Plutonium T5 instalado y tu ISO propia de GTA IV base de Xbox 360.
+Plutonium oficial: https://plutonium.pw/docs/install/
+
+1. Cierra Plutonium y descomprime el paquete completo en una carpeta cualquiera.
+2. Ejecuta Instalar-BO1Delirium.exe. Detecta BO1 en las bibliotecas de Steam; si hay varias instalaciones o no lo encuentra, permite seleccionar BlackOps.exe.
+3. Selecciona tu ISO cuando se solicite. Puede quedarse donde la tienes guardada: no es necesario copiarla a BO1.
+4. Espera a que termine la preparación local y el registro del mod.
+5. Abre BO1 - Plutonium LAN desde el escritorio. Es un acceso al ejecutable oficial de Plutonium, sin CMD.
+6. En Mods, selecciona BO1 Delirium y abre un mapa de Zombies.
+
+El instalador copia sus archivos junto a BlackOps.exe y también crea Jugar-BO1-LAN en esa carpeta.
+Cuando se confirma que la caché está preparada, ya no hace falta la ISO para jugar.
+Si prefieres el lanzador normal de Plutonium, selecciona LAN: el modo online no carga este plugin nativo.
 
 La instalación también abre Kino brevemente en Plutonium para obtener el esqueleto
 y ragdoll de BO1 si todavía no están preparados. Después cierra esa instancia de preparación.
@@ -19,10 +25,11 @@ La lectura de XEX puede necesitar Internet la primera vez para obtener la clave 
 COMPATIBILIDAD
 
 Probado con Plutonium T5 r5369 y BO1 Steam 7.0.152 CL 966072.
-La beta 10 añade el desinstalador de doble clic; conserva las físicas de la beta 8 y la carga nativa de la beta 9.
+La beta 11 simplifica la instalación y añade los accesos LAN automáticos; conserva las físicas de la beta 8 y la carga nativa de la beta 9.
 La nueva carga nativa se ha probado en Kino, también con una caché generada desde cero.
 ISO de GTA IV base Xbox 360. Perfiles comprobados para Media ID 4A53F9F6 y 6AC07221.
 El modo verificado es Zombies de un jugador en LAN. Se han ampliado las pruebas de arranque a los diez mapas clásicos y DLC instalados.
+No se anuncia cooperativo con estas físicas: los cuerpos articulados todavía no tienen sincronización propia entre equipos. Que todos instalen el mod no sustituye esa integración.
 Kino, Five, Ascension, Call of the Dead, Shangri-La, Moon, Nacht, Verrückt, Shi No Numa y Der Riese.
 Esta beta recupera el cuerpo y el controlador de recuperación de nuestra versión de desarrollo.
 Los marcos articulares, masas y parámetros de tareas se leen de los recursos originales de la ISO.
@@ -68,8 +75,10 @@ Solo la preparación inicial usa un puente temporal junto al bootstrapper y lo r
 Las partidas normales usan el cargador de plugins de Plutonium, sin proxy ni lanzador del mod.
 El adaptador se activa únicamente con t5sp -lan y las físicas solo con BO1 Delirium seleccionado.
 Para retirar la integración, cierra Plutonium y abre Desinstalar-BO1Delirium.exe con doble clic.
+Lo encontrarás en la carpeta de BO1 de Steam tras la instalación.
 Confirma la desinstalación en la ventana. Retira el plugin, el script propio y la entrada de Mods.
 Se conservan la caché local, los perfiles, la ISO, los otros mods y los archivos del paquete.
+Los accesos LAN son generales de BO1 y siguen sirviendo para otros mods tras retirar Delirium.
 Puedes reinstalar ejecutando Instalar-BO1Delirium.exe. El modo anterior --uninstall sigue disponible.
 No compartas la caché ni la ISO. El RAR solo contiene el mod y sus dependencias.
 
