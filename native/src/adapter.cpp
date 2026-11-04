@@ -37,7 +37,18 @@ static void log(const char* format,...){
 #include "test_controls.hpp"
 static void selftest(){
     static const bool compatibility=[](){wchar_t value[8]{};return GetEnvironmentVariableW(L"BO1_STEAM_COMPAT_TEST",value,8)&&value[0]==L'1';}();
-    if(!testEnabled||!phys::g_world||(controls::regression&&(!compatibility||controls::testAction<7)))return;
+    if(!testEnabled||!phys::g_world)return;
+    static const bool spawnerTest=[](){wchar_t value[8]{};return GetEnvironmentVariableW(L"BO1_STEAM_SPAWNER_TEST",value,8)&&value[0]==L'1';}();
+    static bool spawnersReported=false;
+    if(spawnerTest&&!spawnersReported){
+        for(int i=0;i<1024;++i){
+            auto* e=native::entity(i);if(native::at<uint16_t>(e,0xbe)!=17)continue;
+            auto text=[&](size_t offset){auto id=native::at<uint16_t>(e,offset);return id?native::string(id):"<none>";};
+            log("STEAM SPAWNER entity %d class %s noteworthy %s target %s",i,text(0x15c),text(0x160),text(0x164));
+        }
+        spawnersReported=true;
+    }
+    if(controls::regression&&(!compatibility||controls::testAction<7))return;
     auto* player=native::entity(0);native::at<unsigned>(player,0x170)|=1u;
     static int target=-1,shots=0,nextShot,report,stage=0,stageTime;
     if(target<0){
