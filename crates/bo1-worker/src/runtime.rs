@@ -321,27 +321,29 @@ pub struct Runtime {
 impl Runtime {
     pub fn load(floor: bool) -> Result<Self, String> {
         let root = root()?;
-        let character=crate::character::Character::parse(
-            &std::fs::read_to_string(root.join("bo1-character.json")).map_err(|e|e.to_string())?)?;
-        let (joints,parts,masses,pairs)=character.asset();
-        if joints.len()!=20 || parts.len()!=21 || masses.iter().any(|m| !m.is_finite() || *m<=0.) {
-            return Err("invalid BO1 physical character".into());
+        let data = std::env::var_os("BO1_DELIRIUM_GTA_CACHE")
+            .map(PathBuf::from).and_then(|path| path.parent().map(PathBuf::from))
+            .ok_or("Missing original GTA IV character cache")?;
+        let asset = std::fs::read(data.join("original-fred.xrt")).map_err(|e| e.to_string())?;
+        delirium_data::LE.store(false, std::sync::atomic::Ordering::Relaxed);
+        delirium::nmrs::load(0, &asset);
+        let text = std::fs::read_to_string(data.join("fred-build.txt")).map_err(|e| e.to_string())?;
+        let (build, mut rest) = Build::undump(&text);
+        if build.parts.len() != PARTS || rest.len() != PARTS {
+            return Err("not a complete original 21-part build".into());
         }
-        delirium::nmrs::CUSTOM[0].store(true,std::sync::atomic::Ordering::Relaxed);
-        delirium::nmrs::set(0,joints,parts,masses,pairs);
-        // These custom frames are explicitly defined in the host's frame;
-        // they need no Fred fragment link correction or logged GTA NM_LINKS.
-        let _=delirium::nmdbm::DERIVED_LINKS[0].set(vec![Quat::IDENTITY;PARTS]);
-        let (mut build,mut rest)=character.build().ok_or("invalid BO1 character build")?;
-        let low=build.parts.iter().zip(&rest).map(|(p,t)| {
-            let r=Mat3::from_quat(t.rotation);
-            let extent=p.boxed.map_or(r.y_axis.z.abs()*p.half+p.radius,
-                |e| r.x_axis.z.abs()*e.x+r.y_axis.z.abs()*e.y+r.z_axis.z.abs()*e.z);
-            t.translation.z-extent
-        }).fold(f32::INFINITY,f32::min);
-        for t in &mut rest {t.translation.z-=low;}
-        let tp=TaskParams::default();
-        println!("BO1 custom character: {} parts, {:.3} kg; built-in task parameters",build.parts.len(),build.parts.iter().map(|p|p.mass).sum::<f32>());
+        let links = delirium::nmrs::derive_links(&build,
+            &rest.iter().map(|pose| pose.rotation).collect::<Vec<_>>())
+            .ok_or("could not derive original articulation frames")?;
+        let _ = delirium::nmdbm::DERIVED_LINKS[0].set(links);
+        let low = build.parts.iter().zip(&rest)
+            .map(|(part, pose)| pose.translation.z - part.half - part.radius)
+            .fold(f32::INFINITY, f32::min);
+        for pose in &mut rest { pose.translation.z -= low; }
+        let tp = taskparams::read(&std::fs::read_to_string(data.join("original-taskparams.txt"))
+            .map_err(|e| e.to_string())?);
+        println!("GTA IV development character: {} parts, {:.3} kg; original task parameters",
+            build.parts.len(), build.parts.iter().map(|part|part.mass).sum::<f32>());
         // A model's exported idle is not a solved physical stance. Calibrate the
         // reference in the actual original articulation before mapping BO1 bones
         // or using it as the terminal posture of a host get-up.
@@ -350,20 +352,15 @@ impl Runtime {
         let mut standing = Agent::new(
             &build,
             Ragdoll::new(&build, &rest, Vec3::ZERO),
-            Quat::from_rotation_z(std::f32::consts::PI),
+            Quat::IDENTITY,
             0.3,
         );
         nm::task_balance(&mut standing, &build, &calibration, &tp, "*", None, false);
-        for f in 0..180 {
-            if std::env::var_os("BO1_PROFILE_DEBUG").is_some() && (f%30==0 || f<3) {
-                let pose:Vec<_>=standing.doll.frames().collect();
-                eprintln!("CAL f={f} root={:?} feet={:?}/{:?} balance={} fallen={} contacts={:?}",standing.doll.root(),pose[3].translation,pose[6].translation,standing.balancing(),standing.fallen,standing.doll.touch);
-                if f<3 {let ch=standing.character().unwrap();for j in 0..6 {eprintln!("CALJOINT {j} actual={:?} desired={:?} limits={:?}",ch.angle(j,&pose),ch.eff[j].desired,ch.joints[j].limits);}}
-            }
+        for _ in 0..180 {
             standing.step(&build, &calibration, DT, &[], &[]);
         }
         if !standing.balancing() {
-            return Err(format!("BO1 articulation did not balance: root {:?}, com {:?}, contacts {:?}",standing.doll.root(),standing.doll.com(),standing.doll.touch));
+            return Err("original articulation neutral stance did not balance".into());
         }
         let calibrated: Vec<Transform> = standing.doll.frames().collect();
         if std::env::var_os("BO1_DELIRIUM_REST_AUDIT").is_some() {

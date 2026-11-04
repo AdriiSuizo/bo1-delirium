@@ -20,12 +20,25 @@ static MAPS: [&[u8]; 3] = [
 /// The release reads its numbers from the game's program (the PC GTAIV.exe or the disc's default.xex), so a PS3 game won't do.
 pub const FROM_GAME: bool = true;
 
+fn matching_map(prog: &[u8]) -> Option<&'static [u8]> {
+    MAPS.into_iter().find(|map| {
+        map.len() == 44 + N * 13 &&
+        u64::from_le_bytes(map[4..12].try_into().unwrap()) == prog.len() as u64 &&
+        map[12..44] == *blake3::hash(prog).as_bytes()
+    })
+}
+
+/// Validate this image even when another tuning cache is already open.
+pub fn supports(prog: &[u8]) -> bool {
+    matching_map(prog).is_some()
+}
+
 /// Opens the numbers from the player's own game program: the PC GTAIV.exe or the disc's default.xex opened
 /// (its bytes); false if it isn't a version they're read from.
 pub fn unlock(prog: &[u8]) -> bool {
     if OPEN.load(Relaxed) { return true }
     let le = |b: &[u8], at: usize, k: usize| b[at..at + k].iter().rev().fold(0u64, |v, &x| v << 8 | x as u64);
-    let Some(map) = MAPS.into_iter().find(|m| m.len() == 44 + N * 13 && le(m, 4, 8) == prog.len() as u64 && m[12..44] == *blake3::hash(prog).as_bytes())
+    let Some(map) = matching_map(prog)
     else { return false };
     let be = map[..4] == *b"DKX1";
     let rd = |at: usize, k: usize| if be { prog[at..at + k].iter().fold(0u64, |v, &x| v << 8 | x as u64) } else { le(prog, at, k) };

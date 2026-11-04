@@ -336,8 +336,7 @@ API int32_t rd_world_set_async(RdWorld* w,uint32_t enabled){
 }
 API int32_t rd_world_set_params_ron(RdWorld* w,const char*){return w?RD_ERR_ARG:RD_ERR_NOT_FOUND;}
 API int32_t rd_load_art(RdWorld* w,const char* path,uint32_t* model){
-    // Kept as an ABI entry name only. The worker has already loaded and
-    // validated the host-authored BO1 character; no ART file exists here.
+    // The worker has loaded the original character from the local disc cache.
     if(!w||!path||!model||!w->client.State()||w->client.State()->parts!=21)return RD_ERR_ARG;
     *model=0;return RD_OK;
 }

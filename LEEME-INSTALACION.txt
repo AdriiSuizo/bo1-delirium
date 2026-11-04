@@ -1,4 +1,4 @@
-BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 5
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 6
 
 INSTALACIÓN
 
@@ -7,11 +7,11 @@ INSTALACIÓN
 3. Coloca ahí tu ISO de GTA IV original de Xbox 360.
 4. Abre Jugar-BO1-Delirium.cmd. El lanzador abre T5 en modo LAN.
 5. En el menú Mods de Plutonium, selecciona BO1 Delirium y luego abre un mapa de Zombies.
-6. Retira la ISO cuando el lanzador confirme que la caché de ajustes y levantamientos está preparada.
+6. Retira la ISO cuando el lanzador confirme que la caché del cuerpo y levantamientos está preparada.
 
 La primera ejecución también abre Kino brevemente en Plutonium para obtener el esqueleto
 y ragdoll de BO1. Después se abre el juego para jugar.
-Si actualizas desde la beta 4, vuelve a colocar la ISO una vez para generar la nueva caché.
+Si actualizas desde una beta anterior, vuelve a colocar la ISO una vez para generar la caché del cuerpo original.
 La lectura de XEX puede necesitar Internet la primera vez para obtener la clave de Xbox
 360 que usa el lector de código abierto de Delirium.
 
@@ -20,8 +20,10 @@ COMPATIBILIDAD
 Probado con Plutonium T5 r5369 y BO1 Steam 7.0.152 CL 966072.
 ISO de GTA IV base Xbox 360. Perfiles comprobados para Media ID 4A53F9F6 y 6AC07221.
 El modo probado es Zombies de un jugador en LAN, en Kino der Toten.
-Esta beta mantiene el núcleo de Delirium de Steam Beta 5 para el equilibrio y el levantamiento.
-Delirium vuelve a usar las siete referencias originales de levantamiento de GTA IV Xbox 360.
+Esta beta recupera el cuerpo y el controlador de recuperación de nuestra versión de desarrollo.
+Los marcos articulares, masas y parámetros de tareas se leen de los recursos originales de la ISO.
+El esqueleto visual de BO1 se adapta a ese cuerpo.
+Delirium usa las siete referencias originales de levantamiento de GTA IV Xbox 360.
 Las referencias guían las articulaciones mientras el solver mantiene los contactos e impactos activos.
 Al recuperar el apoyo, el zombi puede devolver el control a BO1 aunque la IA esté momentáneamente quieta.
 El arranque de la carrera usa la velocidad reciente del cuerpo apoyado.
@@ -44,6 +46,8 @@ CACHÉ Y REGISTROS
 - logs contiene los registros del adaptador y el worker.
 - gta4-xbox360-v060.kv contiene únicamente los valores de ajuste.
 - original-getup.motion y original-locomotion.motion se generan desde la ISO en el primer arranque.
+- original-fred.xrt, fred-build.txt y original-taskparams.txt contienen el cuerpo y los ajustes originales preparados localmente.
+- gta4-development-v1.ready valida que la caché del cuerpo y sus dependencias esté completa.
 - bo1-character-v1 contiene los recursos de BO1 preparados localmente.
 
 El lanzador instala temporalmente winmm.dll junto al bootstrapper de Plutonium

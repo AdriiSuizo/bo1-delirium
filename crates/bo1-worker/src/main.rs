@@ -1,4 +1,3 @@
-mod character;
 mod disc_setup;
 mod disc_motion;
 mod protocol;

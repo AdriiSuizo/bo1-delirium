@@ -1,6 +1,9 @@
 //! GTA IV Xbox 360 recovery references. Adapted from the project's local
 //! lsc4-support exporter. The source skeleton and samples come from the disc.
-use delirium::prelude::{Quat, Vec3};
+use delirium::{
+    prelude::{Quat, Transform, Vec3},
+    ragdoll::Rig,
+};
 use delirium_data::{
     anim, archive_key::ArchiveKey, disc::Disc, img, model, resource, rpf, skeleton,
 };
@@ -141,7 +144,15 @@ impl Exporter {
     }
 }
 
-pub fn extract(disc: &Disc, executable: &[u8]) -> Result<(Vec<u8>, Vec<u8>), String> {
+pub struct DiscResources {
+    pub recovery: Vec<u8>,
+    pub locomotion: Vec<u8>,
+    pub character: Vec<u8>,
+    pub build: Vec<u8>,
+    pub tasks: Vec<u8>,
+}
+
+pub fn extract(disc: &Disc, executable: &[u8]) -> Result<DiscResources, String> {
     let size = disc
         .len("xbox360.rpf")
         .filter(|&size| size <= 256 * 1024 * 1024)
@@ -207,5 +218,123 @@ pub fn extract(disc: &Disc, executable: &[u8]) -> Result<(Vec<u8>, Vec<u8>), Str
                 .ok_or_else(|| format!("Missing GTA IV locomotion reference {name}"))
         })
         .collect::<Result<Vec<_>, _>>()?;
-    Ok((exporter.encode(&get_up)?, exporter.encode(&locomotion)?))
+    let character = archive_file(&platform, &key, "data/naturalmotion/fred.xrt")?;
+    delirium_data::LE.store(false, std::sync::atomic::Ordering::Relaxed);
+    let joints = delirium_data::nm_asset::read(&character);
+    let masses = delirium_data::nm_asset::masses(&character);
+    let parts = delirium_data::nm_asset::parts(&character);
+    if joints.len() != 20 || masses.len() != 21 || parts.len() != 21 {
+        return Err("Incomplete original Fred character".into());
+    }
+    delirium::nmrs::set(
+        0,
+        joints,
+        parts,
+        masses,
+        delirium_data::nm_asset::self_collision(&character),
+    );
+
+    // This is the development lsc4-support export, including the fragment's
+    // actual offsets and the original player idle used to derive joint frames.
+    let path = "xbox360/models/cdimages/componentpeds.img";
+    let header = disc.read_at(path, 0, 20)?;
+    let length = img::table_len(&header, Some(&key))
+        .filter(|&n| n <= 16 * 1024 * 1024)
+        .ok_or("Invalid componentpeds.img table")?;
+    let table = img::read_table(&disc.read_at(path, 0, length)?, Some(&key))?;
+    let entry = table
+        .iter()
+        .find(|entry| entry.name.eq_ignore_ascii_case("m_y_pmanhat_01.xft"))
+        .ok_or("Missing original pedestrian fragment")?;
+    let raw = disc.read_at(path, entry.offset, usize::from(entry.used_blocks) * 2048)?;
+    let fragment = resource::parse(&raw)?;
+    let ped = skeleton::read(&fragment, model::fragment_root(&fragment)?)?;
+    let parts = delirium_data::ragdoll::read(&fragment)?;
+    let parents = ped.iter().map(|bone| bone.parent).collect::<Vec<_>>();
+    let bind = ped
+        .iter()
+        .map(|bone| {
+            (
+                Vec3::from(bone.translation),
+                Quat::from_array(bone.rotation).normalize(),
+            )
+        })
+        .collect::<Vec<_>>();
+    let mut rig =
+        Rig::new(&parts, &parents, &bind, &ped, 0).ok_or("Incomplete original pedestrian rig")?;
+    if rig.build.parts.len() != 21 {
+        return Err("Original pedestrian rig must have 21 parts".into());
+    }
+    let idle = locomotion[0].1;
+    let mut pose = exporter.local.clone();
+    pose[0] = (Vec3::ZERO, Quat::IDENTITY);
+    for track in &idle.tracks {
+        let values = track.sample(0);
+        let bone = exporter
+            .bones
+            .iter()
+            .position(|bone| bone.id == track.bone)
+            .filter(|&i| i != 0);
+        match (track.kind, bone, track.bone, values.as_slice()) {
+            (anim::BONE_ROTATION, Some(i), _, [x, y, z, w]) => {
+                pose[i].1 = Quat::from_xyzw(*x, *y, *z, *w).normalize()
+            }
+            (anim::BONE_TRANSLATION, Some(i), _, [x, y, z]) => pose[i].0 = Vec3::new(*x, *y, *z),
+            (anim::BONE_ROTATION, None, 0, [x, y, z, w]) => {
+                pose[0].1 = Quat::from_xyzw(*x, *y, *z, *w).normalize()
+            }
+            (anim::BONE_TRANSLATION | anim::MOVER_TRANSLATION, None, 0, [x, y, z]) => {
+                pose[0].0 += Vec3::new(*x, *y, *z)
+            }
+            _ => {}
+        }
+    }
+    let turn = Quat::from_rotation_z(-std::f32::consts::FRAC_PI_2);
+    let mut world: Pose = Vec::with_capacity(pose.len());
+    for (index, &(position, rotation)) in pose.iter().enumerate() {
+        let (parent, basis) = exporter.bones[index]
+            .parent
+            .map_or((Vec3::ZERO, turn), |parent| world[parent]);
+        world.push((parent + basis * position, basis * rotation));
+    }
+    let mut frames = rig
+        .build
+        .parts
+        .iter()
+        .map(|part| {
+            let bone = exporter
+                .bones
+                .iter()
+                .position(|bone| bone.name == part.name)
+                .ok_or_else(|| format!("Missing original part bone {}", part.name))?;
+            let (position, rotation) = world[bone];
+            Ok(
+                Transform::from_translation(position + rotation * part.offset.translation)
+                    .with_rotation(rotation * part.offset.rotation),
+            )
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    for (part, frame) in rig.build.parts.iter_mut().zip(&frames) {
+        part.bind = frame.rotation;
+    }
+    delirium::nmrs::asset_layout(&mut rig.build, &mut frames);
+    let common_len = disc
+        .len("common.rpf")
+        .filter(|&n| n <= 256 * 1024 * 1024)
+        .ok_or("Missing or oversized common.rpf")?;
+    let common = disc.read_at("common.rpf", 0, common_len as usize)?;
+    let tasks = archive_file(&common, &key, "data/taskparams.txt")?;
+    if delirium_data::taskparams::read(std::str::from_utf8(&tasks).map_err(|e| e.to_string())?)
+        .0
+        .is_empty()
+    {
+        return Err("Original task parameters are empty".into());
+    }
+    Ok(DiscResources {
+        recovery: exporter.encode(&get_up)?,
+        locomotion: exporter.encode(&locomotion)?,
+        character,
+        build: rig.build.dump(&frames).into_bytes(),
+        tasks,
+    })
 }

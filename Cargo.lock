@@ -382,6 +382,7 @@ dependencies = [
 name = "bo1-delirium-worker"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "delirium",
  "delirium-data",
  "rayon",

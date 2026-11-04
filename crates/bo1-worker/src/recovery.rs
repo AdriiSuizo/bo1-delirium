@@ -76,8 +76,7 @@ impl Motions {
         let mut c = Cursor::new(std::fs::read(path).map_err(|e| e.to_string())?);
         let mut head = [0; 8];
         c.read_exact(&mut head).map_err(|e| e.to_string())?;
-        let bo1 = &head == b"BO1MOT01";
-        if (!bo1 && &head != b"NMMOTN03") || u32r(&mut c)? != 21 {
+        if &head != b"NMMOTN03" || u32r(&mut c)? != 21 {
             return Err("recovery cache header".into());
         }
         let n = u32r(&mut c)?;
@@ -137,7 +136,6 @@ impl Motions {
         // The target build is an idle pose, not a bind pose. Use the matching
         // source idle as reference; applying the bind-to-idle bend twice folded
         // the spine and knees even at the end of a successful muscle recovery.
-        if !bo1 {
         let mut c = Cursor::new(
             std::fs::read(path.with_file_name("original-locomotion.motion"))
                 .map_err(|e| e.to_string())?,
@@ -164,10 +162,9 @@ impl Motions {
         for q in &mut rest {
             *q = quat(&mut c)?;
         }
-        }
         println!(
-            "Delirium host recovery: {} original {} clips, interruptible on impact",
-            clips.len(), if bo1 { "BO1" } else { "GTA IV" }
+            "Delirium host recovery: {} local original clips, interruptible on impact",
+            clips.len()
         );
         Ok(Self { rest, clips })
     }
@@ -226,10 +223,7 @@ impl Motions {
         // There is no injured get-up from the back: a hurt zombie lying face
         // up takes the slow one (played a little slower) rather than normal.
         let fallback = if variant == Variant::Injured { Variant::Slow } else { Variant::Normal };
-        let resolved = |back: bool| if has(back) { variant }
-            else if self.clips.iter().any(|c| c.back == back && c.variant == fallback) { fallback }
-            else { Variant::Normal };
-        let allowed = |c: &Clip| c.variant == resolved(c.back);
+        let allowed = |c: &Clip| c.variant == variant || (c.variant == fallback && !has(c.back));
         let mut best = (f32::INFINITY, 0, 0.0, Quat::IDENTITY);
         let trunk = current[10].translation - current[0].translation;
         let partial = trunk.normalize_or(Vec3::Z).z > 0.45
@@ -413,15 +407,8 @@ impl Recovery {
                 let arm = a.doll.centre(k) - centre;
                 a.doll.inertia(k, axis) + a.doll.part_mass(k) * arm.cross(axis).length_squared()
             }).sum();
-            // A fixed mass*g*0.25 cap could not follow BO1's roll-to-support
-            // get-ups. Bound the absolute drive by the loaded character's
-            // actual hip/spine actuator budgets instead of inventing another
-            // weapon-independent or clip-specific lift multiplier.
-            let torque_budget = delirium::nmrs::ASSET[build.nm].get()
-                .map(|joints| [0,3,6,7,8,9].iter()
-                    .map(|&i| joints[i].max_torque[0].max(joints[i].max_torque[1]))
-                    .sum::<f32>()).unwrap_or(0.0);
-            let torque = (angular_acceleration * inertia).clamp_length_max(torque_budget);
+            let torque = (angular_acceleration * inertia)
+                .clamp_length_max(mass * delirium::ragdoll::GRAVITY() * 0.25);
             let lever = if axis.z.abs() < 0.8 { axis.cross(Vec3::Z) } else { axis.cross(Vec3::X) }
                 .normalize_or(Vec3::X) * 0.2;
             let force = torque.cross(lever) / (2.0 * lever.length_squared());
