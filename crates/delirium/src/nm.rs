@@ -2503,6 +2503,7 @@ pub enum Task {
     Balance,
     Brace,
     Flinch,
+    Explosion,
     HighFall,
     FallDown,
     OnFire,
@@ -2550,7 +2551,9 @@ pub fn task_finish_as(task: Task, since: f32, [min, max]: [f32; 2], v: f32, z: f
     let (flags, row) = match task {
         Balance => (16 | (failed || player && since > delirium_data::kv!(36)) as u32, 1),
         Brace => (8 | (failed || player && since > delirium_data::kv!(36)) as u32, 1),
-        Flinch => (9, 1),
+        // NMExplosion shares NMFlinch's slot-28 function: TU8 vtable
+        // 8203F304 -> 8261B9E8, row 1 / flags 9 into 82617140.
+        Flinch | Explosion => (9, 1),
         FallDown => (if matches!(fall, 4 | 5) { 9 } else { 8 }, 1),
         HighFall => (if failed { 9 } else { 0 } | (player && since > delirium_data::kv!(20)) as u32, 1),
         Shot => (18 | failed as u32, 1),

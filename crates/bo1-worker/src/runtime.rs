@@ -776,6 +776,7 @@ impl Runtime {
                 facing,
                 self.rand.next() as f32 / 32768.0,
             );
+            a.agent.doll.allow_sleep(false);
             a.agent.set_rng((
                 (self.rand.next() << 16) ^ self.rand.next(),
                 (self.rand.next() << 16) ^ self.rand.next(),
@@ -844,6 +845,7 @@ impl Runtime {
                     &mut self.rand,
                 ));
                 a.blast_start = self.frame;
+                a.last_hit = self.frame;
                 a.shot = None;
             }
         } else if kind != 8 {
@@ -1102,15 +1104,19 @@ impl Runtime {
                     vz,
                     near,
                 );
-                let supported = a.agent.doll.touch.iter().any(|x| x & 0x28 == 0x20);
-                let age = (self.frame - a.blast_start) as f32 * DT;
-                if !(supported
-                    && ((age > 2.0 && a.agent.doll.com().1.length() < 0.2)
-                        || (age > 10.0 && a.agent.doll.com().1.length() < 2.0)))
-                {
-                    a.blast = Some(blast);
-                } else {
+                let age = self.frame.wrapping_sub(a.blast_start) as f32 * DT;
+                // The original NMExplosion slot-28 finish, not a BO1 settle timer.
+                // Use its minimum time and speed gate without an extra BO1
+                // ground-contact condition. Balance starts by stopping the
+                // explosion's writhe / windmill / roll-up before recovery runs.
+                let task = nm::Task::Explosion;
+                let finished = nm::task_finish(task, age, task.times(),
+                    a.agent.doll.com().1.length(), a.agent.doll.root().z,
+                    false, 0, a.context().health);
+                if finished.is_some() {
                     a.balance(&self.world, &self.tp);
+                } else {
+                    a.blast = Some(blast);
                 }
             }
             // Start by supplying the BO1 leg cycle as a partial motor target.
@@ -1749,6 +1755,84 @@ pub fn moon_test() -> Result<(), String> {
         (Some(e), Some(m)) if m > e * 1.8 && standing => Ok(()),
         _ => Err("moon gravity test failed".into()),
     }
+}
+// Intact survivors, covering the original roll-up, writhe and windmill starts.
+// Stay separated so this tests task exit/recovery rather than crowd obstruction.
+pub fn blast_recovery_test() -> Result<(), String> {
+    let mut r = Runtime::load(true)?;
+    r.actors[0] = None;
+    let n = 12;
+    let mut initial: Initial = unsafe { std::mem::zeroed() };
+    let mut states = std::collections::BTreeSet::new();
+    for i in 0..n {
+        let at = Vec3::new((i % 4) as f32 * 8.0, (i / 4) as f32 * 8.0, 0.0);
+        for k in 0..PARTS {
+            let t = r.rest[k];
+            initial.pose[k] = matrix(Transform::from_translation(t.translation + at).with_rotation(t.rotation));
+        }
+        r.create(i, Some(&initial))?;
+        let a = r.actors[i].as_mut().unwrap();
+        a.active = true;
+        a.agent.doll.allow_sleep(false);
+        a.balance(&r.world, &r.tp);
+    }
+    for _ in 0..60 { r.step()?; }
+    for i in 0..n {
+        let a = r.actors[i].as_ref().unwrap();
+        let masses: Vec<_> = (0..PARTS).map(|k| a.agent.doll.part_mass(k)).collect();
+        let yaw = i as f32 * 0.7;
+        let dv = Vec3::new(yaw.cos(), yaw.sin(), 0.6).normalize() * 6.0;
+        for (k, mass) in masses.into_iter().enumerate() {
+            let j = dv * mass;
+            r.hit(&Hit { part: k as u32, actor: i as u32, point: [0.0, 0.0, 0.0, 1.0],
+                impulse: [j.x, j.y, j.z, 0.08], normal: [0.0, 0.0, 0.0, 9.0], ..Default::default() })?;
+        }
+        let a = r.actors[i].as_ref().unwrap();
+        let state = a.blast.as_ref().unwrap().state();
+        states.insert(state);
+        println!("SURVIVOR i={i} blast_state={state} detached={:x}", a.detached);
+    }
+    let mut exited = [None; 12];
+    let mut recovered = [None; 12];
+    let mut interrupted = [false; 12];
+    for f in 0..1500 {
+        for i in (0..n).step_by(4) {
+            let a = r.actors[i].as_ref().unwrap();
+            if !interrupted[i] && a.recovery.rise.is_some() && a.recovery.time() > 0.4 {
+                let at = a.agent.doll.frames().nth(10).unwrap().translation;
+                r.hit(&Hit { part: 10, actor: i as u32, point: [at.x, at.y, at.z, 0.0],
+                    impulse: [0.0, -8.0, 0.0, 0.1], bullet_velocity: [0.0, -450.0, 0.0, 0.0],
+                    normal: [0.0, 0.0, 0.0, 2.0] })?;
+                interrupted[i] = true;
+            }
+        }
+        r.step()?;
+        for i in 0..n {
+            let a = r.actors[i].as_ref().unwrap();
+            if a.blast.is_none() && exited[i].is_none() { exited[i] = Some(f); }
+            let poses: Vec<_> = a.agent.doll.frames().collect();
+            let height = poses[12].translation.z - poses[3].translation.z.min(poses[6].translation.z);
+            if exited[i].is_some() && a.agent.balancing() && !a.agent.fallen && height > 1.25
+                && a.recovery.rise.is_none() && recovered[i].is_none() { recovered[i] = Some(f); }
+            if f % 120 == 119 {
+                println!("SURVIVOR i={i} t={:.1} blast={} speed={:.3} balance={} fallen={} rise={} completed={} interrupted={} height={height:.3}",
+                    (f+1) as f32 * DT, a.blast.is_some(), a.agent.doll.com().1.length(),
+                    a.agent.balancing(), a.agent.fallen, a.recovery.rise.is_some(), a.recovery.completed, a.recovery.interrupted);
+            }
+        }
+    }
+    let mut pass = 0;
+    for i in 0..n {
+        let a = r.actors[i].as_ref().unwrap();
+        let ok = recovered[i].is_some() && a.blast.is_none() && a.detached == 0
+            && a.agent.balancing() && a.recovery.rise.is_none()
+            && (i % 4 != 0 || interrupted[i] && a.recovery.interrupted > 0);
+        pass += ok as usize;
+        println!("SURVIVOR result i={i} exit_s={:?} recovered_s={:?} pass={ok}", exited[i].map(|f| f as f32*DT), recovered[i].map(|f| f as f32*DT));
+    }
+    println!("SURVIVOR passed={pass}/{n} states={states:?}");
+    if pass != n || states.iter().any(|&s| s > 2) { return Err("intact explosion survivors must exit their blast reaction and regain balance".into()); }
+    Ok(())
 }
 // A grenade in a horde: `n` zombies enter physics in the same frame (as BO1
 // hands them over) and every part takes the blast push (kind 9, 0.08 s), as

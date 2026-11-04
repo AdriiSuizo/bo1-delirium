@@ -56,6 +56,9 @@ fn run() -> Result<(), String> {
     if args.get(1).map(String::as_str) == Some("--moon") {
         return runtime::moon_test();
     }
+    if args.get(1).map(String::as_str) == Some("--blast-recovery") {
+        return runtime::blast_recovery_test();
+    }
     if args.get(1).map(String::as_str) == Some("--blast-crowd") {
         return runtime::blast_crowd_test(args.get(2).and_then(|v| v.parse().ok()).unwrap_or(20));
     }
@@ -164,4 +167,26 @@ fn run() -> Result<(), String> {
         UnmapViewOfFile(ptr as _);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod blast_finish_tests {
+    #[test]
+    fn original_explosion_finish_and_velocity_gate() {
+        // As with the upstream oracle tests, local game data is optional in CI.
+        let Some(cache) = std::env::var_os("BO1_DELIRIUM_GTA_CACHE") else { return };
+        crate::disc_setup::load(std::path::Path::new(&cache)).unwrap();
+        use delirium::nm::{self, Task, Next};
+        let t = Task::Explosion;
+        assert_eq!(t.times(), [1.0, 10.0]);
+        let finish = |age, speed, z, health| nm::task_finish(t, age, t.times(), speed, z, false, 0, health);
+        assert_eq!(finish(0.9, 0.0, 1.0, 160.0), None);
+        assert_eq!(finish(1.1, 0.15, 1.0, 160.0), Some(Next::Blend));
+        assert_eq!(finish(1.1, 0.15, 1.0, 100.0), Some(Next::Relax));
+        assert_eq!(finish(1.1, 0.3, 1.0, 160.0), None);
+        assert_eq!(finish(10.1, 1.9, 1.0, 160.0), Some(Next::Blend));
+        assert_eq!(finish(10.1, 2.1, 1.0, 160.0), None);
+        assert_eq!(finish(10.1, 2.1, -0.1, 160.0), Some(Next::Blend));
+        assert_eq!(finish(100.1, 2.1, 1.0, 160.0), Some(Next::Blend));
+    }
 }
