@@ -1,4 +1,4 @@
-BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 3
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 4
 
 INSTALACIÓN
 
@@ -19,7 +19,10 @@ COMPATIBILIDAD
 Probado con Plutonium T5 r5369 y BO1 Steam 7.0.152 CL 966072.
 ISO de GTA IV base Xbox 360. Perfiles comprobados para Media ID 4A53F9F6 y 6AC07221.
 El modo probado es Zombies de un jugador en LAN, en Kino der Toten.
-Esta beta recupera el núcleo de Delirium de Steam Beta 5 para el equilibrio y el levantamiento.
+Esta beta mantiene el núcleo de Delirium de Steam Beta 5 para el equilibrio y el levantamiento.
+Al recuperar el apoyo, el zombi puede devolver el control a BO1 aunque la IA esté momentáneamente quieta.
+El arranque de la carrera usa la velocidad reciente del cuerpo apoyado.
+Las colisiones entre cuerpos reutilizan los límites calculados por pieza y los cuerpos independientes se resuelven en paralelo.
 La preparación sigue utilizando la caché del disco compatible con Delirium 0.6.0.
 Si una futura actualización de T5 cambia las firmas del juego, el lanzador rechaza el arranque.
 
@@ -47,6 +50,7 @@ CRÉDITOS Y LICENCIA
 
 Delirium 0.6.0: https://github.com/PVCPC/delirium-physics
 Referencias de integración: https://github.com/SuperSloppers/large-steal-car-4
+Referencia para el historial de movimiento en la transición: https://github.com/NVlabs/motionbricks
 MinHook: Tsuda Kageyu y colaboradores.
 Preparador empaquetado con Python y PyInstaller.
 Integración y empaquetado con asistencia de OpenAI Codex.

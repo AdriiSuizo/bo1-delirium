@@ -55,7 +55,7 @@ RdVec3 Host(V v,float units){return {v.y*units,-v.x*units,v.z*units};}
 Q Gta(RdQuat q){return Unit(Mul(Inv(gtaToHost),{q.x,q.y,q.z,q.w}));}
 RdQuat Host(Q q){q=Unit(Mul(gtaToHost,q));return {q.x,q.y,q.z,q.w};}
 const unsigned parts16[16]={0,1,2,3,4,5,6,7,10,12,14,15,16,18,19,20};
-struct BridgeActor {bool allocated=false,created=false,retired=false;uint32_t handle=0,mode=RD_MODE_PASSIVE,detachedMask=0;nm108::InitialPose initial={};nm108::Target target={};nm108::GaitReference gait={};double gaitUntil=0;V forward={0,1,0},shotPressure={};float pain=0,quiet=0,stable=0;bool settling=false,animationReady=false;V settleForward={0,1,0};uint32_t gravity=1000;};
+struct BridgeActor {bool allocated=false,created=false,retired=false;uint32_t handle=0,mode=RD_MODE_PASSIVE,detachedMask=0;nm108::InitialPose initial={};nm108::Target target={};nm108::GaitReference gait={};double gaitUntil=0;V forward={0,1,0},shotPressure={};float pain=0,quiet=0,stable=0;bool settling=false,animationReady=false;V settleForward={0,1,0};uint32_t gravity=1000,recoveryAtImpact=0;};
 }
 namespace BirthClearance {
 using GuideV=V;using MotionQ=Q;
@@ -195,10 +195,14 @@ struct RdWorld {
             const bool crawl=(s.detachedMask&((1u<<2)|(1u<<3)|(1u<<5)|(1u<<6)))!=0;
             const bool safe=nm108::SafeLocomotion(s);
             const bool maintained=crawl?safe:nm108::MaintainLocomotion(s);
+            // A completed rise has already reached standing under load.
+            // Let its correction steps count if the capture point remains
+            // inside support. A fresh hit still requires new evidence.
+            const bool stableSupport=safe||(s.recoveryCompleted>a.recoveryAtImpact&&maintained);
             if(a.quiet<.8f||!maintained)a.animationReady=false;
             // Count observed poses rather than unseen catch-up frames. Small
             // corrections decay evidence instead of restarting a rigid timer.
-            if(a.quiet>=.8f)a.stable=safe?a.stable+float(steps)/60.f:(std::max)(0.f,a.stable-float(steps)/30.f);
+            if(a.quiet>=.8f)a.stable=stableSupport?a.stable+float(steps)/60.f:(std::max)(0.f,a.stable-float(steps)/30.f);
             else a.stable=0;
             if(maintained&&a.stable>.35f)a.animationReady=true;
         }
@@ -564,6 +568,7 @@ API int32_t rd_actor_hit_profile(RdWorld* w,uint32_t actor,const RdHit* hit,floa
     w->hits.push_back(bullet);
     float mass=0;for(unsigned p=0;p<21;++p)if(!(w->client.Actors()[actor&31].detachedMask&(1u<<p)))mass+=w->rig.shapes[p].mass;
     if(mass>0)a->shotPressure=a->shotPressure+impulse*(1.f/mass);
+    a->recoveryAtImpact=w->client.Actors()[actor&31].recoveryCompleted;
     a->pain+=(std::min)(magnitude,40.f);a->quiet=a->stable=0;a->settling=a->animationReady=false;return RD_OK;
 }
 // External contact/blast momentum, distinct from a projectile and its NMShot.
@@ -576,7 +581,10 @@ API int32_t rd_actor_push(RdWorld* w,uint32_t actor,unsigned body,RdVec3 impulse
     w->hits.push_back(push);
     // Ordinary crowd contacts are judged by the resulting support/velocity.
     // Treating every small shove as a new bullet prevented recovery forever.
-    if(kind==nm108::ExplosionImpulse||Dot(j,j)>144.f){a->quiet=a->stable=0;a->animationReady=a->settling=false;}
+    if(kind==nm108::ExplosionImpulse||Dot(j,j)>144.f){
+        a->recoveryAtImpact=w->client.Actors()[actor&31].recoveryCompleted;
+        a->quiet=a->stable=0;a->animationReady=a->settling=false;
+    }
     return RD_OK;
 }
 API int32_t rd_actor_hit(RdWorld* w,uint32_t actor,const RdHit* hit){return rd_actor_hit_profile(w,actor,hit,0,450,0);}

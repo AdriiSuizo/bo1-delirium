@@ -2368,6 +2368,12 @@ impl Ragdoll {
             (0..d.bodies.len()).map(|a| { let (f, s) = frame_of(d, &t, a); (f, s, swept_box(&ms[i].build.parts[a], f, s)) }).collect()
         }).collect();
         struct Job { contacts: Vec<(usize, usize, Vec3, Vec3, usize)>, i: usize, k: usize, cross: Vec<(usize, usize, Block, Block, Src)>, held: Vec<((usize, usize, usize, usize), Vec<Held>)>, joined: bool }
+        // Convert each swept box once per part, rather than twice per pair.
+        let world_half: Vec<Vec<Vec3>> = parts.iter().map(|body| {
+            body.iter().map(|&(f, _, b)| {
+                Mat3::from_cols(f.1.x_axis.abs(), f.1.y_axis.abs(), f.1.z_axis.abs()) * b.1
+            }).collect()
+        }).collect();
         let mut jobs = vec![];
         for i in 0..n {
             for k in i + 1..n {
@@ -2388,9 +2394,7 @@ impl Ragdoll {
                     for (c, &(fc, sc, bc)) in parts[k].iter().enumerate() {
                         // Swept boxes already enclose both poses and collision margins.
                         // Reject axis-separated pairs before expensive manifold work.
-                        let wa=Mat3::from_cols(fa.1.x_axis.abs(),fa.1.y_axis.abs(),fa.1.z_axis.abs())*ba.1;
-                        let wc=Mat3::from_cols(fc.1.x_axis.abs(),fc.1.y_axis.abs(),fc.1.z_axis.abs())*bc.1;
-                        if (ba.0-bc.0).abs().cmpgt(wa+wc).any() {
+                        if (ba.0-bc.0).abs().cmpgt(world_half[i][a]+world_half[k][c]).any() {
                             continue;
                         }
                         let key = (ms[i].id, a, ms[k].id, c);
@@ -2455,9 +2459,11 @@ impl Ragdoll {
         }
         let tops: Vec<usize> = (0..n).map(|i| root(&mut joined, i)).collect();
         let alone: Vec<bool> = (0..n).map(|i| st[i].is_some() && (0..n).filter(|&k| st[k].is_some() && tops[k] == tops[i]).count() == 1).collect();
-        for (m, s) in ms.iter_mut().zip(st.iter_mut()).zip(&alone).filter(|x| *x.1).map(|x| x.0) {
+        let mut independent: Vec<_> = ms.iter_mut().zip(st.iter_mut()).zip(&alone)
+            .filter_map(|(pair, &alone)| alone.then_some(pair)).collect();
+        par_each(&mut independent, |(m, s)| {
             m.doll.finish(s.take().unwrap(), m.drive.lift);
-        }
+        });
         for top in 0..n {
             let mut is: Vec<usize> = (0..n).filter(|&i| st[i].is_some() && tops[i] == top).collect();
             if is.is_empty() {

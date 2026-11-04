@@ -1,4 +1,4 @@
-Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 3
+Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 4
 Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
 Native game adapter and bridge:
   cmake -S native -B native-build -A Win32

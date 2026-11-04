@@ -83,6 +83,10 @@ struct Actor {
     Vec3 incoming{},incomingLinear[16]{},incomingAngular[16]{},blast{};int incomingTime{};
     int deadSince{},settledSince{},contactTime{},pushTime{};bool pendingContact{},readyRelease{};float pushBudget{};
     float nominalSpeed{},runScale{1.f};
+    // Recent supported COM velocities, sampled once per server tick.
+    Vec3 supportedVelocity[4]{};
+    unsigned supportSamples{};
+    int supportTime{};
     struct Rate {void* tree{};uint16_t info{};float base{},applied{};bool owned{};} rate[2];
     RdActorState status{};AnimationReturn blend{};RunResume run{};WoundBudget wounds{};BulletQueue hits{},weakPellets{};
 };
@@ -168,7 +172,8 @@ static bool loadApi(const std::filesystem::path& root){
 #undef GET
     return true;
 }
-static void release(Actor& a){if(a.active&&g_world)g_api.actor_despawn(g_world,a.handle);a.active=false;a.returning=false;a.blend.reset();}
+static void clearSupport(Actor& a){a.balancedSince=0;a.supportSamples=0;}
+static void release(Actor& a){if(a.active&&g_world)g_api.actor_despawn(g_world,a.handle);a.active=false;a.returning=false;a.readyRelease=false;clearSupport(a);a.blend.reset();}
 static void reset(){for(auto& a:actors)a={};if(g_world)g_api.world_destroy(g_world);g_world=nullptr;map=nullptr;lastStep=0;}
 static bool uploadMap(native::ClipMap& cm);
 static bool world(native::ClipMap* cm){
@@ -248,7 +253,7 @@ static bool activate(Actor& a,void* ent,int now){
     a.detachedMask=detached;
     if(detached)g_api.actor_set_detached_parts(g_world,handle,detached);
     if(g_api.actor_set_mode(g_world,handle,a.dead?0:1)){g_api.actor_despawn(g_world,handle);return false;}
-    a.active=true;a.frozen=false;a.pendingContact=false;a.activeSince=now;a.balancedSince=0;a.blend.reset();a.run.cancel();
+    a.active=true;a.frozen=false;a.pendingContact=false;a.activeSince=now;clearSupport(a);a.blend.reset();a.run.cancel();
     std::copy_n(a.animation,a.count,a.draw);std::copy_n(a.animationQ,a.count,a.drawQ);
     log("Steam physics takeover entity %d handle %u incoming %.2f %.2f %.2f pelvis %.2f %.2f %.2f",native::at<int>(ent,0),handle,velocity.x,velocity.y,velocity.z,linear[0].x,linear[0].y,linear[0].z);return true;
 }
@@ -276,19 +281,25 @@ static void frame(int renderStamp){
             else if(t-a.settledSince>750){release(a);a.frozen=true;log("Steam corpse sleeping entity %u",ent);}
             continue;
         }
-        bool interrupted=animationReturnInterrupted(int(a.status.flags),false,a.hits.ready(t));
+        const bool interrupted=animationReturnInterrupted(int(a.status.flags),false,a.hits.ready(t));
         void* owner=native::at<void*>(native::entity(ent),0x140);
-        bool codeMotion=owner&&native::at<int>(owner,0xde0)==1;
-        if(interrupted||!codeMotion){a.returning=false;a.readyRelease=false;a.balancedSince=0;a.run.cancel();}
-        if(!a.returning&&(a.status.flags&32)&&!interrupted&&codeMotion&&t-a.activeSince>900){
+        if(interrupted||!owner){a.returning=false;a.readyRelease=false;clearSupport(a);a.run.cancel();}
+        if(!a.returning&&(a.status.flags&RD_STATE_BALANCED)&&!interrupted&&owner&&t-a.activeSince>900){
             if(!a.balancedSince)a.balancedSince=t;
+            if(!a.supportSamples||a.supportTime!=t){
+                a.supportedVelocity[a.supportSamples++%4]=v(a.status.com_velocity);
+                a.supportTime=t;
+            }
             if(t-a.balancedSince>=200){
                 a.returning=true;
                 float yaw=native::at<Vec3>(native::entity(ent),0x128).y*DEG2RAD;
-                float carried=std::max(0.f,a.status.com_velocity.x*cosf(yaw)+a.status.com_velocity.y*sinf(yaw));
+                Vec3 carriedVelocity{};
+                unsigned count=std::min(a.supportSamples,4u);
+                for(unsigned i=0;i<count;i++)carriedVelocity+=a.supportedVelocity[i];
+                const float carried=std::max(0.f,dot(carriedVelocity,v3(cosf(yaw),sinf(yaw),0))/float(count));
                 a.run.begin(t,.65f,carried,a.nominalSpeed);
             }
-        }else if(!a.returning&&!(a.status.flags&32))a.balancedSince=0;
+        }else if(!a.returning&&!(a.status.flags&RD_STATE_BALANCED))clearSupport(a);
         float weight=a.blend.step(a.returning,dt);
         if(a.returning&&weight<=.001f){
             // The server must commit the final physical position after its
@@ -342,7 +353,7 @@ static void hit(void* ent,int damage,const float* point,int mod,const float* dir
         for(int i=0;i<16;i++){a.incomingLinear[i]=a.linear[i]-a.rootVelocity+a.incoming;a.incomingAngular[i]=a.angular[i];}
     }
     if(!a.active)activate(a,ent,now);
-    if(a.active){a.returning=false;a.readyRelease=false;a.run.cancel();a.balancedSince=0;if(a.dead)g_api.actor_set_mode(g_world,a.handle,0);}
+    if(a.active){a.returning=false;a.readyRelease=false;a.run.cancel();clearSupport(a);if(a.dead)g_api.actor_set_mode(g_world,a.handle,0);}
     if(testEnabled)log("Steam physical impact entity %d damage %d mod %d body %d profile %u impulse %.3f active %d dead %d",index,damage,mod,body,kind,impulse,a.active,a.dead);
 }
 static void flushHits(Actor& a,int now){
@@ -436,7 +447,7 @@ static void dismember(int index,unsigned parameter){
     for(int piece=0;piece<5;piece++)if(all||(tags&(1u<<(piece+1))))a.detachedMask|=masks[piece];
     if(old!=a.detachedMask){
         if(a.active)g_api.actor_set_detached_parts(g_world,a.handle,a.detachedMask);
-        a.returning=false;a.balancedSince=0;
+        a.returning=false;a.readyRelease=false;clearSupport(a);
         log("Steam native dismember entity %d mask %04X",index,a.detachedMask);
     }
 }
