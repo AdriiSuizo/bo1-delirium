@@ -19,7 +19,7 @@ La lectura de XEX puede necesitar Internet la primera vez para obtener la clave 
 COMPATIBILIDAD
 
 Probado con Plutonium T5 r5369 y BO1 Steam 7.0.152 CL 966072.
-La beta 9 cambia la instalación y la carga del mod; conserva las físicas de la beta 8.
+La beta 10 añade el desinstalador de doble clic; conserva las físicas de la beta 8 y la carga nativa de la beta 9.
 La nueva carga nativa se ha probado en Kino, también con una caché generada desde cero.
 ISO de GTA IV base Xbox 360. Perfiles comprobados para Media ID 4A53F9F6 y 6AC07221.
 El modo verificado es Zombies de un jugador en LAN. Se han ampliado las pruebas de arranque a los diez mapas clásicos y DLC instalados.
@@ -67,8 +67,10 @@ installation.ini guarda la ubicación del mod. No cambia el ejecutable original 
 Solo la preparación inicial usa un puente temporal junto al bootstrapper y lo retira al terminar.
 Las partidas normales usan el cargador de plugins de Plutonium, sin proxy ni lanzador del mod.
 El adaptador se activa únicamente con t5sp -lan y las físicas solo con BO1 Delirium seleccionado.
-Para retirar la integración, ejecuta Instalar-BO1Delirium.exe --uninstall con Plutonium cerrado.
-Se conservan la caché local, los perfiles y los otros mods.
+Para retirar la integración, cierra Plutonium y abre Desinstalar-BO1Delirium.exe con doble clic.
+Confirma la desinstalación en la ventana. Retira el plugin, el script propio y la entrada de Mods.
+Se conservan la caché local, los perfiles, la ISO, los otros mods y los archivos del paquete.
+Puedes reinstalar ejecutando Instalar-BO1Delirium.exe. El modo anterior --uninstall sigue disponible.
 No compartas la caché ni la ISO. El RAR solo contiene el mod y sus dependencias.
 
 CRÉDITOS Y LICENCIA

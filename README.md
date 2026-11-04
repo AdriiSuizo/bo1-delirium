@@ -6,8 +6,10 @@ Descomprime el paquete junto a BlackOps.exe y ejecuta Instalar-BO1Delirium.exe u
 
 El plugin utiliza el cargador de plugins de Plutonium y solo activa este adaptador en T5 Zombies LAN. La simulación permanece desactivada al seleccionar otro mod. La caché contiene recursos del juego del usuario y no debe compartirse.
 
+Para desinstalar, cierra Plutonium y abre Desinstalar-BO1Delirium.exe. Retira la integración de Plutonium y conserva tus partidas, la caché, otros mods y los archivos del paquete para reinstalar.
+
 - [Instalación, compatibilidad y controles](LEEME-INSTALACION.txt)
 - [Compilación](BUILD.txt)
-- [Beta de Plutonium](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/plutonium-v0.3.0-beta9)
+- [Beta de Plutonium](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/plutonium-v0.3.0-beta10)
 
 Integración y empaquetado con asistencia de OpenAI Codex. [Licencia](LICENSE).
