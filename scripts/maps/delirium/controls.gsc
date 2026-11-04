@@ -91,14 +91,31 @@ pause_round()
 
 spawn_five()
 {
-    if ( !IsDefined( level.enemy_spawns ) || !level.enemy_spawns.size || is_true( level.delirium_spawning ) )
+    if ( is_true( level.delirium_spawning ) )
+        return;
+
+    spawners = [];
+    if ( IsDefined( level.enemy_spawns ) && level.enemy_spawns.size )
+        spawners = level.enemy_spawns;
+    else
+    {
+        // Shangri-La uses one stock factory instead of level.enemy_spawns.
+        // Its normal factory is marked zombie_spawner; special enemies use
+        // separate noteworthy values and must keep their own map scripts.
+        candidates = GetSpawnerArray();
+        for ( i = 0; i < candidates.size; i++ )
+        {
+            if ( IsDefined( candidates[i] ) && IsDefined( candidates[i].script_noteworthy ) && candidates[i].script_noteworthy == "zombie_spawner" )
+                spawners[spawners.size] = candidates[i];
+        }
+    }
+    if ( !spawners.size )
         return;
 
     level.delirium_spawning = true;
     spawned = 0;
     for ( attempt = 0; attempt < 25 && spawned < 5; attempt++ )
     {
-        spawners = level.enemy_spawns;
         if ( spawners.size && IsDefined( spawners[attempt % spawners.size] ) )
         {
             zombie = spawn_zombie( spawners[attempt % spawners.size] );
