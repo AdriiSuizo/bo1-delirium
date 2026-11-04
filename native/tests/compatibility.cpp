@@ -1,5 +1,6 @@
 #include "rig_hierarchy.hpp"
 #include "damage_routing.hpp"
+#include "plugin_policy.hpp"
 #include "core/brush_faces.h"
 #include <array>
 #include <cstdio>
@@ -9,6 +10,14 @@ static void require(bool value, const char* message) {
     if (!value) { std::fprintf(stderr, "%s\n", message); std::exit(1); }
 }
 int main() {
+    const std::array<std::wstring_view,4> lan{L"plutonium-bootstrapper-win32.exe",L"t5sp",L"C:\\Steam\\BO1",L"-lan"};
+    require(pluginPolicy::permitted(lan), "normal Plutonium T5 LAN launch refused");
+    auto online=lan;online[3]=L"-token";
+    require(!pluginPolicy::permitted(online), "online launch enabled native adapter");
+    auto mp=lan;mp[1]=L"t5mp";
+    require(!pluginPolicy::permitted(mp), "T5 multiplayer enabled Zombies adapter");
+    const std::array<std::wstring_view,5> dedicated{lan[0],lan[1],lan[2],lan[3],L"-dedicated"};
+    require(!pluginPolicy::permitted(dedicated), "dedicated server enabled client rendering adapter");
     // A thin but non-planar brush must keep all four original boundary faces.
     const float thin[]{0,0,0, 100,0,0, 100,100,100, 0,100,100.0001220703125f};
     std::vector<unsigned> faces;

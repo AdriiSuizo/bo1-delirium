@@ -14,7 +14,7 @@ struct Handle {
     ~Handle(){if(value)CloseHandle(value);}
 };
 
-static bool gameIsRunning(){
+static bool gameIsRunning(bool plutoniumOnly=false){
     Handle snapshot{CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)};
     if(snapshot.value==INVALID_HANDLE_VALUE){
         snapshot.value=nullptr;
@@ -23,7 +23,7 @@ static bool gameIsRunning(){
     PROCESSENTRY32W entry{};
     entry.dwSize=sizeof(entry);
     for(BOOL valid=Process32FirstW(snapshot.value,&entry);valid;valid=Process32NextW(snapshot.value,&entry)){
-        if(!_wcsicmp(entry.szExeFile,L"BlackOps.exe") ||
+        if((!plutoniumOnly&&!_wcsicmp(entry.szExeFile,L"BlackOps.exe")) ||
            !_wcsicmp(entry.szExeFile,L"plutonium-bootstrapper-win32.exe") ||
            !_wcsicmp(entry.szExeFile,L"plutonium-launcher-win32.exe")) return true;
     }
@@ -57,25 +57,47 @@ public:
     }
 };
 #include "portable_paths.hpp"
+#include "mod_install.hpp"
 int wmain(int argc,wchar_t**argv) try {
     wchar_t exe[MAX_PATH];GetModuleFileNameW(nullptr,exe,MAX_PATH);
     fs::path root=fs::path(exe).parent_path();
+#ifdef BO1_DELIRIUM_INSTALLER
+    root/=L"BO1Delirium";
+#endif
     fs::path game=root.parent_path(),adapter=root/L"DeliriumBO1.dll";
     fs::path cache=environment(L"BO1_DELIRIUM_CACHE_DIR");
     if(cache.empty())cache=fs::path(environment(L"LOCALAPPDATA"))/L"BO1PlutoniumDelirium/bo1-character-v1";
-    int seconds=0;bool diagnostics=false;std::wstring map;
+    int seconds=0;bool diagnostics=false,quiet=false,uninstall=false;std::wstring map;
     for(int i=1;i<argc;i++){
         if(!wcscmp(argv[i],L"--test-seconds")&&i+1<argc){seconds=_wtoi(argv[++i]);diagnostics=true;}
         else if(!wcscmp(argv[i],L"--smoke-seconds")&&i+1<argc){seconds=_wtoi(argv[++i]);diagnostics=false;}
         else if(!wcscmp(argv[i],L"--map")&&i+1<argc)map=argv[++i];
         else if(!wcscmp(argv[i],L"--game-dir")&&i+1<argc)game=fs::absolute(argv[++i]);
         else if(!wcscmp(argv[i],L"--resource-cache")&&i+1<argc)cache=fs::absolute(argv[++i]);
+#ifdef BO1_DELIRIUM_INSTALLER
+        else if(!wcscmp(argv[i],L"--quiet"))quiet=true;
+        else if(!wcscmp(argv[i],L"--uninstall"))uninstall=true;
+#endif
         else fail("unknown launcher option");
     }
+#ifdef BO1_DELIRIUM_INSTALLER
+    // Setup changes only mod files and Plutonium registration. Its read-only
+    // resource capture has its own LAN profile, separate from stock Steam BO1.
+    if(gameIsRunning(true))throw std::runtime_error("Close Plutonium before installing or removing Delirium");
+#else
+    if(gameIsRunning())throw std::runtime_error("Close Black Ops and the Plutonium launcher before starting Delirium");
+#endif
+    const fs::path plutonium=fs::path(environment(L"LOCALAPPDATA"))/L"Plutonium";
+#ifdef BO1_DELIRIUM_INSTALLER
+    if(uninstall){
+        installation::uninstall(root,plutonium);
+        puts("Delirium plugin and Mods registration removed. Local resources and other mods preserved.");
+        if(!quiet)MessageBoxW(nullptr,L"Delirium desinstalado de Plutonium.\nLa cache local y los otros mods se conservan.",L"BO1 Delirium",MB_OK|MB_ICONINFORMATION);
+        return 0;
+    }
+#endif
     if(!fs::exists(game/L"BlackOps.exe")||!fs::exists(adapter))fail("Copy BO1Delirium into the original Steam BO1 folder first");
     if(!supportedGame(game/L"BlackOps.exe"))fail("Unsupported BlackOps.exe: requires original Steam Build 7.0.152 CL 966072");
-    if(gameIsRunning())throw std::runtime_error("Close Black Ops and the Plutonium launcher before starting Delirium");
-    const fs::path plutonium=fs::path(environment(L"LOCALAPPDATA"))/L"Plutonium";
     const auto bootstrap=plutonium/L"bin/plutonium-bootstrapper-win32.exe";
     if(!fs::is_regular_file(bootstrap)||!supportedGame(plutonium/L"games/t5sp.exe"))
         throw std::runtime_error("Install a compatible Plutonium T5 Zombies client first");
@@ -89,6 +111,13 @@ int wmain(int argc,wchar_t**argv) try {
     if(!SetEnvironmentVariableW(L"BO1_DELIRIUM_GTA_CACHE",tuning.c_str())||
        !SetEnvironmentVariableW(L"BO1_DELIRIUM_PLUTONIUM_LAN",L"1")) fail("set Plutonium Delirium environment");
     prepareResources(root,game,cache,plutonium);
+#ifdef BO1_DELIRIUM_INSTALLER
+    if(cache!=installation::localData()/L"bo1-character-v1")throw std::runtime_error("The normal installation requires the default resource cache");
+    installation::install(root,plutonium);
+    puts("Installation complete. Start Plutonium normally, choose T5 Zombies LAN mode, then BO1 Delirium in Mods. The ISO can now be removed.");
+    if(!quiet)MessageBoxW(nullptr,L"Instalacion completada.\n\nAbre Plutonium normalmente, elige T5 Zombies en modo LAN y selecciona BO1 Delirium en Mods.\n\nYa puedes retirar la ISO. No necesitas un CMD para jugar.",L"BO1 Delirium",MB_OK|MB_ICONINFORMATION);
+    return 0;
+#endif
     fs::path home=cache.parent_path()/L"profile",logs=cache.parent_path()/L"logs";
     fs::create_directories(home);fs::create_directories(logs);
     const auto mod=plutonium/L"storage/t5/mods/bo1delirium";
@@ -159,5 +188,8 @@ int wmain(int argc,wchar_t**argv) try {
     return code?2:0;
 } catch(const std::exception& error) {
     fprintf(stderr,"%s\n",error.what());
+#ifdef BO1_DELIRIUM_INSTALLER
+    MessageBoxA(nullptr,error.what(),"BO1 Delirium: installation failed",MB_OK|MB_ICONERROR);
+#endif
     return 1;
 }
