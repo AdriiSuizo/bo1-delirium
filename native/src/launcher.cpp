@@ -92,10 +92,13 @@ int wmain(int argc,wchar_t**argv) try {
     fs::path home=cache.parent_path()/L"profile",logs=cache.parent_path()/L"logs";
     fs::create_directories(home);fs::create_directories(logs);
     const auto mod=plutonium/L"storage/t5/mods/bo1delirium";
-    fs::create_directories(mod);
-    fs::copy_file(root/L"scripts/bo1delirium_controls.iwd",mod/L"bo1delirium_controls.iwd",fs::copy_options::overwrite_existing);
-    // T5 lists Mods from fs_homepath. Plutonium also searches its standard
-    // storage directory for the selected mod's assets.
+    const auto scripts=home/L"main";
+    fs::create_directories(scripts);
+    // T5's RunMod changes fs_game without mounting new IWDs in this session.
+    // Stage our script in this private profile, then load it only on selection.
+    fs::copy_file(root/L"scripts/bo1delirium_controls.iwd",scripts/L"bo1delirium_controls.iwd",fs::copy_options::overwrite_existing);
+    // T5 lists Mods from fs_homepath. Register in both the private LAN profile
+    // and Plutonium's normal storage so the menu always shows the same entry.
     for(const auto& folder:{mod,home/L"mods/bo1delirium"}){
         fs::create_directories(folder);
         std::ofstream description(folder/L"description.txt",std::ios::binary);
