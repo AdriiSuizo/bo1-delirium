@@ -40,6 +40,7 @@ struct Api {
 };
 static Api g_api;
 static RdWorld* g_world;
+static bool modSelected;
 static unsigned model;
 static native::ClipMap* map;
 static std::string mapName;
@@ -171,7 +172,7 @@ static void release(Actor& a){if(a.active&&g_world)g_api.actor_despawn(g_world,a
 static void reset(){for(auto& a:actors)a={};if(g_world)g_api.world_destroy(g_world);g_world=nullptr;map=nullptr;lastStep=0;}
 static bool uploadMap(native::ClipMap& cm);
 static bool world(native::ClipMap* cm){
-    if(!cm||!cm->name||strncmp(cm->name,"maps/zombie_",12)){
+    if(!modSelected||!cm||!cm->name||strncmp(cm->name,"maps/zombie_",12)){
         if(g_world)reset();
         return false;
     }

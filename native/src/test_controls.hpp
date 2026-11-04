@@ -39,6 +39,21 @@ static void __cdecl loadScripts(int instance){
     originalLoadScripts(instance);
     if(instance)return;
     pressHandle=0;hintHandle=0;held=false;hinted=false;
+    const auto* modDvar=reinterpret_cast<void*(__cdecl*)(const char*)>(0x5ae810)("fs_game");
+    const auto* path=modDvar?native::at<const char*>(modDvar,0x18):nullptr;
+    const bool selected=path&&(!_stricmp(path,"mods/bo1delirium")||!_stricmp(path,"mods\\bo1delirium"));
+    {
+        std::lock_guard guard(phys::mutex);
+        phys::reset();
+        phys::mapFailed=false;
+        phys::modSelected=selected;
+        clipMap=nullptr;
+        lastReport=native::time()-5001;
+    }
+    if(!selected){
+        log("Delirium inactive: select BO1 Delirium in Mods");
+        return;
+    }
     // The frontend also compiles server scripts, but only Zombies maps load
     // the stock scripts referenced by our controls.
     if(!stockScriptsReady()){

@@ -91,9 +91,19 @@ int wmain(int argc,wchar_t**argv) try {
     prepareResources(root,game,cache,plutonium);
     fs::path home=cache.parent_path()/L"profile",logs=cache.parent_path()/L"logs";
     fs::create_directories(home);fs::create_directories(logs);
-    auto scripts=home/L"main";
-    fs::create_directories(scripts);
-    fs::copy_file(root/L"scripts/bo1delirium_controls.iwd",scripts/L"bo1delirium_controls.iwd",fs::copy_options::overwrite_existing);
+    const auto mod=plutonium/L"storage/t5/mods/bo1delirium";
+    fs::create_directories(mod);
+    fs::copy_file(root/L"scripts/bo1delirium_controls.iwd",mod/L"bo1delirium_controls.iwd",fs::copy_options::overwrite_existing);
+    // T5 lists Mods from fs_homepath. Plutonium also searches its standard
+    // storage directory for the selected mod's assets.
+    for(const auto& folder:{mod,home/L"mods/bo1delirium"}){
+        fs::create_directories(folder);
+        std::ofstream description(folder/L"description.txt",std::ios::binary);
+        description<<"BO1 Delirium";
+        description.close();
+        if(!description)throw std::runtime_error("Could not register BO1 Delirium in the Mods menu");
+    }
+    puts("Select BO1 Delirium from the Plutonium Mods menu.");
     SetEnvironmentVariableW(L"BO1_DELIRIUM_CACHE_DIR",cache.c_str());
     SetEnvironmentVariableW(L"BO1_DELIRIUM_CHARACTER",(cache/L"bo1-character.json").c_str());
 
@@ -109,10 +119,10 @@ int wmain(int argc,wchar_t**argv) try {
     STARTUPINFOW si{};si.cb=sizeof(si);si.dwFlags=STARTF_USESHOWWINDOW;si.wShowWindow=seconds?SW_SHOWMINNOACTIVE:SW_SHOWNORMAL;
     std::wstring args=L"\""+bootstrap.wstring()+L"\" t5sp \""+game.wstring()+L"\" -lan";
     args+=L" +set fs_homepath \""+home.wstring()+
-        L"\" +set fs_basepath \""+game.wstring()+L"\" +set fs_game mods/bo1delirium +set scr_useFastFileOnly 0 +set logfile 2 +set r_d3d9ex 1 +set com_introPlayed 1 +set com_startupIntroPlayed 1";
+        L"\" +set fs_basepath \""+game.wstring()+L"\" +set fs_game \"\" +set scr_useFastFileOnly 0 +set logfile 2 +set r_d3d9ex 1 +set com_introPlayed 1 +set com_startupIntroPlayed 1";
     if(seconds)args+=L" +set r_fullscreen 0 +set r_customMode 1280x720 +set com_maxfps 150 +set r_vsync 0";
     args+=diagnostics?L" +set developer 1":L" +set developer 0";
-    if(!map.empty())args+=L" +devmap "+map;
+    if(!map.empty())args+=L" +set fs_game mods/bo1delirium +devmap "+map;
     if (!SetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER", adapter.c_str()))
         fail("set in-process mod paths");
     const auto eventName=L"Local\\BO1DeliriumBoot-"+std::to_wstring(GetCurrentProcessId());

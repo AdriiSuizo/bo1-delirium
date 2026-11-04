@@ -1,4 +1,4 @@
-BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 1
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 2
 
 INSTALACIÓN
 
@@ -6,7 +6,8 @@ INSTALACIÓN
 2. Copia BO1Delirium y Jugar-BO1-Delirium.cmd junto a BlackOps.exe.
 3. Coloca ahí tu ISO de GTA IV original de Xbox 360.
 4. Abre Jugar-BO1-Delirium.cmd. El lanzador abre T5 en modo LAN.
-5. Retira la ISO cuando el lanzador confirme que la caché de Delirium está preparada.
+5. En el menú Mods de Plutonium, selecciona BO1 Delirium y luego abre un mapa de Zombies.
+6. Retira la ISO cuando el lanzador confirme que la caché de Delirium está preparada.
 
 La primera ejecución también abre Kino brevemente en Plutonium para obtener el esqueleto,
 ragdoll y animaciones de recuperación de tu BO1. Después se abre el juego para jugar.
