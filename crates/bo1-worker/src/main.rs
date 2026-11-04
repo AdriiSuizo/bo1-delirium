@@ -172,6 +172,14 @@ fn run() -> Result<(), String> {
 #[cfg(test)]
 mod blast_finish_tests {
     #[test]
+    fn intact_survivors_keep_recovering_after_balance_lifecycle_update() {
+        if std::env::var_os("BO1_DELIRIUM_GTA_CACHE").is_none()
+            || std::env::var_os("BO1_DELIRIUM_CACHE_DIR").is_none()
+            || std::env::var_os("NM108_RECOVERY_CACHE").is_none() { return; }
+        crate::disc_setup::load(std::path::Path::new(&std::env::var_os("BO1_DELIRIUM_GTA_CACHE").unwrap())).unwrap();
+        crate::runtime::blast_recovery_test().unwrap();
+    }
+    #[test]
     fn original_explosion_finish_and_velocity_gate() {
         // As with the upstream oracle tests, local game data is optional in CI.
         let Some(cache) = std::env::var_os("BO1_DELIRIUM_GTA_CACHE") else { return };

@@ -1879,7 +1879,9 @@ impl Agent {
                 }
             }
         }
-        if self.fallen && self.balance.is_some() {
+        // Upstream Delirium 93eed4d6 (0.6.0) preserves bodyBalance when
+        // dynamic balance has stopped. This host has no separate idle task.
+        if self.fallen && self.balance.as_ref().is_some_and(|b| b.bb.is_none() || b.dbm.is_some()) {
             self.balance = None;
             self.doll.unpin();
             drive.lift = 0.0;
