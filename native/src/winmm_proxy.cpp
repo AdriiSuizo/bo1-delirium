@@ -1,7 +1,7 @@
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <mmsystem.h>
 #include <intrin.h>
+#include <shellapi.h>
 
 
 static HMODULE systemWinmm() {
@@ -20,6 +20,21 @@ static Function systemFunction(const char* name) {
     return reinterpret_cast<Function>(GetProcAddress(systemWinmm(), name));
 }
 
+static bool plutoniumLan() {
+    wchar_t exe[MAX_PATH]{};
+    if (!GetModuleFileNameW(nullptr, exe, MAX_PATH)) return false;
+    const wchar_t* name = wcsrchr(exe, L'\\');
+    if (!name || _wcsicmp(name + 1, L"plutonium-bootstrapper-win32.exe")) return false;
+    int argc = 0;
+    wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    bool lan = false;
+    if (argv && argc >= 4 && !_wcsicmp(argv[1], L"t5sp")) {
+        for (int i = 3; i < argc; ++i) lan |= !_wcsicmp(argv[i], L"-lan");
+    }
+    if (argv) LocalFree(argv);
+    return lan;
+}
+
 static void startMod(void* caller) {
     MEMORY_BASIC_INFORMATION memory{};
     if (!VirtualQuery(caller, &memory, sizeof(memory)) || memory.AllocationBase != GetModuleHandleW(nullptr))
@@ -27,22 +42,22 @@ static void startMod(void* caller) {
 
     static volatile LONG started = 0;
     if (InterlockedCompareExchange(&started, 1, 0) != 0) return;
-    wchar_t gameMod[32768]{}, adapter[32768]{};
-    const DWORD gameModLength = GetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_GAMEMOD", gameMod, 32768);
-    const DWORD adapterLength = GetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER", adapter, 32768);
-    if (!gameModLength || !adapterLength || gameModLength >= 32768 || adapterLength >= 32768)
+    wchar_t pluto[4]{}, adapter[32768]{};
+    if (GetEnvironmentVariableW(L"BO1_DELIRIUM_PLUTONIUM_LAN", pluto, 4) != 1 ||
+        pluto[0] != L'1' || !plutoniumLan())
         return;
+    const DWORD length = GetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER", adapter, 32768);
+    if (!length || length >= 32768) return;
 
     constexpr DWORD search = LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS;
-    const HMODULE loader = LoadLibraryExW(gameMod, nullptr, search);
-    const HMODULE native = loader ? LoadLibraryExW(adapter, nullptr, search) : nullptr;
+    const HMODULE native = LoadLibraryExW(adapter, nullptr, search);
     using Attach = DWORD(WINAPI*)(void*);
     const auto attach = native ? reinterpret_cast<Attach>(GetProcAddress(native, "DeliriumAttach")) : nullptr;
     if (!attach || attach(nullptr) != 1) ExitProcess(2);
 
     wchar_t eventName[128]{};
-    const DWORD length = GetEnvironmentVariableW(L"BO1_DELIRIUM_BOOT_EVENT", eventName, 128);
-    if (length && length < 128) {
+    const DWORD eventLength = GetEnvironmentVariableW(L"BO1_DELIRIUM_BOOT_EVENT", eventName, 128);
+    if (eventLength && eventLength < 128) {
         if (HANDLE event = OpenEventW(EVENT_MODIFY_STATE, FALSE, eventName)) {
             SetEvent(event);
             CloseHandle(event);

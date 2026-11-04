@@ -1,15 +1,17 @@
 use crate::route::Point;
 
-pub const MAX: i32 = 30;
 #[allow(non_snake_case)]
 #[inline]
-pub fn FRAME() -> f32 { 1.0 / crate::kv!(55) }
+pub fn MAX() -> i32 { crate::kv!(276 int) }
 #[allow(non_snake_case)]
 #[inline]
-fn NEAR() -> f32 { crate::kv!(325) }
+pub fn FRAME() -> f32 { 1.0 / crate::kv!(27) }
 #[allow(non_snake_case)]
 #[inline]
-fn NEAR_WIDE() -> f32 { crate::kv!(120) }
+fn NEAR() -> f32 { crate::kv!(77) }
+#[allow(non_snake_case)]
+#[inline]
+fn NEAR_WIDE() -> f32 { crate::kv!(187) }
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Look {
@@ -23,9 +25,13 @@ pub struct Look {
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn FULL() -> f32 { crate::kv!(61) }
-pub const NO_MOVER_TRACK: u32 = 0x20_0000;
-pub const MOVER_BITS: u32 = 0x1E00;
+pub fn FULL() -> f32 { crate::kv!(28) }
+#[allow(non_snake_case)]
+#[inline]
+pub fn NO_MOVER_TRACK() -> u32 { crate::kv!(822 int) }
+#[allow(non_snake_case)]
+#[inline]
+pub fn MOVER_BITS() -> u32 { crate::kv!(973 int) }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Anim {
@@ -41,13 +47,13 @@ pub fn anim_moves(anims: &[Anim]) -> bool {
         if a.weight < FULL() {
             return false;
         }
-        if a.flags & NO_MOVER_TRACK == 0 && a.mover_track {
-            let mask = (a.flags & 0xF) as u8;
+        if a.flags & NO_MOVER_TRACK() == 0 && a.mover_track {
+            let mask = (a.flags & crate::kv!(198 int)) as u8;
             if mask == 0 || crate::animblend::mask_passes(mask, 0) {
                 return true;
             }
         }
-        a.flags & MOVER_BITS != 0
+        a.flags & MOVER_BITS() != 0
     })
 }
 
@@ -87,14 +93,14 @@ impl StaticCount {
             return;
         }
         if look.simulated {
-            if self.since > 4 {
+            if self.since > crate::kv!(1 int) {
                 self.sample = look.pos;
             }
             self.since = 0;
         } else {
             self.since = tick(self.since);
         }
-        if self.since > 4 {
+        if self.since > crate::kv!(1 int) {
             self.count = 0;
             return;
         }
@@ -119,6 +125,5 @@ impl StaticCount {
 
 fn tick(n: u32) -> u32 {
     let n = n.wrapping_add(1);
-    if n == u32::MAX { 4 } else { n }
+    if n == u32::MAX { crate::kv!(1 int) } else { n }
 }
-

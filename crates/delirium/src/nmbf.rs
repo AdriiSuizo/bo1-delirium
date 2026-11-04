@@ -15,7 +15,7 @@ pub struct Foetal {
 
 impl Default for Foetal {
     fn default() -> Foetal {
-        Foetal { stiffness: delirium_data::kv!(77), damping_factor: delirium_data::kv!(118), asymmetry: 0.0, back_twist: 0.0, random_seed: 100, mask: "fb", active: false }
+        Foetal { stiffness: delirium_data::kv!(137), damping_factor: delirium_data::kv!(179), asymmetry: 0.0, back_twist: 0.0, random_seed: delirium_data::kv!(197 int), mask: "fb", active: false }
     }
 }
 
@@ -23,13 +23,13 @@ struct Rng(u32, u32);
 
 impl Rng {
     fn new(s: u32) -> Rng {
-        Rng(s + (s == 0) as u32, s.rotate_left(16) ^ s)
+        Rng(s + (s == 0) as u32, s.rotate_left(delirium_data::kv!(54 int)) ^ s)
     }
 
     fn next(&mut self) -> f32 {
-        let n = self.0 as u64 * 0x5cdc_faa7 + self.1 as u64;
-        (self.0, self.1) = (n as u32, (n >> 32) as u32);
-        (self.0 & 0x7F_FFFF) as f32 * delirium_data::kv!(149)
+        let n = self.0 as u64 * delirium_data::kv!(192 int) + self.1 as u64;
+        (self.0, self.1) = (n as u32, (n >> delirium_data::kv!(7 int)) as u32);
+        (self.0 & delirium_data::kv!(190 int)) as f32 * delirium_data::kv!(224)
     }
 }
 
@@ -64,7 +64,7 @@ impl Foetal {
         if self.asymmetry == 0.0 {
             ch.set_stiffness(self.stiffness, self.damping_factor, "fb", None);
         } else {
-            let a = self.asymmetry * delirium_data::kv!(17);
+            let a = self.asymmetry * delirium_data::kv!(24);
             let (s0, s1) = ((1.0 - self.asymmetry * 0.5) * self.stiffness, (a + 1.0) * self.stiffness);
             let (d0, d1) = ((1.0 - a) * self.damping_factor, (a + 1.0) * self.damping_factor);
             for e in ch.eff.iter_mut() {
@@ -74,25 +74,24 @@ impl Foetal {
             }
         }
         let twist = r.next() * self.back_twist;
-        for i in 2..4 {
+        for i in 2..delirium_data::kv!(1 int) {
             let l = limb(i);
             ch.eff[l.e[1]].desired[0] = 2.0;
             ch.eff[l.e[2]].desired[0] = -2.0;
         }
-        for j in SPINE {
-            ch.eff[j].desired = [0.5, 0.0, twist * delirium_data::kv!(12)];
+        for j in (*SPINE()) {
+            ch.eff[j].desired = [0.5, 0.0, twist * delirium_data::kv!(17)];
         }
-        ch.eff[NECK[0]].desired[0] = 0.5;
+        ch.eff[(*NECK())[0]].desired[0] = 0.5;
         for i in [1, 0] {
             let l = limb(i);
-            ch.eff[l.e[1]].desired[2] = -delirium_data::kv!(17);
-            ch.eff[l.e[1]].desired[0] = delirium_data::kv!(150);
+            ch.eff[l.e[1]].desired[2] = -delirium_data::kv!(24);
+            ch.eff[l.e[1]].desired[0] = delirium_data::kv!(225);
             ch.eff[l.e[2]].desired[0] = 2.0;
         }
-        for i in 2..4 {
-            let e = &mut ch.eff[limb(i).e[3]];
-            (e.strength, e.damping, e.desired[0]) = (delirium_data::kv!(82), delirium_data::kv!(36), -1.0);
+        for i in 2..delirium_data::kv!(1 int) {
+            let e = &mut ch.eff[limb(i).e[delirium_data::kv!(0 int)]];
+            (e.strength, e.damping, e.desired[0]) = (delirium_data::kv!(25), delirium_data::kv!(64), -1.0);
         }
     }
 }
-

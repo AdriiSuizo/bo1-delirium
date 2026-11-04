@@ -23,7 +23,9 @@ static bool gameIsRunning(){
     PROCESSENTRY32W entry{};
     entry.dwSize=sizeof(entry);
     for(BOOL valid=Process32FirstW(snapshot.value,&entry);valid;valid=Process32NextW(snapshot.value,&entry)){
-        if(_wcsicmp(entry.szExeFile,L"BlackOps.exe")==0)return true;
+        if(!_wcsicmp(entry.szExeFile,L"BlackOps.exe") ||
+           !_wcsicmp(entry.szExeFile,L"plutonium-bootstrapper-win32.exe") ||
+           !_wcsicmp(entry.szExeFile,L"plutonium-launcher-win32.exe")) return true;
     }
     return false;
 }
@@ -54,22 +56,13 @@ public:
         if(error)fwprintf(stderr,L"Could not remove temporary WinMM bridge: %ls\n",destination.c_str());
     }
 };
-static BOOL CALLBACK describeWindow(HWND window,LPARAM){
-    wchar_t title[2048]{},kind[128]{};DWORD_PTR result=0;
-    GetClassNameW(window,kind,128);
-    SendMessageTimeoutW(window,WM_GETTEXT,2048,reinterpret_cast<LPARAM>(title),SMTO_ABORTIFHUNG,100,&result);
-    wprintf(L"Private test window %s: %s\n",kind,title);return TRUE;
-}
-static BOOL CALLBACK describeTopWindow(HWND window,LPARAM arg){
-    describeWindow(window,arg);EnumChildWindows(window,describeWindow,arg);return TRUE;
-}
 #include "portable_paths.hpp"
 int wmain(int argc,wchar_t**argv) try {
     wchar_t exe[MAX_PATH];GetModuleFileNameW(nullptr,exe,MAX_PATH);
     fs::path root=fs::path(exe).parent_path();
     fs::path game=root.parent_path(),adapter=root/L"DeliriumBO1.dll";
     fs::path cache=environment(L"BO1_DELIRIUM_CACHE_DIR");
-    if(cache.empty())cache=fs::path(environment(L"LOCALAPPDATA"))/L"BO1Delirium/bo1-independent-v1";
+    if(cache.empty())cache=fs::path(environment(L"LOCALAPPDATA"))/L"BO1PlutoniumDelirium/bo1-character-v1";
     int seconds=0;bool diagnostics=false;std::wstring map;
     for(int i=1;i<argc;i++){
         if(!wcscmp(argv[i],L"--test-seconds")&&i+1<argc){seconds=_wtoi(argv[++i]);diagnostics=true;}
@@ -81,10 +74,21 @@ int wmain(int argc,wchar_t**argv) try {
     }
     if(!fs::exists(game/L"BlackOps.exe")||!fs::exists(adapter))fail("Copy BO1Delirium into the original Steam BO1 folder first");
     if(!supportedGame(game/L"BlackOps.exe"))fail("Unsupported BlackOps.exe: requires original Steam Build 7.0.152 CL 966072");
-    if(gameIsRunning())throw std::runtime_error("Close the running Black Ops game before launching Delirium");
-    TemporaryWinmm winmm(game,root);
-    prepareResources(root,game,cache);
-    auto loader=prepareLoader(root,cache.parent_path());
+    if(gameIsRunning())throw std::runtime_error("Close Black Ops and the Plutonium launcher before starting Delirium");
+    const fs::path plutonium=fs::path(environment(L"LOCALAPPDATA"))/L"Plutonium";
+    const auto bootstrap=plutonium/L"bin/plutonium-bootstrapper-win32.exe";
+    if(!fs::is_regular_file(bootstrap)||!supportedGame(plutonium/L"games/t5sp.exe"))
+        throw std::runtime_error("Install a compatible Plutonium T5 Zombies client first");
+    TemporaryWinmm winmm(bootstrap.parent_path(),root);
+    const auto tuning=cache.parent_path()/L"gta4-xbox360-v060.kv";
+    fs::create_directories(cache.parent_path());
+    setupTool(root/L"runtime/delirium_worker.exe",
+        L"--prepare-disc \""+game.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log");
+    puts("GTA IV tuning cache ready. You can remove the ISO.");
+    fflush(stdout);
+    if(!SetEnvironmentVariableW(L"BO1_DELIRIUM_GTA_CACHE",tuning.c_str())||
+       !SetEnvironmentVariableW(L"BO1_DELIRIUM_PLUTONIUM_LAN",L"1")) fail("set Plutonium Delirium environment");
+    prepareResources(root,game,cache,plutonium);
     fs::path home=cache.parent_path()/L"profile",logs=cache.parent_path()/L"logs";
     fs::create_directories(home);fs::create_directories(logs);
     auto scripts=home/L"main";
@@ -102,21 +106,14 @@ int wmain(int argc,wchar_t**argv) try {
     SetEnvironmentVariableW(L"BO1_STEAM_DELIRIUM_TEST",diagnostics?L"1":nullptr);
     for(auto pair: {std::pair{L"NM108_RECOVERY_CACHE",L"bo1-getup.motion"}})
         SetEnvironmentVariableW(pair.first,(cache/pair.second).c_str());
-    STARTUPINFOW si{};si.cb=sizeof(si);si.dwFlags=STARTF_USESHOWWINDOW;si.wShowWindow=seconds?SW_HIDE:SW_SHOWNORMAL;
-    HDESK desktop=nullptr;std::wstring desktopName;
-    if(seconds){
-        desktopName=L"BO1SteamDelirium-"+std::to_wstring(GetCurrentProcessId());
-        desktop=CreateDesktopW(desktopName.c_str(),nullptr,nullptr,0,GENERIC_ALL,nullptr);
-        if(!desktop)fail("private test desktop");si.lpDesktop=desktopName.data();
-    }
-    std::wstring args=L"\""+(game/L"BlackOps.exe").wstring()+L"\"";
-    if(seconds)args+=L" allowdupe";
+    STARTUPINFOW si{};si.cb=sizeof(si);si.dwFlags=STARTF_USESHOWWINDOW;si.wShowWindow=seconds?SW_SHOWMINNOACTIVE:SW_SHOWNORMAL;
+    std::wstring args=L"\""+bootstrap.wstring()+L"\" t5sp \""+game.wstring()+L"\" -lan";
     args+=L" +set fs_homepath \""+home.wstring()+
-        L"\" +set fs_basepath \""+game.wstring()+L"\" +set fs_game mods/bo1delirium +set scr_useFastFileOnly 0 +set logfile 2 +set r_fullscreen 0 +set r_d3d9ex 1 +set r_customMode 1280x720 +set com_maxfps 150 +set r_vsync 0 +set com_introPlayed 1 +set com_startupIntroPlayed 1";
+        L"\" +set fs_basepath \""+game.wstring()+L"\" +set fs_game mods/bo1delirium +set scr_useFastFileOnly 0 +set logfile 2 +set com_introPlayed 1 +set com_startupIntroPlayed 1";
+    if(seconds)args+=L" +set r_fullscreen 0 +set r_customMode 1280x720";
     args+=diagnostics?L" +set developer 1":L" +set developer 0";
     if(!map.empty())args+=L" +devmap "+map;
-    if (!SetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_GAMEMOD", loader.c_str()) ||
-        !SetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER", adapter.c_str()))
+    if (!SetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER", adapter.c_str()))
         fail("set in-process mod paths");
     const auto eventName=L"Local\\BO1DeliriumBoot-"+std::to_wstring(GetCurrentProcessId());
     Handle boot{CreateEventW(nullptr,TRUE,FALSE,eventName.c_str())};
@@ -127,15 +124,15 @@ int wmain(int argc,wchar_t**argv) try {
     if(!job.value)fail("owned process job");
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
     if(!SetInformationJobObject(job.value,JobObjectExtendedLimitInformation,&limits,sizeof(limits)))fail("job limits");
-    if(!CreateProcessW((game/L"BlackOps.exe").c_str(),args.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,game.c_str(),&si,&pi))fail("Steam BlackOps.exe launch");
+    if(!CreateProcessW(bootstrap.c_str(),args.data(),nullptr,nullptr,FALSE,CREATE_SUSPENDED,nullptr,plutonium.c_str(),&si,&pi))fail("Plutonium T5 LAN launch");
     Handle gameProcess{pi.hProcess},gameThread{pi.hThread};
     if(!AssignProcessToJobObject(job.value,pi.hProcess)){
         TerminateProcess(pi.hProcess,1);
         fail("own process job assignment");
     }
-    printf("Original Steam BlackOps.exe PID %lu, private test %d seconds\n",pi.dwProcessId,seconds);
+    printf("Plutonium T5 LAN PID %lu, test deadline %d seconds\n",pi.dwProcessId,seconds);
     fflush(stdout);
-    if(ResumeThread(pi.hThread)==DWORD(-1))fail("resume Steam game");
+    if(ResumeThread(pi.hThread)==DWORD(-1))fail("resume Plutonium T5");
     HANDLE startup[]={boot.value,pi.hProcess};
     if(WaitForMultipleObjects(2,startup,FALSE,30000)!=WAIT_OBJECT_0){
         TerminateJobObject(job.value,1);
@@ -144,9 +141,8 @@ int wmain(int argc,wchar_t**argv) try {
     }
     puts("Delirium loaded in-process");
     DWORD wait=WaitForSingleObject(pi.hProcess,seconds?static_cast<DWORD>(seconds)*1000:INFINITE);
-    if(wait==WAIT_TIMEOUT){printf("Owned test deadline reached\n");if(desktop)EnumDesktopWindows(desktop,describeTopWindow,0);TerminateJobObject(job.value,0);WaitForSingleObject(pi.hProcess,5000);}
-    DWORD code=0;GetExitCodeProcess(pi.hProcess,&code);printf("Steam game exit 0x%08lX\n",code);
-    if(desktop)CloseDesktop(desktop);
+    if(wait==WAIT_TIMEOUT){printf("Owned test deadline reached\n");TerminateJobObject(job.value,0);WaitForSingleObject(pi.hProcess,5000);}
+    DWORD code=0;GetExitCodeProcess(pi.hProcess,&code);printf("Plutonium T5 exit 0x%08lX\n",code);
     return code?2:0;
 } catch(const std::exception& error) {
     fprintf(stderr,"%s\n",error.what());

@@ -21,7 +21,7 @@ pub struct SpineTwist {
 
 impl Default for SpineTwist {
     fn default() -> SpineTwist {
-        SpineTwist { pos: Vec3::ZERO, vel: Vec3::ZERO, stiffness: delirium_data::kv!(16), twist: 0.0, active: false, arms: false, always: false,
+        SpineTwist { pos: Vec3::ZERO, vel: Vec3::ZERO, stiffness: delirium_data::kv!(21), twist: 0.0, active: false, arms: false, always: false,
                      twisting: false, range: [(0.0, 0.0); 4], sum: (0.0, 0.0), inv: (0.0, 0.0) }
     }
 }
@@ -32,13 +32,13 @@ impl SpineTwist {
             return;
         }
         (self.active, self.twist, self.twisting) = (true, 0.0, true);
-        for (k, j) in SPINE.into_iter().enumerate() {
+        for (k, j) in (*SPINE()).into_iter().enumerate() {
             let l = ch.limits(j);
-            let f = if k == 0 { delirium_data::kv!(229) } else { delirium_data::kv!(39 f32) + 1.0 };
-            self.range[k] = (l[4] * f, l[5] * f);
+            let f = if k == 0 { delirium_data::kv!(517) } else { delirium_data::kv!(140 f32) + 1.0 };
+            self.range[k] = (l[delirium_data::kv!(1 int)] * f, l[delirium_data::kv!(2 int)] * f);
         }
         let r = &self.range;
-        self.sum = (((r[2].0 + r[1].0) + r[0].0) + r[3].0, ((r[3].1 + r[2].1) + r[1].1) + r[0].1);
+        self.sum = (((r[2].0 + r[1].0) + r[0].0) + r[delirium_data::kv!(0 int)].0, ((r[delirium_data::kv!(0 int)].1 + r[2].1) + r[1].1) + r[0].1);
         self.inv = (1.0 / self.sum.0, 1.0 / self.sum.1);
         ch.set_stiffness(self.stiffness, 2.0, "us", None);
     }
@@ -54,10 +54,10 @@ impl SpineTwist {
             return;
         }
         let p = b.pmat(0);
-        let t = (self.vel - p.v).mul_add(Vec3::splat(delirium_data::kv!(49)), self.pos);
+        let t = (self.vel - p.v).mul_add(Vec3::splat(delirium_data::kv!(78)), self.pos);
         let n = crate::rigid::nrm(t - p.m.d);
         self.twist = crate::nmdbm::atan2(p.m.b.vd(n), -p.m.c.vd(n));
-        let lim = delirium_data::kv!(176);
+        let lim = delirium_data::kv!(254);
         if !(self.twist < lim && self.twist > -lim) && !self.always {
             self.twisting = false;
             return;
@@ -65,14 +65,13 @@ impl SpineTwist {
         self.twisting = true;
         let up = crate::nmdbm::sdot(ch.block.unwrap_or_else(|| b.block()).m.b, ch.up, b"zyx").abs();
         let x = (up * self.twist).max(self.sum.0).min(self.sum.1);
-        for (k, j) in SPINE.into_iter().enumerate() {
+        for (k, j) in (*SPINE()).into_iter().enumerate() {
             let share = if x >= 0.0 { self.range[k].1 * self.inv.1 } else { self.range[k].0 * self.inv.0 };
             ch.eff[j].desired[2] = share * x;
         }
         if self.arms {
-            ch.eff[CLAVICLE[1]].desired[0] = x;
-            ch.eff[CLAVICLE[0]].desired[0] = -x;
+            ch.eff[(*CLAVICLE())[1]].desired[0] = x;
+            ch.eff[(*CLAVICLE())[0]].desired[0] = -x;
         }
     }
 }
-

@@ -23,7 +23,7 @@ impl LocomotionDrive {
         self.weight.is_finite()&&(0.0..=1.0).contains(&self.weight)
             &&self.gain_weight.is_finite()&&(0.0..=self.weight).contains(&self.gain_weight)
             &&self.targets.iter().flatten().all(|x|x.is_finite())
-            &&self.leg_stiffness.iter().all(|x|x.is_finite()&&(delirium_data::kv!(25)..=delirium_data::kv!(136)).contains(x))
+            &&self.leg_stiffness.iter().all(|x|x.is_finite()&&(delirium_data::kv!(35)..=delirium_data::kv!(214)).contains(x))
             &&self.response.iter().all(|x|x.is_finite()&&(0.5..=2.0).contains(x))
     }
 }
@@ -35,7 +35,7 @@ impl Agent {
             if !d.valid() {return Err("invalid locomotion drive");}
             self.locomotion_tracking=true;
             if d.weight>0. {
-                if !self.ch.as_ref().is_some_and(|c|c.eff.len()>=6&&c.joints.len()>=6) {return Err("locomotion requires native leg effectors");}
+                if !self.ch.as_ref().is_some_and(|c|c.eff.len()>=delirium_data::kv!(6 int)&&c.joints.len()>=delirium_data::kv!(6 int)) {return Err("locomotion requires native leg effectors");}
                 self.locomotion_drive=Some(d);
             }
         }
@@ -66,8 +66,8 @@ impl Agent {
         let body=crate::nmdbm::Body{ch:&phase,build,doll:&self.doll,frames:&frames};
         let mut yaw=native.yaw;
         let mut torque=crate::nmdbm::foot_yaw(&body,&mut yaw,dt);
-        for i in 0..2 {if !stance[i] {torque[phase.joints[ANKLE[i]].child]=Vec3::ZERO;}}
-        for (t,g) in torque.iter_mut().zip(crate::nmdbm::oppose_gravity(&body,phase.attached)) {*t+=g;}
+        for i in 0..2 {if !stance[i] {torque[phase.joints[(*ANKLE())[i]].child]=Vec3::ZERO;}}
+        crate::nmdbm::oppose_gravity(&body,phase.attached,&mut torque);
         let desired_push=ch.stabilise.map_or_else(||vec![Vec3::ZERO;build.parts.len()],|(k,_)|stabilise_on(&body,k,dt,stance));
         if held.torque.len()<torque.len() {held.torque.resize(torque.len(),Vec3::ZERO);}
         for (i,t) in torque.into_iter().enumerate() {
@@ -85,39 +85,38 @@ impl Agent {
 }
 
 pub(super) fn actual_stance(ch:&Character,doll:&Ragdoll,wanted:[bool;2])->[bool;2] {
-    std::array::from_fn(|i|wanted[i]&&doll.touch[ch.joints[ANKLE[i]].child]&0x20!=0)
+    std::array::from_fn(|i|wanted[i]&&doll.touch[ch.joints[(*ANKLE())[i]].child]&delirium_data::kv!(7 int)!=0)
 }
 
 pub(super) fn apply_targets(ch:&mut Character,d:LocomotionDrive,stance:[bool;2]) {
-    for i in 0..6 {
+    for i in 0..delirium_data::kv!(6 int) {
         let limits=ch.limits(i);
         ch.eff[i].desired=std::array::from_fn(|j|d.targets[i][j].clamp(limits[2*j],limits[2*j+1]));
-        let leg=i/3;let e=&mut ch.eff[i];let k=d.leg_stiffness[leg];
+        let leg=i/delirium_data::kv!(0 int);let e=&mut ch.eff[i];let k=d.leg_stiffness[leg];
         e.strength+=(k*k-e.strength)*d.gain_weight;
         e.damping+=(2.*k-e.damping)*d.gain_weight;
-        let response=if ANKLE.contains(&i) {if stance[leg] {delirium_data::kv!(20)} else {1.}}
-            else if KNEE.contains(&i) {if stance[leg] {delirium_data::kv!(7)} else {2.}} else {delirium_data::kv!(7)};
+        let response=if (*ANKLE()).contains(&i) {if stance[leg] {delirium_data::kv!(31)} else {1.}}
+            else if (*KNEE()).contains(&i) {if stance[leg] {delirium_data::kv!(12)} else {2.}} else {delirium_data::kv!(12)};
         e.muscle_stiffness+=(response*d.response[leg]-e.muscle_stiffness)*d.gain_weight;
     }
 }
 
 pub(super) fn support_character(ch:&Character,stance:[bool;2])->Character {
     let mut phase=ch.clone();
-    phase.support=std::array::from_fn(|i|if stance[i] {ch.joints[ANKLE[i]].child as i32} else {-1});
+    phase.support=std::array::from_fn(|i|if stance[i] {ch.joints[(*ANKLE())[i]].child as i32} else {-1});
     phase
 }
 
 pub(super) fn stabilise_on(body:&crate::nmdbm::Body,k:f32,dt:f32,stance:[bool;2])->Vec<Vec3> {
-    let feet:Vec<_>=(0..2).filter(|&i|stance[i]).map(|i|body.ch.joints[ANKLE[i]].child)
-        .filter(|&f|body.doll.touch[f]&0x28==0x20).collect();
+    let feet:Vec<_>=(0..2).filter(|&i|stance[i]).map(|i|body.ch.joints[(*ANKLE())[i]].child)
+        .filter(|&f|body.doll.touch[f]&delirium_data::kv!(95 int)==delirium_data::kv!(7 int)).collect();
     if feet.len()==2 {return crate::nmdbm::stabilise(body,k,dt);}
     let mut out=vec![Vec3::ZERO;body.build.parts.len()];
     let Some(&foot)=feet.first() else {return out;};
     let up=body.ch.up;let (com,vel)=body.doll.com();let mid=body.doll.centre(foot);
     let fv=body.doll.motion(foot).0;
     let s=((com-mid).normalize_or_zero().dot(up).max(0.).powi(4)*k).powi(2);
-    let f=(com+vel*delirium_data::kv!(49)-mid)*s+(vel-fv)*(delirium_data::kv!(34)*s);
-    let f=(f-up*f.dot(up))*(dt*delirium_data::kv!(128));
-    out[foot]+=f;out[body.ch.joints[HIP[0]].parent]-=f;out
+    let f=(com+vel*delirium_data::kv!(78)-mid)*s+(vel-fv)*(delirium_data::kv!(60)*s);
+    let f=(f-up*f.dot(up))*(dt*delirium_data::kv!(103));
+    out[foot]+=f;out[body.ch.joints[(*HIP())[0]].parent]-=f;out
 }
-

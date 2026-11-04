@@ -2,7 +2,9 @@ use crate::msg::Value;
 use crate::prelude::Vec3;
 use crate::shottask::Msg;
 
-pub const TYPE: u32 = 2115;
+#[allow(non_snake_case)]
+#[inline]
+pub fn TYPE() -> u32 { delirium_data::kv!(559 int) }
 
 #[derive(Clone, Copy, Debug)]
 pub struct Entity {
@@ -16,7 +18,7 @@ pub fn look(point: Vec3, entity: Option<&Entity>) -> Vec3 {
         None => point,
         Some(e) => match e.ped {
             Some(true) => e.head,
-            Some(false) => e.place + Vec3::new(0.0, 0.0, delirium_data::kv!(46)),
+            Some(false) => e.place + Vec3::new(0.0, 0.0, delirium_data::kv!(74)),
             None => e.place,
         },
     }
@@ -63,4 +65,3 @@ impl Sit {
         d.z.mul_add(d.z, d.y.mul_add(d.y, d.x * d.x))
     }
 }
-

@@ -11,7 +11,7 @@ pub fn mbr_for_state(state: u32) -> f32 {
     match state {
         2 => 1.0,
         3 => 2.0,
-        4 => crate::kv!(2),
+        4 => crate::kv!(5),
         _ => 0.0,
     }
 }
@@ -29,7 +29,7 @@ impl Mover {
     }
 
     pub fn set(&mut self, mbr: f32, flag: bool) {
-        self.mbr = if mbr >= crate::kv!(2) { crate::kv!(2) } else if mbr >= 0.0 { mbr } else { 0.0 };
+        self.mbr = if mbr >= crate::kv!(5) { crate::kv!(5) } else if mbr >= 0.0 { mbr } else { 0.0 };
         self.flagged = flag;
     }
 
@@ -221,7 +221,7 @@ impl<P: Moves> Movement<P> {
             if s.chain.len() < 2 {
                 return finish(s);
             }
-            if rounds > 10 {
+            if rounds > crate::kv!(81 int) {
                 return;
             }
         }
@@ -259,12 +259,12 @@ impl MoveDoNothing {
 
 impl<P: Moves> Task<P> for MoveDoNothing {
     fn kind(&self) -> u32 {
-        kind::MOVE_DO_NOTHING
+        kind::MOVE_DO_NOTHING()
     }
 
     fn process(&mut self, ped: &mut P) -> bool {
         if self.ms > 0 {
-            self.ms -= (ped.dt() * crate::kv!(53)) as i32;
+            self.ms -= (ped.dt() * crate::kv!(82)) as i32;
             if self.ms <= 0 {
                 return true;
             }
@@ -332,7 +332,7 @@ impl<P: Moves> ControlMovement<P> {
 
 impl<P: Moves> Task<P> for ControlMovement<P> {
     fn kind(&self) -> u32 {
-        kind::CONTROL_MOVEMENT
+        kind::CONTROL_MOVEMENT()
     }
 
     fn simple(&self) -> bool {
@@ -351,6 +351,29 @@ impl<P: Moves> Task<P> for ControlMovement<P> {
             ped.movement_mut().own(1, false);
         }
         true
+    }
+
+    fn set_target(&mut self, ped: &mut P, at: [f32; 3]) {
+        if self.ours(ped) {
+            with(ped, |mv, ped| {
+                if let Some(n) = mv.slot[1].chain.first_mut() {
+                    n.task.set_target(ped, at);
+                }
+            });
+        }
+        if let Some(m) = self.movement.as_mut() {
+            m.set_target(ped, at);
+        }
+    }
+
+    fn set_move_state(&mut self, ped: &mut P, state: u32) {
+        if self.ours(ped) {
+            with(ped, |mv, ped| {
+                for n in mv.slot[1].chain.iter_mut() {
+                    n.task.set_move_state(ped, state);
+                }
+            });
+        }
     }
 
     fn first(&mut self, ped: &mut P) -> Option<Box<dyn Task<P>>> {
@@ -404,4 +427,3 @@ impl<P: Moves> Task<P> for ControlMovement<P> {
         None
     }
 }
-

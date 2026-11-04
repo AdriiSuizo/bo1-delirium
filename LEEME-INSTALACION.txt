@@ -1,56 +1,47 @@
-BO1 DELIRIUM STEAM - 0.2.4-bo1-only-beta5 - UN JUGADOR
+BO1 DELIRIUM PARA PLUTONIUM T5 LAN - 0.3.0 BETA 1
 
-INSTALACION
-1. Descomprime el RAR.
-2. Arrastra BO1Delirium y Jugar-BO1-Delirium.cmd a la carpeta donde esta BlackOps.exe.
-3. Abre Jugar-BO1-Delirium.cmd, con Steam abierto. Elige Zombies y mapa en el menu original.
-No se reemplaza BlackOps.exe ni ningun archivo original de Steam.
+INSTALACIÓN
 
-REQUISITOS Y PRIMER ARRANQUE
-Windows 10/11 x64 y BO1 Steam Build 7.0.152 CL 966072, con los componentes DirectX del juego.
-No necesita GTA IV, Fred.art, taskparams.txt ni WeaponInfo.xml.
-En el primer arranque se abre BO1 una vez en un escritorio privado durante hasta tres minutos, terminando al obtener los recursos
-para leer su esqueleto, ragdoll y animaciones originales. Despues se abre el juego para jugar.
-Deja terminar la preparacion. No es una instalacion silenciosa del sistema ni modifica el juego.
-Hace falta Internet la primera vez para descargar y verificar Game_Mod 1.3.2 de Nukem9/LinkerMod.
-No necesitas instalar Python, Rust ni herramientas de desarrollo para jugar.
+1. Instala Plutonium y configura T5 Zombies con tu BO1 de Steam. Cierra Plutonium y BO1.
+2. Copia BO1Delirium y Jugar-BO1-Delirium.cmd junto a BlackOps.exe.
+3. Coloca ahí tu ISO de GTA IV original de Xbox 360.
+4. Abre Jugar-BO1-Delirium.cmd. El lanzador abre T5 en modo LAN.
+5. Retira la ISO cuando el lanzador confirme que la caché de Delirium está preparada.
 
-CONTROLES DE PRUEBA
-Flecha abajo del teclado o cruceta abajo del mando Xbox: alterna god mode y suma 10000 puntos.
-Solo la primera pulsacion de cada partida solicita el salto a ronda 10, con la transicion normal.
-No reinicia las rondas en las siguientes pulsaciones ni retrocede si ya estas por encima de 10.
-
-CAMBIOS
-El lanzador instala temporalmente un puente WinMM en la carpeta del juego. Windows lo carga al iniciar BO1, y el puente carga el mod dentro del juego. El lanzador retira el puente al salir.
-Los controles se cargan solo al entrar en un mapa de Zombies, despues del menu principal.
-La preparacion espera a los recursos reales, informa del progreso y muestra el registro si falla.
-Corregido el enlace entre la cabeza del cuerpo y los huesos compartidos del modelo facial.
-El cuerpo de 21 partes se construye desde los huesos, masas y limites del ragdoll de BO1.
-Se conservan los controladores de Delirium adaptados a BO1 y sus impactos localizados.
-El levantamiento utiliza objetivos articulares de siete animaciones originales de BO1, con respuesta fisica
-e interrupcion por impactos. No es un levantamiento completamente libre de animaciones.
-Se conserva la transicion a la animacion de persecucion de BO1.
-Las respuestas por clase de arma son ajustes numericos del mod; no se carga un XML de GTA.
+La primera ejecución también abre Kino brevemente en Plutonium para obtener el esqueleto,
+ragdoll y animaciones de recuperación de tu BO1. Después se abre el juego para jugar.
+La lectura de XEX puede necesitar Internet la primera vez para obtener la clave de Xbox
+360 que usa el lector de código abierto de Delirium.
 
 COMPATIBILIDAD
-Beta de un jugador para BlackOps.exe, no BlackOpsMP.exe. El cooperativo del otro proyecto no esta portado.
-Verificada tecnicamente en Kino; no implica que todos los mapas o equipos esten validados.
-No mezcles con otras DLL de hooks nativos. Conserva tu paquete anterior si quieres volver a el.
-No cambia a Delirium SDK 0.5.0: conserva la base de runtime y las adaptaciones jugables anteriores.
 
-CACHE Y DESINSTALACION
-Cache privada: %LOCALAPPDATA%\BO1Delirium\bo1-independent-v1
-Registros: %LOCALAPPDATA%\BO1Delirium\logs
-La cache contiene datos de tu BO1: no la incluyas al compartir el RAR.
-Para quitar el mod elimina BO1Delirium y Jugar-BO1-Delirium.cmd de la carpeta del juego.
-Abrir desde Steam normalmente sigue iniciando el juego original.
+Probado con Plutonium T5 r5369 y BO1 Steam 7.0.152 CL 966072.
+ISO de GTA IV base Xbox 360. Perfiles comprobados para Media ID 4A53F9F6 y 6AC07221.
+El modo probado es Zombies de un jugador en LAN, en Kino der Toten.
+El levantamiento sigue siendo experimental en 0.6.0 y puede quedarse incompleto.
+Si una futura actualización de T5 cambia las firmas del juego, el lanzador rechaza el arranque.
 
-CODIGO Y CREDITOS
-BO1Delirium\SOURCE.zip contiene el codigo correspondiente y BUILD.txt; GPL-3.0-only.
-Delirium: https://github.com/PVCPC/delirium-physics
-Custom character y referencias: https://github.com/SuperSloppers/large-steal-car-4
-Game_Mod oficial sin cambios: https://github.com/Nukem9/LinkerMod/releases/tag/v1.3.2
-MinHook: Tsuda Kageyu y colaboradores. Licencias de dependencias incluidas en BO1Delirium\licenses.
-Preparador empaquetado con Python y PyInstaller; licencias y excepcion del bootloader incluidas.
-Integracion y empaquetado con asistencia de OpenAI Codex.
-No incluye ejecutables originales, modelos, texturas, sonidos, animaciones ni volcados de BO1 o GTA IV.
+CONTROLES DE PRUEBA
+
+Flecha abajo o cruceta abajo alterna el modo dios y suma 10.000 puntos.
+La primera pulsación por partida solicita el salto a ronda 10.
+
+CACHÉ Y REGISTROS
+
+%LOCALAPPDATA%\BO1PlutoniumDelirium
+- disc-setup.log registra el resultado del importador.
+- logs contiene los registros del adaptador y el worker.
+- gta4-xbox360-v060.kv contiene únicamente los valores de ajuste.
+- bo1-character-v1 contiene los recursos de BO1 preparados localmente.
+
+El lanzador instala temporalmente winmm.dll junto al bootstrapper de Plutonium
+y lo retira al cerrar. El adaptador se activa únicamente con t5sp -lan.
+No compartas la caché ni la ISO. El RAR solo contiene el mod y sus dependencias.
+
+CRÉDITOS Y LICENCIA
+
+Delirium 0.6.0: https://github.com/PVCPC/delirium-physics
+Referencias de integración: https://github.com/SuperSloppers/large-steal-car-4
+MinHook: Tsuda Kageyu y colaboradores.
+Preparador empaquetado con Python y PyInstaller.
+Integración y empaquetado con asistencia de OpenAI Codex.

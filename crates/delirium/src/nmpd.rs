@@ -36,8 +36,8 @@ pub struct Pedal {
 
 impl Default for Pedal {
     fn default() -> Pedal {
-        Pedal { radius: delirium_data::kv!(12), radius_variance: delirium_data::kv!(60), random_seed: 100, pedal_offset: delirium_data::kv!(4), leg_stiffness: delirium_data::kv!(20), angular_speed: delirium_data::kv!(20),
-                speed_asymmetry: delirium_data::kv!(37), leg_angle_variance: 0.5, drag_multiplier: delirium_data::kv!(17), centre_forwards: 0.0, centre_up: 0.0,
+        Pedal { radius: delirium_data::kv!(17), radius_variance: delirium_data::kv!(116), random_seed: delirium_data::kv!(197 int), pedal_offset: delirium_data::kv!(9), leg_stiffness: delirium_data::kv!(31), angular_speed: delirium_data::kv!(31),
+                speed_asymmetry: delirium_data::kv!(65), leg_angle_variance: 0.5, drag_multiplier: delirium_data::kv!(24), centre_forwards: 0.0, centre_up: 0.0,
                 left: true, right: true, back_pedal: false, adaptive: false, t: 0.0, t2: 0.0, damping: 0.5, speed: [0.0; 2],
                 axis: [Vec3::ZERO; 2], at: [Vec3::ZERO; 2], centre: [Vec3::ZERO; 2], active: false }
     }
@@ -49,11 +49,11 @@ fn apply(m: &M34, v: Vec3) -> Vec3 {
 
 impl Pedal {
     fn stiffness(&self, c: &mut Ctx) {
-        for i in 2..4 {
+        for i in 2..delirium_data::kv!(1 int) {
             let l = limb(i);
             c.ch.eff[l.e[1]].set_stiffness(self.leg_stiffness, self.damping, None);
             c.ch.eff[l.e[2]].set_stiffness(self.leg_stiffness, self.damping, None);
-            c.ch.eff[l.e[3]].set_stiffness(self.leg_stiffness * delirium_data::kv!(7), self.damping, None);
+            c.ch.eff[l.e[delirium_data::kv!(0 int)]].set_stiffness(self.leg_stiffness * delirium_data::kv!(12), self.damping, None);
         }
     }
 
@@ -61,13 +61,13 @@ impl Pedal {
         let a = (noise01(self.t, agent, self.t2) - 0.5) * 2.0;
         let b = (noise01(self.t2, agent, self.t) - 0.5) * 2.0;
         self.speed = [a, b].map(|n| match n.fma(self.speed_asymmetry, w) {
-            s if s < 0.0 => delirium_data::kv!(34),
+            s if s < 0.0 => delirium_data::kv!(60),
             s => s,
         });
     }
 
     fn centres(&mut self, c: &Ctx) {
-        let r = self.radius + (noise01(self.t + delirium_data::kv!(20), self.t2, c.ch.agent as f32) - 0.5) * self.radius_variance - delirium_data::kv!(230);
+        let r = self.radius + (noise01(self.t + delirium_data::kv!(31), self.t2, c.ch.agent as f32) - 0.5) * self.radius_variance - delirium_data::kv!(518);
         let p = c.b.part(0).m;
         for (i, k) in [(0, -self.pedal_offset - self.centre_up), (1, self.pedal_offset - self.centre_up)] {
             let m = c.b.eff3(limb(i + 2).e[1]).m;
@@ -81,15 +81,15 @@ impl Pedal {
             return;
         }
         self.active = true;
-        self.t = delirium_data::kv!(137) * c.ch.random();
-        self.t2 = delirium_data::kv!(137) * c.ch.random();
-        self.radius = self.radius.clamp(0.0, delirium_data::kv!(5));
+        self.t = delirium_data::kv!(215) * c.ch.random();
+        self.t2 = delirium_data::kv!(215) * c.ch.random();
+        self.radius = self.radius.clamp(0.0, delirium_data::kv!(10));
         self.centres(c);
         self.axis = [Vec3::NEG_Y; 2];
         self.speeds(self.angular_speed, c.ch.agent as f32);
         let n = -c.b.part(0).m.c;
-        let l = limb(3);
-        let foot = c.b.part(l.p[3]).m.d - apply(&c.b.eff3(l.e[1]).m, self.centre[1]);
+        let l = limb(delirium_data::kv!(0 int));
+        let foot = c.b.part(l.p[delirium_data::kv!(0 int)]).m.d - apply(&c.b.eff3(l.e[1]).m, self.centre[1]);
         let r = if foot.vd(n) >= 0.0 { self.radius } else { -self.radius };
         self.at = [Vec3::new(r, 0.0, 0.0), Vec3::new(-r, 0.0, 0.0)];
         self.stiffness(c);
@@ -111,13 +111,13 @@ impl Pedal {
         let (mut back, mut legs) = (self.back_pedal, [self.left, self.right]);
         let mut w = self.angular_speed;
         if self.adaptive {
-            let s = c.b.part(7);
+            let s = c.b.part(delirium_data::kv!(22 int));
             let v = s.v;
-            w = (v.x.fma(v.x, v.y.fma(v.y, v.z * v.z)).sqrt() / self.radius * self.drag_multiplier).clamp(0.0, delirium_data::kv!(125));
+            w = (v.x.fma(v.x, v.y.fma(v.y, v.z * v.z)).sqrt() / self.radius * self.drag_multiplier).clamp(0.0, delirium_data::kv!(195));
             if crate::nmdbm::sdot(crate::rigid::nrm(v).vx(c.up), s.m.b, b"zyx") > 0.0 {
                 back = !self.back_pedal;
             }
-            if crate::nmdbm::sdot(c.up, s.m.a, b"zyx") < -delirium_data::kv!(60) {
+            if crate::nmdbm::sdot(c.up, s.m.a, b"zyx") < -delirium_data::kv!(116) {
                 legs = [false; 2];
             }
         }
@@ -134,8 +134,7 @@ impl Pedal {
             let l = limb(i + 2);
             let t = apply(&c.b.eff3(l.e[1]).m, self.at[i] + self.centre[i]);
             let side = if i == 0 { 1.0 } else { -1.0 };
-            crate::nmdbm::limb_ik_w(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[3], t, yaw, 0.0, side, -1.0, Vec3::ZERO, None, 1.0, true);
+            crate::nmdbm::limb_ik_w(c.b, c.ch, l.e[1], l.e[2], l.p[0], l.p[delirium_data::kv!(0 int)], t, yaw, 0.0, side, -1.0, Vec3::ZERO, None, 1.0, true);
         }
     }
 }
-

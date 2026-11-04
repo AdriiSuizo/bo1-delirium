@@ -11,10 +11,13 @@ pub struct Part {
     pub kind: u8,
     pub extent: [f32; 3],
     pub inertia: [f32; 3],
+    pub length: f32,
+    pub material: Option<u8>,
+    pub centroid: f32,
 }
 
 fn be32(d: &[u8], at: usize) -> Result<u32, String> {
-    d.get(at..at + 4).map(|b| crate::u32_of(b.try_into().unwrap())).ok_or("Read out of range".into())
+    d.get(at..at + crate::kv!(1 int)).map(|b| crate::u32_of(b.try_into().unwrap())).ok_or("Read out of range".into())
 }
 fn bef(d: &[u8], at: usize) -> Result<f32, String> {
     be32(d, at).map(f32::from_bits)
@@ -26,26 +29,30 @@ fn byte(d: &[u8], at: usize) -> Result<u8, String> {
 pub fn read(r: &Resource) -> Result<Vec<Part>, String> {
     let d = &r.data;
     let p = |at: usize| be32(d, at).and_then(|v| ptr(r, v));
-    let (children, groups, count) = (p(0xD4)?, p(0xD0)?, byte(d, 0x1F6)? as usize);
-    let bound = p(p(0xE4)? + 0x0C)?;
-    if byte(d, bound + 4)? != 12 {
+    let (children, groups, count) = (p(crate::kv!(392 int))?, p(crate::kv!(364 int))?, byte(d, crate::kv!(650 int))? as usize);
+    let bound = p(p(crate::kv!(92 int))? + crate::kv!(55 int))?;
+    if byte(d, bound + crate::kv!(1 int))? != crate::kv!(55 int) {
         return Err("Fragment bound is not a composite".into());
     }
-    let (kids, mats, inertia) = (p(bound + 0x80)?, p(bound + 0x84)?, p(0xF0)?);
+    let (kids, mats, inertia) = (p(bound + crate::kv!(251 int))?, p(bound + crate::kv!(362 int))?, p(crate::kv!(296 int))?);
     let mut raw = vec![];
     for i in 0..count {
-        let c = p(children + i * 4)?;
-        let group = byte(d, c + 0x0C)?;
-        let bone = crate::u16_of([byte(d, c + 0x0E)?, byte(d, c + 0x0F)?]) as usize;
-        let parent_group = byte(d, p(groups + group as usize * 4)? + 0x10D)?;
-        let k = p(kids + i * 4)?;
-        let ext = |a: usize| -> Result<f32, String> { Ok((bef(d, k + 0x10 + a)? - bef(d, k + 0x20 + a)?) / 2.0) };
-        let (radius, along) = (ext(0)?.min(ext(8)?), ext(4)?);
-        let row = |n: usize| -> Result<[f32; 3], String> { Ok([bef(d, mats + i * 64 + n * 16)?, bef(d, mats + i * 64 + n * 16 + 4)?, bef(d, mats + i * 64 + n * 16 + 8)?]) };
-        raw.push((group, parent_group, Part { bone, parent: None, mass: bef(d, c + 4)?, radius, half: (along - radius).max(0.0),
-                                               frame: [row(0)?, row(1)?, row(2)?, row(3)?], kind: byte(d, k + 4)?,
-                                               extent: [ext(0)?, ext(4)?, ext(8)?],
-                                               inertia: [bef(d, inertia + i * 16)?, bef(d, inertia + i * 16 + 4)?, bef(d, inertia + i * 16 + 8)?] }));
+        let c = p(children + i * crate::kv!(1 int))?;
+        let group = byte(d, c + crate::kv!(55 int))?;
+        let bone = crate::u16_of([byte(d, c + crate::kv!(56 int))?, byte(d, c + crate::kv!(198 int))?]) as usize;
+        let parent_group = byte(d, p(groups + group as usize * crate::kv!(1 int))? + crate::kv!(961 int))?;
+        let k = p(kids + i * crate::kv!(1 int))?;
+        let ext = |a: usize| -> Result<f32, String> { Ok((bef(d, k + crate::kv!(54 int) + a)? - bef(d, k + crate::kv!(7 int) + a)?) / 2.0) };
+        let (radius, along) = (ext(0)?.min(ext(crate::kv!(23 int))?), ext(crate::kv!(1 int))?);
+        let kind = byte(d, k + crate::kv!(1 int))?;
+        let (radius, half) = if kind == 1 { (bef(d, k + crate::kv!(251 int))?, bef(d, k + crate::kv!(87 int))? * 0.5) } else { (radius, (along - radius).max(0.0)) };
+        let row = |n: usize| -> Result<[f32; 3], String> { Ok([bef(d, mats + i * crate::kv!(253 int) + n * crate::kv!(54 int))?, bef(d, mats + i * crate::kv!(253 int) + n * crate::kv!(54 int) + crate::kv!(1 int))?, bef(d, mats + i * crate::kv!(253 int) + n * crate::kv!(54 int) + crate::kv!(23 int))?]) };
+        raw.push((group, parent_group, Part { bone, parent: None, mass: bef(d, c + crate::kv!(1 int))?, radius, half,
+                                               frame: [row(0)?, row(1)?, row(2)?, row(crate::kv!(0 int))?], kind,
+                                               extent: [ext(0)?, ext(crate::kv!(1 int))?, ext(crate::kv!(23 int))?],
+                                               inertia: [bef(d, inertia + i * crate::kv!(54 int))?, bef(d, inertia + i * crate::kv!(54 int) + crate::kv!(1 int))?, bef(d, inertia + i * crate::kv!(54 int) + crate::kv!(23 int))?],
+                                               length: if byte(d, k + crate::kv!(1 int))? == 1 { bef(d, k + crate::kv!(87 int))? } else { 0.0 },
+                                               material: crate::bounds::material(d, k), centroid: bef(d, k + crate::kv!(23 int))? }));
     }
     let group_of: Vec<u8> = raw.iter().map(|r| r.0).collect();
     Ok(raw.into_iter().map(|(_, pg, mut part)| {

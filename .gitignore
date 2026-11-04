@@ -5,3 +5,8 @@
 /build/
 /__pycache__/
 *.spec
+
+*.iso
+*.xex
+*.kv
+*.private

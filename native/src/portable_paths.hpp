@@ -19,7 +19,6 @@ static bool cacheReady(const fs::path& cache){
   if(!fs::is_regular_file(cache/name)||fs::file_size(cache/name)==0)return false;
  return true;
 }
-static fs::path prepareLoader(const fs::path&,const fs::path&);
 static void setupTool(const fs::path& program,std::wstring args,const fs::path& root,const fs::path& log){
  SECURITY_ATTRIBUTES security{sizeof(security),nullptr,TRUE};
  HANDLE output=CreateFileW(log.c_str(),FILE_APPEND_DATA,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,nullptr);
@@ -38,13 +37,12 @@ static void setupTool(const fs::path& program,std::wstring args,const fs::path& 
  DWORD code=1;GetExitCodeProcess(process.hProcess,&code);CloseHandle(process.hProcess);CloseHandle(output);
  if(code){fwprintf(stderr,L"BO1 preparation tool exited with code %lu. Details: %ls\n",code,log.c_str());throw std::runtime_error("BO1 preparation failed");}
 }
-static void prepareResources(const fs::path& root,const fs::path& game,const fs::path& cache){
+static void prepareResources(const fs::path& root,const fs::path& game,const fs::path& cache,const fs::path& plutonium){
  if(cacheReady(cache))return;
  fwprintf(stdout,L"Preparing physics from your BO1 installation. Waiting for Kino resources in the background (up to 3 minutes).\n");fflush(stdout);
- fs::create_directories(cache);auto raw=cache/L"raw";auto loader=prepareLoader(root,cache.parent_path());
- fs::create_directories(cache/L"loader");fs::copy_file(loader,cache/L"loader/game_mod.dll",fs::copy_options::overwrite_existing);
+ fs::create_directories(cache);auto raw=cache/L"raw";
  auto log=cache/L"preparation.log";
- setupTool(root/L"tools/CaptureBO1.exe",L"--game-dir \""+game.wstring()+L"\" --resource-cache \""+raw.wstring()+L"\" --prepare-seconds 180 --map zombie_theater",root,log);
+ setupTool(root/L"tools/CaptureBO1.exe",L"--game-dir \""+game.wstring()+L"\" --resource-cache \""+raw.wstring()+L"\" --plutonium-dir \""+plutonium.wstring()+L"\" --prepare-seconds 180 --map zombie_theater",root,log);
  setupTool(root/L"tools/PrepareBO1.exe",L"--capture \""+raw.wstring()+L"\" --output \""+cache.wstring()+L"\"",root,log);
  if(!cacheReady(cache))fail("BO1-only resources incomplete");
 }
@@ -73,17 +71,4 @@ static bool supportedGame(const fs::path& path){
   if(!matched)return false;
  }
  return true;
-}
-
-static fs::path prepareLoader(const fs::path& root,const fs::path& userRoot){
- fs::path directory=userRoot/L"loader",dll=directory/L"game_mod.dll";
- if(fs::is_regular_file(dll))return dll;
- fs::create_directories(directory);
- wchar_t system[32768]{};GetSystemDirectoryW(system,32768);
- fs::path powershell=fs::path(system)/L"WindowsPowerShell/v1.0/powershell.exe";
- std::wstring command=L"\""+powershell.wstring()+L"\" -NoProfile -ExecutionPolicy Bypass -File \""+(root/L"tools/FetchLoader.ps1").wstring()+L"\" -Destination \""+directory.wstring()+L"\"";
- STARTUPINFOW start{};start.cb=sizeof(start);PROCESS_INFORMATION process{};
- if(!CreateProcessW(powershell.c_str(),command.data(),nullptr,nullptr,FALSE,0,nullptr,root.c_str(),&start,&process))fail("official Game_Mod dependency setup");
- CloseHandle(process.hThread);WaitForSingleObject(process.hProcess,INFINITE);DWORD code=1;GetExitCodeProcess(process.hProcess,&code);CloseHandle(process.hProcess);
- if(code||!fs::is_regular_file(dll))fail("Game_Mod download failed; see the setup output");return dll;
 }

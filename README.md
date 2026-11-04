@@ -1,13 +1,11 @@
-# BO1 Delirium Steam beta 5
+# BO1 Delirium para Plutonium T5
 
-Mod para Zombies de un jugador en Black Ops de Steam. La preparación usa los recursos de la instalación local de BO1. La beta 5 carga el atajo de flecha abajo cuando están disponibles los scripts de Zombies. Un puente WinMM temporal carga el mod dentro de BO1 y el lanzador retira el puente cuando el juego se cierra.
+Mod de Zombies para BO1 en Plutonium T5 LAN. Usa el runtime Delirium 0.6.0, con el esqueleto, ragdoll y animaciones de levantamiento de la instalación de BO1.
 
-- [Instalación y controles](LEEME-INSTALACION.txt)
-- [Compilar desde el código fuente](BUILD.txt)
-- [Descarga de la beta 5](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/steam-v0.2.4-beta5)
+La primera ejecución lee una ISO propia de GTA IV de Xbox 360 situada junto a BlackOps.exe. Cuando el lanzador confirma que ha preparado la caché, se puede retirar la ISO. La caché es local y contiene datos del juego del usuario.
 
-El arranque desde una caché sin preparar se comprobó en Kino con BO1 de Steam Build 7.0.152 CL 966072. Para jugar se requiere Windows x64 y una instalación de BO1 en Steam. El lanzador descarga Game_Mod 1.3.2 durante la primera preparación.
+- [Instalación, compatibilidad y controles](LEEME-INSTALACION.txt)
+- [Compilación](BUILD.txt)
+- [Beta de Plutonium](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/releases/tag/plutonium-v0.3.0-beta1)
 
-Esta variante usa el runtime de Delirium adaptado a BO1. El port con SDK 0.5.0 está en la rama [sdk-050-original](https://github.com/AdriiSuizo/bo1-delirium-sdk-050-20261102/tree/sdk-050-original).
-
-Integración y empaquetado con asistencia de OpenAI Codex. Créditos y licencia en las instrucciones de instalación y en [LICENSE](LICENSE).
+Integración y empaquetado con asistencia de OpenAI Codex. [Licencia](LICENSE).

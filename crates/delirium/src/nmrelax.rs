@@ -2,7 +2,7 @@ use crate::msg::Value;
 use crate::shottask::Msg;
 
 pub fn relaxation(stiffness: f32) -> f32 {
-    if stiffness >= 0.0 { (delirium_data::kv!(21) - stiffness).max(delirium_data::kv!(20)) } else { delirium_data::kv!(128) }
+    if stiffness >= 0.0 { (delirium_data::kv!(26) - stiffness).max(delirium_data::kv!(31)) } else { delirium_data::kv!(103) }
 }
 
 pub fn damping(damping: f32) -> Option<f32> {
@@ -42,4 +42,3 @@ impl Relax {
         m
     }
 }
-

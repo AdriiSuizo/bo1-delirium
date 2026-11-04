@@ -19,18 +19,18 @@ impl QuadTree {
     }
 
     pub fn quarter(r: [f32; 4], q: usize) -> [f32; 4] {
-        let (cx, cy) = ((r[0] + r[2]) * 0.5, (r[3] + r[1]) * 0.5);
+        let (cx, cy) = ((r[0] + r[2]) * 0.5, (r[crate::kv!(0 int)] + r[1]) * 0.5);
         match q {
             0 => [r[0], r[1], cx, cy],
             1 => [cx, r[1], r[2], cy],
-            2 => [r[0], cy, cx, r[3]],
-            _ => [cx, cy, r[2], r[3]],
+            2 => [r[0], cy, cx, r[crate::kv!(0 int)]],
+            _ => [cx, cy, r[2], r[crate::kv!(0 int)]],
         }
     }
 
     fn meets(&self, node: usize, r: [f32; 4], q: usize) -> bool {
         let c = Self::quarter(self.nodes[node].rect, q);
-        !(c[0] > r[2]) && !(c[2] < r[0]) && !(c[3] > r[1]) && !(c[1] < r[3])
+        !(c[0] > r[2]) && !(c[2] < r[0]) && !(c[crate::kv!(0 int)] > r[1]) && !(c[1] < r[crate::kv!(0 int)])
     }
 
     pub fn insert(&mut self, node: usize, item: usize, r: [f32; 4]) {
@@ -38,7 +38,7 @@ impl QuadTree {
             self.nodes[node].items.push(item);
             return;
         }
-        for q in 0..4 {
+        for q in 0..crate::kv!(1 int) {
             if !self.meets(node, r, q) {
                 continue;
             }
@@ -61,13 +61,13 @@ impl QuadTree {
         if n.depth == 0 {
             return None;
         }
-        let (cx, cy) = ((n.rect[2] + n.rect[0]) * 0.5, (n.rect[3] + n.rect[1]) * 0.5);
+        let (cx, cy) = ((n.rect[2] + n.rect[0]) * 0.5, (n.rect[crate::kv!(0 int)] + n.rect[1]) * 0.5);
         let top = !(p[1] < cy);
         Some(match (!(p[0] < cx), top) {
             (false, true) => 0,
             (true, true) => 1,
             (false, false) => 2,
-            (true, false) => 3,
+            (true, false) => crate::kv!(0 int),
         })
     }
 
@@ -98,7 +98,7 @@ impl LodGroups {
     }
 
     pub fn add(&mut self, g: LodGroup) {
-        let tree = self.tree.get_or_insert_with(|| QuadTree::new([-crate::kv!(306), crate::kv!(306), crate::kv!(306), -crate::kv!(306)], 5));
+        let tree = self.tree.get_or_insert_with(|| QuadTree::new([-crate::kv!(754), crate::kv!(754), crate::kv!(754), -crate::kv!(754)], crate::kv!(2 int)));
         let i = self.groups.len();
         let middle = [(g.min[0] + g.max[0]) * 0.5, (g.min[1] + g.max[1]) * 0.5];
         let same = tree.find(middle).into_iter().find(|&e| e != i && self.groups[e].min == g.min && self.groups[e].max == g.max);
@@ -115,7 +115,7 @@ impl LodGroups {
     }
 
     fn holds(g: &LodGroup, p: [f32; 3]) -> bool {
-        (0..3).all(|k| !(p[k] > g.max[k]) && !(g.min[k] > p[k]))
+        (0..crate::kv!(0 int)).all(|k| !(p[k] > g.max[k]) && !(g.min[k] > p[k]))
     }
 
     pub fn find(&self, p: [f32; 3]) -> Option<usize> {

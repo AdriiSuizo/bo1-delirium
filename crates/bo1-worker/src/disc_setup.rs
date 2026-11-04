@@ -1,0 +1,74 @@
+use delirium_data::{disc::Disc, kv, xex};
+use std::{
+    fs::{self, File, OpenOptions},
+    io::{Read, Write},
+    path::{Path, PathBuf},
+};
+
+pub fn load(cache: &Path) -> Result<(), String> {
+    let file = File::open(cache).map_err(|e| format!("{}: {e}", cache.display()))?;
+    let mut data = Vec::with_capacity(kv::CACHE_BYTES);
+    file.take((kv::CACHE_BYTES + 1) as u64).read_to_end(&mut data).map_err(|e| e.to_string())?;
+    if !kv::restore(&data) {
+        return Err(format!("Invalid or outdated Delirium cache {}", cache.display()));
+    }
+    Ok(())
+}
+
+pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
+    if load(cache).is_ok() {
+        println!("Delirium tuning cache ready.");
+        return Ok(());
+    }
+
+    let mut images: Vec<PathBuf> = fs::read_dir(game).map_err(|e| e.to_string())?
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().is_some_and(|ext| ext.eq_ignore_ascii_case("iso")) && path.is_file())
+        .collect();
+    images.sort();
+    if images.is_empty() {
+        return Err(format!("Place your GTA IV Xbox 360 ISO beside BlackOps.exe in {}", game.display()));
+    }
+
+    for path in images {
+        match import(&path) {
+            Ok(data) => {
+                write_cache(cache, &data)?;
+                println!("Delirium tuning prepared from {}. You can now remove the ISO.", path.display());
+                return Ok(());
+            }
+            Err(error) => eprintln!("{}: {error}", path.display()),
+        }
+    }
+    Err("No compatible GTA IV Xbox 360 disc found. Use the base game disc.".into())
+}
+
+fn import(path: &Path) -> Result<Vec<u8>, String> {
+    let disc = Disc::open(path)?;
+    let length = disc.len("default.xex").filter(|&n| n > 4 && n <= 32 * 1024 * 1024)
+        .ok_or("No valid default.xex in the disc root")?;
+    let xex = disc.read_at("default.xex", 0, length as usize)?;
+    if !xex.starts_with(b"XEX2") {
+        return Err("default.xex is not an Xbox 360 executable".into());
+    }
+    let image = xex::XexImage::parse_with_key(&xex, &xex::fetched_key()?)?.image;
+    if !kv::unlock(&image) {
+        return Err("Delirium 0.6.0 does not recognize this disc program".into());
+    }
+    kv::snapshot().ok_or_else(|| "Tuning import produced no data".into())
+}
+
+fn write_cache(cache: &Path, data: &[u8]) -> Result<(), String> {
+    let dir = cache.parent().ok_or("Missing cache directory")?;
+    fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let temporary = cache.with_extension(format!("{}.tmp", std::process::id()));
+    let mut output = OpenOptions::new().create_new(true).write(true).open(&temporary).map_err(|e| e.to_string())?;
+    let result = output.write_all(data).and_then(|_| output.sync_all());
+    drop(output);
+    if let Err(error) = result.and_then(|_| fs::rename(&temporary, cache)) {
+        let _ = fs::remove_file(&temporary);
+        return Err(format!("{}: {error}", cache.display()));
+    }
+    Ok(())
+}

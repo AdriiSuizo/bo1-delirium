@@ -159,7 +159,7 @@ extern "C" __declspec(dllexport) DWORD WINAPI DeliriumAttach(void*){
     wchar_t root[MAX_PATH]{};GetEnvironmentVariableW(L"BO1_STEAM_DELIRIUM_ROOT",root,MAX_PATH);
     wchar_t logs[32768]{};GetEnvironmentVariableW(L"BO1_DELIRIUM_LOG_DIR",logs,32768);
     logFile=_wfsopen((std::filesystem::path(logs)/L"native-runtime.log").c_str(),L"w",_SH_DENYNO);
-    log("adapter loaded into original Steam BlackOps.exe, module %p",module);
+    log("Delirium native adapter loaded, module %p",module);
     wchar_t test[8]{};testEnabled=GetEnvironmentVariableW(L"BO1_STEAM_DELIRIUM_TEST",test,8)&&test[0]==L'1';
     controls::regression=testEnabled&&GetEnvironmentVariableW(L"BO1_STEAM_CONTROLS_TEST",test,8)&&test[0]==L'1';
     if(GetModuleHandleW(nullptr)!=reinterpret_cast<HMODULE>(0x400000)){log("unexpected executable image base");return 0;}

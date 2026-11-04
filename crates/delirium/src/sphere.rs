@@ -1,3 +1,4 @@
+use crate::fneg;
 use crate::prelude::*;
 use crate::Vd;
 
@@ -36,55 +37,55 @@ fn be16(d: &[u8], at: usize) -> Result<u16, String> {
     be(d, at, 2).map(|b| u16::from_be_bytes([b[0], b[1]]))
 }
 fn be32(d: &[u8], at: usize) -> Result<u32, String> {
-    be(d, at, 4).map(|b| u32::from_be_bytes([b[0], b[1], b[2], b[3]]))
+    be(d, at, delirium_data::kv!(1 int)).map(|b| u32::from_be_bytes([b[0], b[1], b[2], b[delirium_data::kv!(0 int)]]))
 }
 fn vec3(d: &[u8], at: usize) -> Result<Vec3, String> {
-    let f = |k: usize| be32(d, at + 4 * k).map(f32::from_bits);
+    let f = |k: usize| be32(d, at + delirium_data::kv!(1 int) * k).map(f32::from_bits);
     Ok(Vec3::new(f(0)?, f(1)?, f(2)?))
 }
 fn ptr(p: u32) -> Result<usize, String> {
-    (p >> 28 == 5).then_some((p & 0x0FFF_FFFF) as usize).ok_or_else(|| format!("Bad resource pointer {p:08x}"))
+    (p >> delirium_data::kv!(85 int) == delirium_data::kv!(2 int)).then_some((p & delirium_data::kv!(86 int)) as usize).ok_or_else(|| format!("Bad resource pointer {p:08x}"))
 }
 
 impl Mesh {
     pub fn read(d: &[u8], at: usize) -> Result<Mesh, String> {
-        let (scale, offset) = (vec3(d, at + 0x90)?, vec3(d, at + 0xA0)?);
-        let (nv, np) = (be32(d, at + 0xC8)? as usize, be32(d, at + 0xCC)? as usize);
+        let (scale, offset) = (vec3(d, at + delirium_data::kv!(87 int))?, vec3(d, at + delirium_data::kv!(88 int))?);
+        let (nv, np) = (be32(d, at + delirium_data::kv!(89 int))? as usize, be32(d, at + delirium_data::kv!(463 int))? as usize);
         let raw: Vec<u16> = match nv {
             0 => vec![],
-            _ => { let vp = ptr(be32(d, at + 0xB0)?)?; (0..3 * nv).map(|k| be16(d, vp + 2 * k)).collect::<Result<_, _>>()? }
+            _ => { let vp = ptr(be32(d, at + delirium_data::kv!(91 int))?)?; (0..delirium_data::kv!(0 int) * nv).map(|k| be16(d, vp + 2 * k)).collect::<Result<_, _>>()? }
         };
         let mut polys = vec![];
         if np > 0 {
-            let pp = ptr(be32(d, at + 0x8C)?)?;
+            let pp = ptr(be32(d, at + delirium_data::kv!(290 int))?)?;
             for i in 0..np {
-                let p = pp + 32 * i;
+                let p = pp + delirium_data::kv!(7 int) * i;
                 let h = |o: usize| be16(d, p + o);
-                polys.push(Poly { n: vec3(d, p)?, mat: be(d, p + 15, 1)?[0], v: [h(16)?, h(18)?, h(20)?, h(22)?], nb: [h(24)?, h(26)?, h(28)?, h(30)?] });
+                polys.push(Poly { n: vec3(d, p)?, mat: be(d, p + delirium_data::kv!(198 int), 1)?[0], v: [h(delirium_data::kv!(54 int))?, h(delirium_data::kv!(211 int))?, h(delirium_data::kv!(127 int))?, h(delirium_data::kv!(105 int))?], nb: [h(delirium_data::kv!(107 int))?, h(delirium_data::kv!(109 int))?, h(delirium_data::kv!(85 int))?, h(delirium_data::kv!(276 int))?] });
             }
         }
-        let mats = match be32(d, at + 0xD0)? {
+        let mats = match be32(d, at + delirium_data::kv!(364 int))? {
             0 => vec![],
-            p => (0..be(d, at + 0xD8, 1)?[0] as usize).map(|k| be32(d, ptr(p)? + 4 * k)).collect::<Result<_, _>>()?,
+            p => (0..be(d, at + delirium_data::kv!(357 int), 1)?[0] as usize).map(|k| be32(d, ptr(p)? + delirium_data::kv!(1 int) * k)).collect::<Result<_, _>>()?,
         };
-        Ok(Mesh::new(&raw, scale, offset, polys, mats, f32::from_bits(be32(d, at + 8)?), vec3(d, at + 48)?))
+        Ok(Mesh::new(&raw, scale, offset, polys, mats, f32::from_bits(be32(d, at + delirium_data::kv!(23 int))?), vec3(d, at + delirium_data::kv!(93 int))?))
     }
 
     pub fn new(raw: &[u16], scale: Vec3, offset: Vec3, polys: Vec<Poly>, mats: Vec<u32>, radius: f32, cen: Vec3) -> Mesh {
         let q = |k: usize| raw[k] as i16 as f32;
-        let verts = (0..raw.len() / 3).map(|i| Vec3::new(q(3 * i).mul_add(scale.x, offset.x), q(3 * i + 1).mul_add(scale.y, offset.y),
-                                                           q(3 * i + 2).mul_add(scale.z, offset.z))).collect();
+        let verts = (0..raw.len() / delirium_data::kv!(0 int)).map(|i| Vec3::new(q(delirium_data::kv!(0 int) * i).mul_add(scale.x, offset.x), q(delirium_data::kv!(0 int) * i + 1).mul_add(scale.y, offset.y),
+                                                           q(delirium_data::kv!(0 int) * i + 2).mul_add(scale.z, offset.z))).collect();
         Mesh { verts, polys, mats, radius, cen }
     }
 }
 
 fn into(m: &[Vec3; 4], p: Vec3) -> Vec3 {
-    let q = p - m[3];
+    let q = p - m[delirium_data::kv!(0 int)];
     Vec3::new(m[0].vd(q), m[1].vd(q), m[2].vd(q))
 }
 
 fn out_of(m: &[Vec3; 4], p: Vec3) -> Vec3 {
-    crate::vm4(m[0], m[1], m[2], m[3], p)
+    crate::vm4(m[0], m[1], m[2], m[delirium_data::kv!(0 int)], p)
 }
 
 pub fn turn(m: &[Vec3; 4], n: Vec3) -> Vec3 {
@@ -94,7 +95,7 @@ pub fn turn(m: &[Vec3; 4], n: Vec3) -> Vec3 {
 
 pub fn inverse(m: &[Vec3; 4]) -> [Vec3; 4] {
     let c = |k: usize| Vec3::new(m[0][k], m[1][k], m[2][k]);
-    [c(0), c(1), c(2), -Vec3::new(m[0].vd(m[3]), m[1].vd(m[3]), m[2].vd(m[3]))]
+    [c(0), c(1), c(2), -Vec3::new(m[0].vd(m[delirium_data::kv!(0 int)]), m[1].vd(m[delirium_data::kv!(0 int)]), m[2].vd(m[delirium_data::kv!(0 int)]))]
 }
 
 fn recip(h: f32) -> f32 {
@@ -132,7 +133,7 @@ fn polygon(m: &Mesh, pi: usize, c: Vec3, r: f32, slot: &mut Slot, k: usize) {
     if dist.abs() > r {
         return;
     }
-    let n = if p.v[3] != 0 { 4 } else { 3 };
+    let n = if p.v[delirium_data::kv!(0 int)] != 0 { delirium_data::kv!(1 int) } else { delirium_data::kv!(0 int) };
     let (mut inside, mut cls) = (true, [0i8; 4]);
     let mut found: Option<(Vec3, Vec3, f32)> = None;
     for i in 0..n {
@@ -157,16 +158,16 @@ fn polygon(m: &Mesh, pi: usize, c: Vec3, r: f32, slot: &mut Slot, k: usize) {
             continue;
         }
         let (a, b, l2) = (sq(d), sq(d1), sq(e));
-        let inv = if l2 == 0.0 { delirium_data::kv!(0) } else { 1.0 / l2 };
+        let inv = if l2 == 0.0 { delirium_data::kv!(3) } else { 1.0 / l2 };
         let ab = a - b;
-        let h2 = (-(ab * ab)).mul_add(inv, (b + a).mul_add(2.0, -l2)) * delirium_data::kv!(12);
+        let h2 = fneg(ab * ab).mul_add(inv, (b + a).mul_add(2.0, fneg(l2))) * delirium_data::kv!(17);
         if h2 > r * r {
             return;
         }
         let h = if h2 > 0.0 { h2.sqrt() } else { 0.0 };
         let u = ((a - h2) * inv).max(0.0).sqrt();
         let at = e.mul_add(Vec3::splat(u), pi_);
-        let nrm = if h > delirium_data::kv!(42) { (c - at) * recip(h) } else { nn };
+        let nrm = if h > delirium_data::kv!(70) { (c - at) * recip(h) } else { nn };
         let across = match p.nb[i] {
             0xFFFF => None,
             q => Some(m.polys.get(q as usize).map_or(Vec3::Z, |q| q.n)),
@@ -191,7 +192,7 @@ fn polygon(m: &Mesh, pi: usize, c: Vec3, r: f32, slot: &mut Slot, k: usize) {
             if q > r * r {
                 return;
             }
-            let (dd, nrm) = if q > delirium_data::kv!(42) { let s = q.sqrt(); (s, d * recip(s)) } else { (0.0, nn) };
+            let (dd, nrm) = if q > delirium_data::kv!(70) { let s = q.sqrt(); (s, d * recip(s)) } else { (0.0, nn) };
             (pm, nrm, r - dd)
         }
     };

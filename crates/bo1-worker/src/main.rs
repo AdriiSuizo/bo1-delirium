@@ -1,4 +1,5 @@
 mod character;
+mod disc_setup;
 mod protocol;
 mod recovery;
 mod runtime;
@@ -27,6 +28,14 @@ fn main() {
 }
 fn run() -> Result<(), String> {
     let args: Vec<String> = std::env::args().collect();
+    if args.get(1).is_some_and(|value| value == "--prepare-disc") {
+        let game = args.get(2).ok_or("Missing BO1 installation path")?;
+        let cache = args.get(3).ok_or("Missing Delirium tuning cache path")?;
+        return disc_setup::prepare(std::path::Path::new(game), std::path::Path::new(cache));
+    }
+    let cache = std::env::var_os("BO1_DELIRIUM_GTA_CACHE")
+        .ok_or("Missing BO1_DELIRIUM_GTA_CACHE. Run the Plutonium Delirium launcher first.")?;
+    disc_setup::load(std::path::Path::new(&cache))?;
     if args.get(1).map(String::as_str) == Some("--selftest") {
         return runtime::selftest();
     }

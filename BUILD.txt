@@ -1,4 +1,4 @@
-Corresponding source: BO1 Delirium Steam 0.2.4-bo1-only-beta5
+Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 1
 Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
 Native game adapter and bridge:
   cmake -S native -B native-build -A Win32
@@ -15,12 +15,13 @@ Own control script archive (standard ZIP/IWD; no original game scripts):
   python -c "import zipfile; z=zipfile.ZipFile('bo1delirium_controls.iwd','w',zipfile.ZIP_DEFLATED); z.write('scripts/maps/delirium/controls.gsc','maps/delirium/controls.gsc'); z.close()"
 Binary layout is described in manifest.json in the installation archive.
 Rename bo1-delirium-worker.exe to runtime/delirium_worker.exe.
-Copy winmm.dll to BO1Delirium/runtime/. The launcher stages it temporarily beside BlackOps.exe.
-Copy CaptureBO1.exe, BO1CharacterCapture.dll, PrepareBO1.exe and FetchLoader.ps1 to tools/.
+Copy BO1SteamDelirium.exe to BO1Delirium/BO1PlutoniumDelirium.exe.
+Copy winmm.dll to BO1Delirium/runtime/. The launcher stages it temporarily beside the Plutonium bootstrapper.
+Copy CaptureBO1.exe, BO1CharacterCapture.dll, and PrepareBO1.exe to tools/.
 Copy bo1delirium_controls.iwd to BO1Delirium/scripts/. The launcher installs this own script into its private profile.
 Keep the original native BO1 executable, assets and private generated cache out of redistribution.
-No GTA game files are necessary at runtime or for preparing the host character.
-Runtime base: PVCPC/delirium-physics revision 23ea7cfa2a1000d64870d2549834006d21b3e05c,
-with the retained BO1 gameplay adaptations; this is not a wholesale SDK 0.5.0 upgrade.
+The launcher calls --prepare-disc with the BO1 directory and private cache path. The worker reads tuning values from a supported Xbox 360 GTA IV ISO in that directory. BO1 supplies the character and recovery motions.
+Runtime base: PVCPC/delirium-physics v0.6.0 (93eed4d6a0aafa2e84526730ea1f54dab48ac7d4),
+with BO1 host adapters and the existing native Steam bridge.
 Custom character interface and public configuration references: SuperSloppers/large-steal-car-4
 revision 0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36.

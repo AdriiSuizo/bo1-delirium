@@ -120,7 +120,7 @@ impl Character {
         let mut joints: Vec<nm_asset::Joint> = self.joints.iter().map(|j| nm_asset::Joint {
             name: j.name.clone(), index: j.index, three: j.three, pos: j.pos, twist_axis: j.twist_axis, lean_axis: j.lean_axis,
             limits: j.limits.map(|[a, b]| (a, b)), flip: j.flip, muscle_stiffness: j.muscle_stiffness, damping: j.damping,
-            strength: j.strength, max_torque: j.max_torque,
+            strength: j.strength, max_torque: j.max_torque, centred: false,
         }).collect();
         joints.sort_by_key(|j| j.index);
         (joints, self.parts.iter().map(|p| p.frame).collect(), self.parts.iter().map(|p| p.mass).collect(),
@@ -132,6 +132,7 @@ impl Character {
         let parts = self.build.as_ref()?;
         let tf = |f: &Frame| Transform::from_translation(Vec3::from_array(f.pos)).with_rotation(q(f.rot));
         let mut frames: Vec<Transform> = parts.iter().map(|p| tf(&p.frame)).collect();
+        let links = vec![Quat::IDENTITY; parts.len()];
         let parts = parts.iter().enumerate().map(|(i, p)| PartDef {
             bone: i, parent: p.parent, mass: p.mass, radius: p.radius, half: p.half, offset: tf(&p.offset), rest: q(p.rest),
             anchor_parent: Vec3::from_array(p.anchor_parent), anchor: Vec3::from_array(p.anchor),
@@ -143,9 +144,9 @@ impl Character {
                 JointLimit::Locked => Limit::Locked,
             },
             lower: p.lower, reach: p.reach, name: p.name.clone(), bind: q(p.bind), boxed: p.boxed.map(Vec3::from_array),
-            inertia: Vec3::from_array(p.inertia), size: 1.0, heft: 1.0, grown: 1.0,
+            inertia: Vec3::from_array(p.inertia), size: 1.0, heft: 1.0, grown: 1.0, length: 2.0 * p.half,
         }).collect();
-        let mut build = Build { parts, nm: delirium::nmrs::HOMER };
+        let mut build = Build { parts, nm: delirium::nmrs::HOMER, links };
         delirium::nmrs::asset_layout(&mut build, &mut frames);
         if let Some(asset) = delirium::nmrs::ASSET[build.nm].get() {
             let defs=delirium::nmrs::joints(&build,asset)?;
@@ -160,4 +161,3 @@ impl Character {
         Some((build, frames))
     }
 }
-

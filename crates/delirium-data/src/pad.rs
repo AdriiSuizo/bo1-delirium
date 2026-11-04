@@ -1,12 +1,12 @@
 #[allow(non_snake_case)]
 #[inline]
-pub fn STICK_DEAD_ZONE() -> f32 { crate::kv!(375 f32) }
+pub fn STICK_DEAD_ZONE() -> f32 { crate::kv!(779 f32) }
 #[allow(non_snake_case)]
 #[inline]
-fn HALF_RANGE() -> f32 { crate::kv!(268 f32) }
+fn HALF_RANGE() -> f32 { crate::kv!(563 f32) }
 #[allow(non_snake_case)]
 #[inline]
-fn STICK_SCALE() -> f32 { crate::kv!(294 f32) }
+fn STICK_SCALE() -> f32 { crate::kv!(739 f32) }
 
 pub fn dead_zone(v: f32, t: f32) -> f32 {
     if v > t {
@@ -32,7 +32,7 @@ pub struct RagePad {
 impl RagePad {
     pub fn set_motor(&mut self, v: f32, motor: usize) {
         let v = (v as f64).clamp(0.0, 1.0);
-        self.motor_speed[motor] = (v * crate::kv!(376)) as i64 as u16;
+        self.motor_speed[motor] = (v * crate::kv!(931)) as i64 as u16;
         self.motors_changed = true;
     }
 
@@ -46,24 +46,26 @@ impl RagePad {
     }
 }
 
-const BUTTONS: [(u32, Option<usize>); 16] = [
-    (0x0004, Some(0x08)),
-    (0x0001, Some(0x0A)),
-    (0x0200, None),
-    (0x0008, Some(0x09)),
-    (0x0002, Some(0x0B)),
-    (0x0400, None),
-    (0x0080, Some(0x07)),
-    (0x0010, Some(0x04)),
-    (0x0020, Some(0x05)),
-    (0x0040, Some(0x06)),
-    (0x1000, Some(0x02)),
-    (0x4000, Some(0x03)),
-    (0x8000, Some(0x01)),
-    (0x2000, Some(0x00)),
-    (0x0800, None),
-    (0x0100, None),
-];
+#[allow(non_snake_case)]
+#[inline]
+fn BUTTONS() -> &'static [(u32, Option<usize>); 16] { static V: std::sync::OnceLock<[(u32, Option<usize>); 16]> = std::sync::OnceLock::new(); let f = || [
+    (crate::kv!(1 int), Some(crate::kv!(23 int))),
+    (0x0001, Some(crate::kv!(81 int))),
+    (crate::kv!(182 int), None),
+    (crate::kv!(23 int), Some(crate::kv!(104 int))),
+    (0x0002, Some(crate::kv!(113 int))),
+    (crate::kv!(183 int), None),
+    (crate::kv!(251 int), Some(crate::kv!(22 int))),
+    (crate::kv!(54 int), Some(crate::kv!(1 int))),
+    (crate::kv!(7 int), Some(crate::kv!(2 int))),
+    (crate::kv!(253 int), Some(crate::kv!(6 int))),
+    (crate::kv!(181 int), Some(0x02)),
+    (crate::kv!(672 int), Some(crate::kv!(0 int))),
+    (crate::kv!(708 int), Some(0x01)),
+    (crate::kv!(52 int), Some(0x00)),
+    (crate::kv!(718 int), None),
+    (crate::kv!(96 int), None),
+]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct PadState(pub [i32; 20]);
@@ -74,10 +76,10 @@ impl PadState {
         for (k, &b) in p.sticks.iter().enumerate() {
             w[k] = stick(b);
         }
-        for (k, &(bit, pressure)) in BUTTONS.iter().enumerate() {
-            w[4 + k] = match pressure {
+        for (k, &(bit, pressure)) in (*BUTTONS()).iter().enumerate() {
+            w[crate::kv!(1 int) + k] = match pressure {
                 Some(i) if p.has_pressure => p.pressure[i] as i32,
-                _ => if p.buttons & bit != 0 { 255 } else { 0 },
+                _ => if p.buttons & bit != 0 { crate::kv!(389 int) } else { 0 },
             };
         }
         PadState(w)
@@ -114,8 +116,8 @@ impl Pad {
             self.now = PadState::from_rage(p);
         }
         if self.rumble_time != 0 {
-            let fifth = (self.rumble_strength as f64 * crate::kv!(34)) as i32;
-            if player_state_3 && fifth > 10 {
+            let fifth = (self.rumble_strength as f64 * crate::kv!(60)) as i32;
+            if player_state_3 && fifth > crate::kv!(81 int) {
                 self.rumble_strength -= fifth;
                 if let Some(p) = rigid.as_deref_mut() {
                     self.set_rumble(p, self.rumble_strength, 0, now);
@@ -132,7 +134,7 @@ impl Pad {
         rigid.set_motor(0.0, 1);
         for (motor, s) in [(0, a), (1, b)] {
             if s > 0 {
-                rigid.set_motor((s as f64 * (1.0 / crate::kv!(377))) as f32, motor);
+                rigid.set_motor((s as f64 * (1.0 / crate::kv!(932))) as f32, motor);
                 rigid.set_motors_on(true);
                 self.rumble_start = now;
             }
@@ -184,4 +186,3 @@ impl Pad {
         self.set_rumble(rigid, strength_a, strength_b, now);
     }
 }
-

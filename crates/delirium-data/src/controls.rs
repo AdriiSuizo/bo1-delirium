@@ -8,19 +8,27 @@ pub enum Source {
 impl Source {
     pub fn code(self) -> (u32, u32) {
         match self {
-            Source::Button(b) => (6, b),
-            Source::Analog(i) => (8, i),
-            Source::Axis(i) => (9, i),
+            Source::Button(b) => (crate::kv!(6 int), b),
+            Source::Analog(i) => (crate::kv!(23 int), i),
+            Source::Axis(i) => (crate::kv!(104 int), i),
         }
     }
 }
 
 pub type Mapper = u32;
 pub const M0: Mapper = 0x000;
-pub const M1: Mapper = 0x308;
-pub const M2: Mapper = 0x610;
-pub const M3: Mapper = 0xD58;
-pub const MAPPERS: [Mapper; 4] = [M0, M1, M2, M3];
+#[allow(non_snake_case)]
+#[inline]
+pub fn M1() -> &'static Mapper { static V: std::sync::OnceLock<Mapper> = std::sync::OnceLock::new(); let f = || crate::kv!(654 int); if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+#[allow(non_snake_case)]
+#[inline]
+pub fn M2() -> &'static Mapper { static V: std::sync::OnceLock<Mapper> = std::sync::OnceLock::new(); let f = || crate::kv!(655 int); if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+#[allow(non_snake_case)]
+#[inline]
+pub fn M3() -> &'static Mapper { static V: std::sync::OnceLock<Mapper> = std::sync::OnceLock::new(); let f = || crate::kv!(656 int); if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
+#[allow(non_snake_case)]
+#[inline]
+pub fn MAPPERS() -> &'static [Mapper; 4] { static V: std::sync::OnceLock<[Mapper; 4]> = std::sync::OnceLock::new(); let f = || [M0, (*M1()), (*M2()), (*M3())]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Binding {
@@ -34,194 +42,206 @@ const fn b(mapper: Mapper, source: Source, control: u32) -> Binding {
 }
 use Source::{Analog, Axis, Button};
 
-const NO_PAD: &[Binding] = &[
-    b(M0, Button(0x100), 0x918),
-    b(M0, Button(0x40), 0x924),
-    b(M0, Button(0x80), 0x930),
-    b(M0, Button(0x20), 0x948),
-    b(M0, Button(0x4), 0x954),
-    b(M0, Button(0x10), 0x93C),
-    b(M0, Button(0x8), 0x960),
-    b(M0, Button(0x4), 0xA2C),
-    b(M0, Button(0x2), 0x978),
-    b(M0, Button(0x1), 0x984),
-    b(M0, Button(0x200), 0xA08),
-    b(M0, Button(0x400), 0x96C),
-    b(M0, Button(0x8), 0xA68),
-    b(M0, Button(0x20), 0xA74),
-    b(M0, Button(0x1000), 0xA14),
-    b(M0, Button(0x4000), 0xA20),
-    b(M0, Axis(0x1), 0xA38),
-    b(M0, Axis(0x1), 0xA44),
-    b(M0, Axis(0x3), 0xA50),
-    b(M0, Axis(0x3), 0xA5C),
-    b(M0, Axis(0x0), 0x9A8),
-    b(M0, Axis(0x0), 0x9B4),
-    b(M0, Axis(0x1), 0x9C0),
-    b(M0, Axis(0x1), 0x9CC),
-    b(M0, Axis(0x2), 0x9D8),
-    b(M0, Axis(0x2), 0x9E4),
-    b(M0, Axis(0x3), 0x9F0),
-    b(M0, Axis(0x3), 0x9FC),
-    b(M1, Button(0x20), 0xBDC),
-    b(M1, Button(0x10), 0xBE8),
-    b(M1, Button(0x2), 0xBF4),
-    b(M0, Button(0x4), 0xD14),
-    b(M1, Button(0x80), 0xC00),
-    b(M1, Button(0x40), 0xC0C),
-    b(M2, Axis(0x0), 0xA80),
-    b(M2, Axis(0x0), 0xA8C),
-    b(M2, Axis(0x1), 0xA98),
-    b(M2, Axis(0x1), 0xAA4),
-    b(M2, Axis(0x2), 0xAB0),
-    b(M2, Axis(0x2), 0xABC),
-    b(M2, Axis(0x3), 0xAC8),
-    b(M2, Axis(0x3), 0xAD4),
-    b(M2, Button(0x4), 0xAE0),
-    b(M2, Button(0x4), 0xAEC),
-    b(M2, Button(0x10), 0xB1C),
-    b(M2, Button(0x80), 0xB10),
-    b(M2, Button(0x8), 0xB28),
-    b(M2, Button(0x20), 0xB7C),
-    b(M2, Button(0x400), 0xB70),
-    b(M2, Button(0x2000), 0xB88),
-    b(M2, Button(0x8000), 0xB94),
-    b(M2, Button(0x200), 0xBA0),
-    b(M2, Button(0x40), 0xAF8),
-    b(M2, Button(0x80), 0xB04),
-    b(M2, Button(0x40), 0xBAC),
-    b(M2, Button(0x80), 0xBB8),
-    b(M2, Button(0x1), 0xBC4),
-];
+#[allow(non_snake_case)]
+#[inline]
+fn NO_PAD() -> &'static [Binding] { static V: std::sync::OnceLock<Box<[Binding]>> = std::sync::OnceLock::new(); let f = || Box::new([
+    b(M0, Button(crate::kv!(96 int)), crate::kv!(657 int)),
+    b(M0, Button(crate::kv!(253 int)), crate::kv!(658 int)),
+    b(M0, Button(crate::kv!(251 int)), crate::kv!(659 int)),
+    b(M0, Button(crate::kv!(7 int)), crate::kv!(660 int)),
+    b(M0, Button(crate::kv!(1 int)), crate::kv!(661 int)),
+    b(M0, Button(crate::kv!(54 int)), crate::kv!(662 int)),
+    b(M0, Button(crate::kv!(23 int)), crate::kv!(663 int)),
+    b(M0, Button(crate::kv!(1 int)), crate::kv!(664 int)),
+    b(M0, Button(0x2), crate::kv!(665 int)),
+    b(M0, Button(0x1), crate::kv!(666 int)),
+    b(M0, Button(crate::kv!(182 int)), crate::kv!(667 int)),
+    b(M0, Button(crate::kv!(183 int)), crate::kv!(668 int)),
+    b(M0, Button(crate::kv!(23 int)), crate::kv!(669 int)),
+    b(M0, Button(crate::kv!(7 int)), crate::kv!(670 int)),
+    b(M0, Button(crate::kv!(181 int)), crate::kv!(671 int)),
+    b(M0, Button(crate::kv!(672 int)), crate::kv!(673 int)),
+    b(M0, Axis(0x1), crate::kv!(674 int)),
+    b(M0, Axis(0x1), crate::kv!(675 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(676 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(677 int)),
+    b(M0, Axis(0x0), crate::kv!(678 int)),
+    b(M0, Axis(0x0), crate::kv!(679 int)),
+    b(M0, Axis(0x1), crate::kv!(680 int)),
+    b(M0, Axis(0x1), crate::kv!(681 int)),
+    b(M0, Axis(0x2), crate::kv!(682 int)),
+    b(M0, Axis(0x2), crate::kv!(683 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(684 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(685 int)),
+    b((*M1()), Button(crate::kv!(7 int)), crate::kv!(686 int)),
+    b((*M1()), Button(crate::kv!(54 int)), crate::kv!(687 int)),
+    b((*M1()), Button(0x2), crate::kv!(688 int)),
+    b(M0, Button(crate::kv!(1 int)), crate::kv!(689 int)),
+    b((*M1()), Button(crate::kv!(251 int)), crate::kv!(690 int)),
+    b((*M1()), Button(crate::kv!(253 int)), crate::kv!(691 int)),
+    b((*M2()), Axis(0x0), crate::kv!(692 int)),
+    b((*M2()), Axis(0x0), crate::kv!(693 int)),
+    b((*M2()), Axis(0x1), crate::kv!(694 int)),
+    b((*M2()), Axis(0x1), crate::kv!(695 int)),
+    b((*M2()), Axis(0x2), crate::kv!(696 int)),
+    b((*M2()), Axis(0x2), crate::kv!(697 int)),
+    b((*M2()), Axis(crate::kv!(0 int)), crate::kv!(698 int)),
+    b((*M2()), Axis(crate::kv!(0 int)), crate::kv!(699 int)),
+    b((*M2()), Button(crate::kv!(1 int)), crate::kv!(700 int)),
+    b((*M2()), Button(crate::kv!(1 int)), crate::kv!(701 int)),
+    b((*M2()), Button(crate::kv!(54 int)), crate::kv!(702 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(703 int)),
+    b((*M2()), Button(crate::kv!(23 int)), crate::kv!(704 int)),
+    b((*M2()), Button(crate::kv!(7 int)), crate::kv!(705 int)),
+    b((*M2()), Button(crate::kv!(183 int)), crate::kv!(706 int)),
+    b((*M2()), Button(crate::kv!(52 int)), crate::kv!(707 int)),
+    b((*M2()), Button(crate::kv!(708 int)), crate::kv!(709 int)),
+    b((*M2()), Button(crate::kv!(182 int)), crate::kv!(710 int)),
+    b((*M2()), Button(crate::kv!(253 int)), crate::kv!(711 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(712 int)),
+    b((*M2()), Button(crate::kv!(253 int)), crate::kv!(713 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(42 int)),
+    b((*M2()), Button(0x1), crate::kv!(714 int)),
+]) as Box<[Binding]>; if crate::kv::open() { &**V.get_or_init(f) } else { Box::leak(f()) } }
 
-const PAD: &[Binding] = &[
-    b(M0, Axis(0x0), 0x9A8),
-    b(M0, Axis(0x0), 0x9B4),
-    b(M0, Axis(0x1), 0x9C0),
-    b(M0, Axis(0x1), 0x9CC),
-    b(M0, Axis(0x2), 0x9D8),
-    b(M0, Axis(0x2), 0x9E4),
-    b(M0, Axis(0x3), 0x9F0),
-    b(M0, Axis(0x3), 0x9FC),
-    b(M0, Button(0x100), 0x918),
-    b(M0, Button(0x40), 0x924),
-    b(M0, Button(0x80), 0x930),
-    b(M0, Button(0x10), 0x93C),
-    b(M0, Button(0x200), 0xA08),
-    b(M0, Button(0x400), 0x96C),
-    b(M0, Button(0x2000), 0x978),
-    b(M0, Button(0x8000), 0x984),
-    b(M0, Axis(0x1), 0xA38),
-    b(M0, Axis(0x1), 0xA44),
-    b(M0, Axis(0x3), 0xA50),
-    b(M0, Axis(0x3), 0xA5C),
-    b(M0, Button(0x1000), 0xA14),
-    b(M0, Button(0x4000), 0xA20),
-    b(M1, Button(0x20), 0xBDC),
-    b(M1, Button(0x10), 0xBE8),
-    b(M1, Button(0x80), 0xC00),
-    b(M1, Button(0x40), 0xC0C),
-    b(M2, Axis(0x0), 0xA80),
-    b(M2, Axis(0x0), 0xA8C),
-    b(M2, Axis(0x1), 0xA98),
-    b(M2, Axis(0x1), 0xAA4),
-    b(M2, Axis(0x2), 0xAB0),
-    b(M2, Axis(0x2), 0xABC),
-    b(M2, Axis(0x3), 0xAC8),
-    b(M2, Axis(0x3), 0xAD4),
-    b(M2, Button(0x10), 0xB1C),
-    b(M2, Button(0x400), 0xB70),
-    b(M2, Button(0x2000), 0xB88),
-    b(M2, Button(0x8000), 0xB94),
-    b(M2, Button(0x200), 0xBA0),
-];
+#[allow(non_snake_case)]
+#[inline]
+fn PAD() -> &'static [Binding] { static V: std::sync::OnceLock<Box<[Binding]>> = std::sync::OnceLock::new(); let f = || Box::new([
+    b(M0, Axis(0x0), crate::kv!(678 int)),
+    b(M0, Axis(0x0), crate::kv!(679 int)),
+    b(M0, Axis(0x1), crate::kv!(680 int)),
+    b(M0, Axis(0x1), crate::kv!(681 int)),
+    b(M0, Axis(0x2), crate::kv!(682 int)),
+    b(M0, Axis(0x2), crate::kv!(683 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(684 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(685 int)),
+    b(M0, Button(crate::kv!(96 int)), crate::kv!(657 int)),
+    b(M0, Button(crate::kv!(253 int)), crate::kv!(658 int)),
+    b(M0, Button(crate::kv!(251 int)), crate::kv!(659 int)),
+    b(M0, Button(crate::kv!(54 int)), crate::kv!(662 int)),
+    b(M0, Button(crate::kv!(182 int)), crate::kv!(667 int)),
+    b(M0, Button(crate::kv!(183 int)), crate::kv!(668 int)),
+    b(M0, Button(crate::kv!(52 int)), crate::kv!(665 int)),
+    b(M0, Button(crate::kv!(708 int)), crate::kv!(666 int)),
+    b(M0, Axis(0x1), crate::kv!(674 int)),
+    b(M0, Axis(0x1), crate::kv!(675 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(676 int)),
+    b(M0, Axis(crate::kv!(0 int)), crate::kv!(677 int)),
+    b(M0, Button(crate::kv!(181 int)), crate::kv!(671 int)),
+    b(M0, Button(crate::kv!(672 int)), crate::kv!(673 int)),
+    b((*M1()), Button(crate::kv!(7 int)), crate::kv!(686 int)),
+    b((*M1()), Button(crate::kv!(54 int)), crate::kv!(687 int)),
+    b((*M1()), Button(crate::kv!(251 int)), crate::kv!(690 int)),
+    b((*M1()), Button(crate::kv!(253 int)), crate::kv!(691 int)),
+    b((*M2()), Axis(0x0), crate::kv!(692 int)),
+    b((*M2()), Axis(0x0), crate::kv!(693 int)),
+    b((*M2()), Axis(0x1), crate::kv!(694 int)),
+    b((*M2()), Axis(0x1), crate::kv!(695 int)),
+    b((*M2()), Axis(0x2), crate::kv!(696 int)),
+    b((*M2()), Axis(0x2), crate::kv!(697 int)),
+    b((*M2()), Axis(crate::kv!(0 int)), crate::kv!(698 int)),
+    b((*M2()), Axis(crate::kv!(0 int)), crate::kv!(699 int)),
+    b((*M2()), Button(crate::kv!(54 int)), crate::kv!(702 int)),
+    b((*M2()), Button(crate::kv!(183 int)), crate::kv!(706 int)),
+    b((*M2()), Button(crate::kv!(52 int)), crate::kv!(707 int)),
+    b((*M2()), Button(crate::kv!(708 int)), crate::kv!(709 int)),
+    b((*M2()), Button(crate::kv!(182 int)), crate::kv!(710 int)),
+]) as Box<[Binding]>; if crate::kv::open() { &**V.get_or_init(f) } else { Box::leak(f()) } }
 
-const PAD_ANALOG_TRIGGERS: &[Binding] = &[
-    b(M0, Analog(0xA), 0x960),
-    b(M0, Analog(0xB), 0x948),
-    b(M0, Analog(0xB), 0x954),
-    b(M0, Button(0x4), 0xA2C),
-    b(M0, Button(0x8), 0xA68),
-    b(M0, Button(0x20), 0xA74),
-    b(M1, Analog(0xB), 0xBF4),
-    b(M1, Analog(0xB), 0xD14),
-    b(M2, Analog(0xB), 0xAF8),
-    b(M2, Analog(0xA), 0xB04),
-    b(M2, Button(0x8), 0xB28),
-    b(M2, Button(0x40), 0xB34),
-    b(M2, Button(0x4), 0xAE0),
-    b(M2, Button(0x80), 0xAEC),
-    b(M2, Button(0x80), 0xB10),
-    b(M2, Button(0x20), 0xB7C),
-    b(M2, Analog(0xA), 0xB40),
-    b(M2, Analog(0xB), 0xB4C),
-    b(M2, Analog(0xB), 0xBAC),
-    b(M2, Analog(0xA), 0xBB8),
-    b(M2, Button(0x4), 0xBC4),
-];
+#[allow(non_snake_case)]
+#[inline]
+fn PAD_ANALOG_TRIGGERS() -> &'static [Binding] { static V: std::sync::OnceLock<Box<[Binding]>> = std::sync::OnceLock::new(); let f = || Box::new([
+    b(M0, Analog(crate::kv!(81 int)), crate::kv!(663 int)),
+    b(M0, Analog(crate::kv!(113 int)), crate::kv!(660 int)),
+    b(M0, Analog(crate::kv!(113 int)), crate::kv!(661 int)),
+    b(M0, Button(crate::kv!(1 int)), crate::kv!(664 int)),
+    b(M0, Button(crate::kv!(23 int)), crate::kv!(669 int)),
+    b(M0, Button(crate::kv!(7 int)), crate::kv!(670 int)),
+    b((*M1()), Analog(crate::kv!(113 int)), crate::kv!(688 int)),
+    b((*M1()), Analog(crate::kv!(113 int)), crate::kv!(689 int)),
+    b((*M2()), Analog(crate::kv!(113 int)), crate::kv!(711 int)),
+    b((*M2()), Analog(crate::kv!(81 int)), crate::kv!(712 int)),
+    b((*M2()), Button(crate::kv!(23 int)), crate::kv!(704 int)),
+    b((*M2()), Button(crate::kv!(253 int)), crate::kv!(715 int)),
+    b((*M2()), Button(crate::kv!(1 int)), crate::kv!(700 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(701 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(703 int)),
+    b((*M2()), Button(crate::kv!(7 int)), crate::kv!(705 int)),
+    b((*M2()), Analog(crate::kv!(81 int)), crate::kv!(716 int)),
+    b((*M2()), Analog(crate::kv!(113 int)), crate::kv!(717 int)),
+    b((*M2()), Analog(crate::kv!(113 int)), crate::kv!(713 int)),
+    b((*M2()), Analog(crate::kv!(81 int)), crate::kv!(42 int)),
+    b((*M2()), Button(crate::kv!(1 int)), crate::kv!(714 int)),
+]) as Box<[Binding]>; if crate::kv::open() { &**V.get_or_init(f) } else { Box::leak(f()) } }
 
-const PAD_BUTTON_TRIGGERS: &[Binding] = &[
-    b(M0, Button(0x8), 0x960),
-    b(M0, Button(0x4), 0x948),
-    b(M0, Button(0x20), 0x954),
-    b(M0, Button(0x1), 0xA2C),
-    b(M0, Button(0x2), 0xA68),
-    b(M1, Button(0x4), 0xBF4),
-    b(M1, Button(0x20), 0xD14),
-    b(M2, Button(0x40), 0xAF8),
-    b(M2, Button(0x80), 0xB04),
-    b(M2, Button(0x8), 0xB28),
-    b(M2, Button(0x8), 0xB34),
-    b(M2, Button(0x4), 0xAE0),
-    b(M2, Button(0x4), 0xAEC),
-    b(M2, Button(0x1), 0xB10),
-    b(M2, Button(0x20), 0xB7C),
-    b(M2, Button(0x40), 0xB40),
-    b(M2, Button(0x80), 0xB4C),
-    b(M2, Button(0x40), 0xBAC),
-    b(M2, Button(0x80), 0xBB8),
-    b(M2, Analog(0xA), 0xBC4),
-];
+#[allow(non_snake_case)]
+#[inline]
+fn PAD_BUTTON_TRIGGERS() -> &'static [Binding] { static V: std::sync::OnceLock<Box<[Binding]>> = std::sync::OnceLock::new(); let f = || Box::new([
+    b(M0, Button(crate::kv!(23 int)), crate::kv!(663 int)),
+    b(M0, Button(crate::kv!(1 int)), crate::kv!(660 int)),
+    b(M0, Button(crate::kv!(7 int)), crate::kv!(661 int)),
+    b(M0, Button(0x1), crate::kv!(664 int)),
+    b(M0, Button(0x2), crate::kv!(669 int)),
+    b((*M1()), Button(crate::kv!(1 int)), crate::kv!(688 int)),
+    b((*M1()), Button(crate::kv!(7 int)), crate::kv!(689 int)),
+    b((*M2()), Button(crate::kv!(253 int)), crate::kv!(711 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(712 int)),
+    b((*M2()), Button(crate::kv!(23 int)), crate::kv!(704 int)),
+    b((*M2()), Button(crate::kv!(23 int)), crate::kv!(715 int)),
+    b((*M2()), Button(crate::kv!(1 int)), crate::kv!(700 int)),
+    b((*M2()), Button(crate::kv!(1 int)), crate::kv!(701 int)),
+    b((*M2()), Button(0x1), crate::kv!(703 int)),
+    b((*M2()), Button(crate::kv!(7 int)), crate::kv!(705 int)),
+    b((*M2()), Button(crate::kv!(253 int)), crate::kv!(716 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(717 int)),
+    b((*M2()), Button(crate::kv!(253 int)), crate::kv!(713 int)),
+    b((*M2()), Button(crate::kv!(251 int)), crate::kv!(42 int)),
+    b((*M2()), Analog(crate::kv!(81 int)), crate::kv!(714 int)),
+]) as Box<[Binding]>; if crate::kv::open() { &**V.get_or_init(f) } else { Box::leak(f()) } }
 
-const TAIL: &[Binding] = &[
-    b(M3, Button(0x800), 0xCA8),
-    b(M3, Button(0x1000), 0xC24),
-    b(M3, Button(0x4000), 0xC18),
-    b(M3, Button(0x8000), 0xC30),
-    b(M3, Button(0x2000), 0xC3C),
-    b(M3, Axis(0x0), 0xC78),
-    b(M3, Axis(0x1), 0xC84),
-    b(M3, Axis(0x2), 0xC90),
-    b(M3, Axis(0x3), 0xC9C),
-    b(M3, Button(0x40), 0xCB4),
-    b(M3, Button(0x20), 0xCC0),
-    b(M3, Button(0x80), 0xCCC),
-    b(M3, Button(0x10), 0xCD8),
-    b(M3, Button(0x4), 0xCE4),
-    b(M3, Button(0x8), 0xCF0),
-    b(M3, Button(0x1), 0xCFC),
-    b(M3, Button(0x2), 0xD08),
-];
+#[allow(non_snake_case)]
+#[inline]
+fn TAIL() -> &'static [Binding] { static V: std::sync::OnceLock<Box<[Binding]>> = std::sync::OnceLock::new(); let f = || Box::new([
+    b((*M3()), Button(crate::kv!(718 int)), crate::kv!(719 int)),
+    b((*M3()), Button(crate::kv!(181 int)), crate::kv!(720 int)),
+    b((*M3()), Button(crate::kv!(672 int)), crate::kv!(721 int)),
+    b((*M3()), Button(crate::kv!(708 int)), crate::kv!(722 int)),
+    b((*M3()), Button(crate::kv!(52 int)), crate::kv!(723 int)),
+    b((*M3()), Axis(0x0), crate::kv!(724 int)),
+    b((*M3()), Axis(0x1), crate::kv!(725 int)),
+    b((*M3()), Axis(0x2), crate::kv!(726 int)),
+    b((*M3()), Axis(crate::kv!(0 int)), crate::kv!(727 int)),
+    b((*M3()), Button(crate::kv!(253 int)), crate::kv!(728 int)),
+    b((*M3()), Button(crate::kv!(7 int)), crate::kv!(729 int)),
+    b((*M3()), Button(crate::kv!(251 int)), crate::kv!(730 int)),
+    b((*M3()), Button(crate::kv!(54 int)), crate::kv!(731 int)),
+    b((*M3()), Button(crate::kv!(1 int)), crate::kv!(732 int)),
+    b((*M3()), Button(crate::kv!(23 int)), crate::kv!(733 int)),
+    b((*M3()), Button(0x1), crate::kv!(734 int)),
+    b((*M3()), Button(0x2), crate::kv!(735 int)),
+]) as Box<[Binding]>; if crate::kv::open() { &**V.get_or_init(f) } else { Box::leak(f()) } }
 
-pub const SETUP_WORDS: [u32; 2] = [0x40, 0x20];
+#[allow(non_snake_case)]
+#[inline]
+pub fn SETUP_WORDS() -> &'static [u32; 2] { static V: std::sync::OnceLock<[u32; 2]> = std::sync::OnceLock::new(); let f = || [crate::kv!(253 int), crate::kv!(7 int)]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
 
 pub fn bindings(controller: bool, setting: u32) -> Vec<Binding> {
     let mut v = vec![];
     let last = if !controller {
-        v.extend_from_slice(NO_PAD);
+        v.extend_from_slice(NO_PAD());
         Button(0x2)
     } else {
-        v.extend_from_slice(PAD);
+        v.extend_from_slice(PAD());
         if setting == 0 {
-            v.extend_from_slice(PAD_ANALOG_TRIGGERS);
-            Button(0x8)
+            v.extend_from_slice(PAD_ANALOG_TRIGGERS());
+            Button(crate::kv!(23 int))
         } else {
-            v.extend_from_slice(PAD_BUTTON_TRIGGERS);
-            Analog(0xB)
+            v.extend_from_slice(PAD_BUTTON_TRIGGERS());
+            Analog(crate::kv!(113 int))
         }
     };
-    v.push(b(M2, last, 0xBD0));
-    v.extend_from_slice(TAIL);
+    v.push(b((*M2()), last, crate::kv!(736 int)));
+    v.extend_from_slice(TAIL());
     v
 }
 
@@ -241,25 +261,26 @@ impl IoValue {
     }
 
     pub fn stick(&self) -> f32 {
-        let v = ((self.get() as f32 - crate::kv!(268 f32)) * crate::kv!(292 f32)).clamp(-1.0, 1.0);
+        let v = ((self.get() as f32 - crate::kv!(563 f32)) * crate::kv!(737 f32)).clamp(-1.0, 1.0);
         crate::pad::dead_zone(v, READ_DEAD_ZONE())
     }
 
     pub fn stick_int(&self) -> i32 {
-        (self.stick() * crate::kv!(268 f32)) as i32
+        (self.stick() * crate::kv!(563 f32)) as i32
     }
 
     pub fn button(&self) -> f32 {
-        crate::pad::dead_zone(self.get() as f32 * crate::kv!(293 f32), READ_DEAD_ZONE())
+        crate::pad::dead_zone(self.get() as f32 * crate::kv!(738 f32), READ_DEAD_ZONE())
     }
 }
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn READ_DEAD_ZONE() -> f32 { crate::kv!(12) }
+pub fn READ_DEAD_ZONE() -> f32 { crate::kv!(17) }
 
-pub const AXIS_PAIRS: [(u32, u32); 8] =
-    [(0x9A8, 0x9B4), (0x9C0, 0x9CC), (0x9D8, 0x9E4), (0x9F0, 0x9FC), (0xA80, 0xA8C), (0xA98, 0xAA4), (0xAB0, 0xABC), (0xAC8, 0xAD4)];
+#[allow(non_snake_case)]
+#[inline]
+pub fn AXIS_PAIRS() -> &'static [(u32, u32); 8] { static V: std::sync::OnceLock<[(u32, u32); 8]> = std::sync::OnceLock::new(); let f = || [(crate::kv!(678 int), crate::kv!(679 int)), (crate::kv!(680 int), crate::kv!(681 int)), (crate::kv!(682 int), crate::kv!(683 int)), (crate::kv!(684 int), crate::kv!(685 int)), (crate::kv!(692 int), crate::kv!(693 int)), (crate::kv!(694 int), crate::kv!(695 int)), (crate::kv!(696 int), crate::kv!(697 int)), (crate::kv!(698 int), crate::kv!(699 int))]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
 
 pub fn pick(pair: (u32, u32), first: &IoValue) -> u32 {
     if first.stick_int() < 0 { pair.0 } else { pair.1 }
@@ -286,32 +307,32 @@ impl Default for RageInput {
 }
 
 fn stick(p: &crate::pad::RagePad, axis: usize) -> f32 {
-    ((p.sticks[axis] as f32 - crate::kv!(268 f32)) * crate::kv!(294 f32)).clamp(-1.0, 1.0)
+    ((p.sticks[axis] as f32 - crate::kv!(563 f32)) * crate::kv!(739 f32)).clamp(-1.0, 1.0)
 }
 
 fn pair(first: bool, second: bool) -> u8 {
     match (second, first) {
         (false, true) => 0,
-        (true, false) => 0xFF,
-        _ => 0x80,
+        (true, false) => crate::kv!(389 int),
+        _ => crate::kv!(251 int),
     }
 }
 
 fn source_value(kind: u32, index: u32, pad: &crate::pad::RagePad, input: &RageInput) -> u8 {
     #[allow(non_snake_case)]
     #[inline]
-    fn NEAR() -> f32 { crate::kv!(295 f32) }
+    fn NEAR() -> f32 { crate::kv!(740 f32) }
     #[allow(non_snake_case)]
     #[inline]
-    fn FAR() -> f32 { crate::kv!(296 f32) }
-    let on = |b: bool| if b { 0xFF } else { 0 };
+    fn FAR() -> f32 { crate::kv!(741 f32) }
+    let on = |b: bool| if b { crate::kv!(389 int) } else { 0 };
     match kind {
-        0 => on(input.keys[index as usize & 0xFF] != 0),
+        0 => on(input.keys[index as usize & crate::kv!(389 int)] != 0),
         1 => {
             let k = match index { 0 => 0, 1 => 1, _ => return 0 };
-            ((input.mouse_move[k] as f32 * input.mouse_scale[k]) as f64 * crate::kv!(297)) as i64 as u8
+            ((input.mouse_move[k] as f32 * input.mouse_scale[k]) as f64 * crate::kv!(742)) as i64 as u8
         }
-        2 => match index { 0 => (input.mouse_axis[0] + 0x80) as u8, 1 => (input.mouse_axis[1] + 0x80) as u8, _ => 0 },
+        2 => match index { 0 => (input.mouse_axis[0] + crate::kv!(251 int)) as u8, 1 => (input.mouse_axis[1] + crate::kv!(251 int)) as u8, _ => 0 },
         3 => on(input.mouse_buttons & index == index),
         4 => on(input.mouse_buttons & index != 0),
         5 if input.wheel_valid => match index { 0 => on(input.wheel >= 1), 1 => on(input.wheel < 0), _ => 0 },
@@ -319,7 +340,7 @@ fn source_value(kind: u32, index: u32, pad: &crate::pad::RagePad, input: &RageIn
         7 => on(pad.buttons & index != 0),
         8 => pad.pressure.get(index as usize).copied().unwrap_or(0),
         9 => {
-            let (a0, a1, a2, a3) = (stick(pad, 0), stick(pad, 1), stick(pad, 2), stick(pad, 3));
+            let (a0, a1, a2, a3) = (stick(pad, 0), stick(pad, 1), stick(pad, 2), stick(pad, crate::kv!(0 int)));
             match index {
                 0..=3 => pad.sticks[index as usize],
                 4 => on(a1 < -FAR() && a0.abs() < NEAR()),
@@ -338,15 +359,15 @@ fn source_value(kind: u32, index: u32, pad: &crate::pad::RagePad, input: &RageIn
                 17 => on(a3 < -NEAR() && a2 < -NEAR()),
                 18 => on(a3 > NEAR() && a2 > NEAR()),
                 19 => on(a3 > NEAR() && a2 < -NEAR()),
-                0x14 => pair(pad.buttons & 0xA000 == 0x8000, pad.buttons & 0xA000 == 0x2000),
-                0x15 => pair(pad.buttons & 0x5000 == 0x1000, pad.buttons & 0x5000 == 0x4000),
+                0x14 => pair(pad.buttons & crate::kv!(743 int) == crate::kv!(708 int), pad.buttons & crate::kv!(743 int) == crate::kv!(52 int)),
+                0x15 => pair(pad.buttons & crate::kv!(744 int) == crate::kv!(181 int), pad.buttons & crate::kv!(744 int) == crate::kv!(672 int)),
                 _ => 0,
             }
         }
-        14 => pair(input.keys[index as usize & 0xFF] != 0, input.keys[(index >> 8) as usize & 0xFF] != 0),
+        14 => pair(input.keys[index as usize & crate::kv!(389 int)] != 0, input.keys[(index >> crate::kv!(23 int)) as usize & crate::kv!(389 int)] != 0),
         15 => {
-            let bit = |n: u32| 1u32.checked_shl(n & 0x3F).unwrap_or(0);
-            pair(pad.buttons & bit(index) != 0, pad.buttons & bit(index >> 8) != 0)
+            let bit = |n: u32| 1u32.checked_shl(n & crate::kv!(252 int)).unwrap_or(0);
+            pair(pad.buttons & bit(index) != 0, pad.buttons & bit(index >> crate::kv!(23 int)) != 0)
         }
         _ => 0,
     }
@@ -354,8 +375,8 @@ fn source_value(kind: u32, index: u32, pad: &crate::pad::RagePad, input: &RageIn
 
 fn rest_value(kind: u32, index: u32) -> u8 {
     match kind {
-        1 | 2 | 14 | 15 => 0x80,
-        9 if matches!(index & 0xFF_FFFF, 0..=3 | 0x14 | 0x15) => 0x80,
+        1 | 2 | 14 | 15 => crate::kv!(251 int),
+        9 if matches!(index & crate::kv!(745 int), 0..=3 | 0x14 | 0x15) => crate::kv!(251 int),
         _ => 0,
     }
 }
@@ -368,13 +389,13 @@ pub struct IoMapper {
 
 impl IoMapper {
     pub fn map(&mut self, kind: u32, index: u32, control: usize, pad: i32) {
-        self.bindings.push((kind, ((pad as u32) << 24) | index, control));
+        self.bindings.push((kind, ((pad as u32) << crate::kv!(107 int)) | index, control));
     }
 
     pub fn reset(&self, values: &mut [IoValue]) {
         for &(kind, code, control) in &self.bindings {
             let v = &mut values[control];
-            v.value = rest_value(kind, code & 0xFF_FFFF);
+            v.value = rest_value(kind, code & crate::kv!(745 int));
             let at = v.history_at as usize;
             if let Some(h) = v.history.as_mut() {
                 h[at].0 = v.value;
@@ -391,15 +412,15 @@ impl IoMapper {
                 v.value = 0;
                 if let Some(h) = v.history.as_mut() {
                     let next = v.history_at.wrapping_add(1);
-                    v.history_at = if next < 0x40 { next } else { 0 };
+                    v.history_at = if next < crate::kv!(253 int) { next } else { 0 };
                     h[v.history_at as usize] = (0, time);
                 }
                 v.stamp = input.pass;
             }
         }
         for &(kind, code, control) in &self.bindings {
-            let pad = if code >> 24 == 0xFF { self.default_pad } else { code >> 24 };
-            let s = source_value(kind, code & 0xFF_FFFF, &input.pads[pad as usize], input);
+            let pad = if code >> crate::kv!(107 int) == crate::kv!(389 int) { self.default_pad } else { code >> crate::kv!(107 int) };
+            let s = source_value(kind, code & crate::kv!(745 int), &input.pads[pad as usize], input);
             let v = &mut values[control];
             if v.value ^ v.invert < s {
                 v.value = s;
@@ -412,22 +433,28 @@ impl IoMapper {
     }
 }
 
-pub const CONTROLS: usize = 87;
+#[allow(non_snake_case)]
+#[inline]
+pub fn CONTROLS() -> usize { crate::kv!(318 int) }
 
-pub const fn index(offset: u32) -> usize {
-    ((offset - 0x918) / 12) as usize
+pub fn index(offset: u32) -> usize {
+    ((offset - crate::kv!(657 int)) / crate::kv!(55 int)) as usize
 }
 
-const KEEP_HISTORY: [u32; 19] = [0xBDC, 0xBE8, 0xBF4, 0xD14, 0xC00, 0xC0C, 0x960, 0x9D8, 0x9E4, 0x9A8, 0x9B4, 0x9C0, 0x9CC, 0xB1C,
-                                 0xB88, 0xB94, 0xBA0, 0xA20, 0xB10];
+#[allow(non_snake_case)]
+#[inline]
+fn KEEP_HISTORY() -> &'static [u32; 19] { static V: std::sync::OnceLock<[u32; 19]> = std::sync::OnceLock::new(); let f = || [crate::kv!(686 int), crate::kv!(687 int), crate::kv!(688 int), crate::kv!(689 int), crate::kv!(690 int), crate::kv!(691 int), crate::kv!(663 int), crate::kv!(682 int), crate::kv!(683 int), crate::kv!(678 int), crate::kv!(679 int), crate::kv!(680 int), crate::kv!(681 int), crate::kv!(702 int),
+                                 crate::kv!(707 int), crate::kv!(709 int), crate::kv!(710 int), crate::kv!(673 int), crate::kv!(703 int)]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
 
-const RESET_TABLES: [&[usize]; 3] = [
-    &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14,
-      0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D],
-    &[0x3B, 0x3C, 0x3D, 0x55, 0x3E, 0x3F],
-    &[0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x30, 0x31, 0x32, 0x33, 0x34,
-      0x35, 0x36, 0x37, 0x38, 0x39, 0x3A],
-];
+#[allow(non_snake_case)]
+#[inline]
+fn RESET_TABLES() -> &'static [&'static [usize]; 3] { static V: std::sync::OnceLock<[&'static [usize]; 3]> = std::sync::OnceLock::new(); let f = || [
+    Box::leak(Box::new([0x00, 0x01, 0x02, crate::kv!(0 int), crate::kv!(1 int), crate::kv!(2 int), crate::kv!(6 int), crate::kv!(22 int), crate::kv!(23 int), crate::kv!(104 int), crate::kv!(81 int), crate::kv!(113 int), crate::kv!(55 int), crate::kv!(114 int), crate::kv!(56 int), crate::kv!(198 int), crate::kv!(54 int), crate::kv!(110 int), crate::kv!(211 int), crate::kv!(199 int), crate::kv!(127 int),
+      crate::kv!(111 int), crate::kv!(105 int), crate::kv!(106 int), crate::kv!(107 int), crate::kv!(108 int), crate::kv!(109 int), crate::kv!(331 int), crate::kv!(85 int), crate::kv!(476 int)])).as_slice(),
+    Box::leak(Box::new([crate::kv!(395 int), crate::kv!(341 int), crate::kv!(484 int), crate::kv!(391 int), crate::kv!(304 int), crate::kv!(252 int)])).as_slice(),
+    Box::leak(Box::new([crate::kv!(276 int), crate::kv!(456 int), crate::kv!(7 int), crate::kv!(313 int), crate::kv!(437 int), crate::kv!(310 int), crate::kv!(94 int), crate::kv!(295 int), crate::kv!(385 int), crate::kv!(421 int), crate::kv!(95 int), crate::kv!(348 int), crate::kv!(401 int), crate::kv!(418 int), crate::kv!(409 int), crate::kv!(466 int), crate::kv!(93 int), crate::kv!(453 int), crate::kv!(36 int), crate::kv!(447 int), crate::kv!(379 int),
+      crate::kv!(286 int), crate::kv!(37 int), crate::kv!(349 int), crate::kv!(317 int), crate::kv!(311 int), crate::kv!(398 int)])).as_slice(),
+]; if crate::kv::open() { V.get_or_init(f) } else { Box::leak(Box::new(f())) } }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Controls {
@@ -442,7 +469,7 @@ pub struct Controls {
 
 impl Default for Controls {
     fn default() -> Self {
-        Controls { mappers: Default::default(), values: vec![IoValue::default(); CONTROLS], flag_d50: 0, pad: 0, setup_words: [0; 2],
+        Controls { mappers: Default::default(), values: vec![IoValue::default(); CONTROLS()], flag_d50: 0, pad: 0, setup_words: [0; 2],
                    last_used: 0, sticks: [0; 4] }
     }
 }
@@ -454,11 +481,11 @@ impl Controls {
             m.bindings.clear();
         }
         for b in bindings(controller, setting) {
-            let k = MAPPERS.iter().position(|&m| m == b.mapper).unwrap();
+            let k = (*MAPPERS()).iter().position(|&m| m == b.mapper).unwrap();
             let (kind, n) = b.source.code();
             self.mappers[k].map(kind, n, index(b.control), -1);
         }
-        self.setup_words = SETUP_WORDS;
+        self.setup_words = (*SETUP_WORDS());
     }
 
     pub fn set_up_for_pad(&mut self, pad: u32, now: u32, controller: bool, setting: u32) {
@@ -469,7 +496,7 @@ impl Controls {
         }
         self.last_used = now;
         self.set_up(controller, setting);
-        for c in KEEP_HISTORY {
+        for c in (*KEEP_HISTORY()) {
             let v = &mut self.values[index(c)];
             if v.history.is_none() {
                 v.history = Some(vec![(0, 0); 64]);
@@ -478,24 +505,24 @@ impl Controls {
     }
 
     pub fn stick_values(&self) -> [i32; 4] {
-        [0xC78, 0xC84, 0xC9C, 0xC90].map(|c| self.values[index(c)].stick_int())
+        [crate::kv!(724 int), crate::kv!(725 int), crate::kv!(727 int), crate::kv!(726 int)].map(|c| self.values[index(c)].stick_int())
     }
 
     pub fn update(&mut self, player: [i32; 4], input: &mut RageInput, now: u32, paused: bool) {
         self.sticks = player;
         for (k, m) in self.mappers.iter().enumerate() {
-            if k == 3 || !paused {
+            if k == crate::kv!(0 int) || !paused {
                 m.update(input, &mut self.values, now);
             }
         }
         self.flag_d50 = 0;
         for (i, v) in self.values.iter().enumerate() {
-            if (0x40..=0x54).contains(&i) {
+            if (crate::kv!(253 int)..=crate::kv!(462 int)).contains(&i) {
                 continue;
             }
             let in_use = match i {
                 0x0C..=0x25 if !matches!(i, 0x14..=0x17 | 0x1C | 0x1D) => v.stick_int() != 0,
-                _ => v.get() >= 0x80,
+                _ => v.get() >= crate::kv!(251 int),
             };
             if in_use {
                 self.last_used = now;
@@ -504,10 +531,10 @@ impl Controls {
     }
 
     pub fn reset(&mut self, now: u32) {
-        for (m, table) in self.mappers.iter().zip(RESET_TABLES) {
+        for (m, table) in self.mappers.iter().zip((*RESET_TABLES())) {
             for &c in table {
                 let kind = m.bindings.iter().find(|b| b.2 == c).map_or(m.default_pad, |b| b.0);
-                let rest = if matches!(kind, 1 | 9 | 11 | 14 | 15) { 0x7F } else { 0 };
+                let rest = if matches!(kind, 1 | 9 | 11 | 14 | 15) { crate::kv!(467 int) } else { 0 };
                 let v = &mut self.values[c];
                 v.value = rest;
                 v.last = rest;
@@ -518,4 +545,3 @@ impl Controls {
         }
     }
 }
-

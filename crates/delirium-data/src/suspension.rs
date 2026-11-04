@@ -2,7 +2,7 @@ use crate::vehicles::Handling;
 
 #[allow(non_snake_case)]
 #[inline]
-pub fn GRAVITY() -> f32 { crate::kv!(24) }
+pub fn GRAVITY() -> f32 { crate::kv!(34) }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Spring {
@@ -43,7 +43,7 @@ pub struct Load {
 
 pub fn force(h: &Handling, s: &Spring, x: f32, rate: f32, mass: f32) -> Load {
     let x = x.min(s.travel);
-    let k = if s.front { 1.0 } else { crate::kv!(13) } * h.suspension_force;
+    let k = if s.front { 1.0 } else { crate::kv!(18) } * h.suspension_force;
     let spring = k.mul_add(x - s.rest, s.share).clamp(0.0, 1.0) * mass * GRAVITY();
     let c = if rate > 0.0 { h.suspension_comp_damp } else { h.suspension_rebound_damp };
     let bias = h.suspension_bias[if s.front { 0 } else { 1 }];
@@ -54,8 +54,8 @@ pub fn force(h: &Handling, s: &Spring, x: f32, rate: f32, mass: f32) -> Load {
 pub fn sag(s: &Spring, health: f32, x: f32, drop: f32) -> f32 {
     if health <= 0.0 {
         drop
-    } else if health < crate::kv!(53) {
-        drop * ((-health).mul_add(crate::kv!(75), 1.0) * (x / s.rest).min(1.0)).max(0.0)
+    } else if health < crate::kv!(82) {
+        drop * ((-health).mul_add(crate::kv!(134), 1.0) * (x / s.rest).min(1.0)).max(0.0)
     } else {
         0.0
     }
@@ -63,20 +63,20 @@ pub fn sag(s: &Spring, health: f32, x: f32, drop: f32) -> f32 {
 
 pub fn ground_flags(material: &str) -> u32 {
     match material {
-        "SAND" => crate::tyre::flags::SAND,
-        "MUD_SOFT" | "GRASS" | "SHORT_GRASS" => crate::tyre::flags::SOFT,
+        "SAND" => crate::tyre::flags::SAND(),
+        "MUD_SOFT" | "GRASS" | "SHORT_GRASS" => crate::tyre::flags::SOFT(),
         _ => 0,
     }
 }
 
 pub fn sink(flags: u32) -> f32 {
     use crate::tyre::flags::{SAND, SOFT};
-    if flags & (SAND | SOFT) == 0 {
+    if flags & (SAND() | SOFT()) == 0 {
         0.0
-    } else if flags & SAND != 0 {
-        crate::kv!(40)
+    } else if flags & SAND() != 0 {
+        crate::kv!(68)
     } else {
-        crate::kv!(71)
+        crate::kv!(131)
     }
 }
 
@@ -86,7 +86,7 @@ fn at_least_zero(v: f32) -> f32 {
 
 pub fn settled(s: &Spring, health: f32, flags: u32, capped: f32, x: f32, drop: f32) -> f32 {
     let mut v = capped;
-    if health < crate::kv!(53) {
+    if health < crate::kv!(82) {
         v = at_least_zero(v - sag(s, health, x, drop));
     }
     if sink(flags) != 0.0 { at_least_zero(v - sink(flags)) } else { v }
@@ -102,7 +102,7 @@ pub struct Contact {
 #[allow(clippy::too_many_arguments)]
 pub fn contact(s: &Spring, health: f32, flags: u32, x: f32, limit: f32, drop: f32, grip: f32, wet_grip: f32,
                wetness: f32) -> Contact {
-    let mut give = if health < crate::kv!(53) { sag(s, health, x, drop) } else { 0.0 };
+    let mut give = if health < crate::kv!(82) { sag(s, health, x, drop) } else { 0.0 };
     if sink(flags) != 0.0 {
         give = sink(flags) + give;
     }
@@ -136,29 +136,29 @@ pub struct WheelPart {
 pub fn steer_flags(corner: usize, rear_steer: bool, bike: bool) -> u32 {
     let (left, rear) = (corner % 2 == 0, corner >= 2);
     if bike {
-        return if rear { 0x9400 } else { 0x2400 };
+        return if rear { crate::kv!(974 int) } else { crate::kv!(975 int) };
     }
-    let side = if left { 0x800 } else { 0 } | if rear { 0x1000 } else { 0 };
+    let side = if left { crate::kv!(718 int) } else { 0 } | if rear { crate::kv!(181 int) } else { 0 };
     side | match (rear, rear_steer) {
-        (false, false) => 0x2000,
-        (true, true) => 0x4000,
+        (false, false) => crate::kv!(52 int),
+        (true, true) => crate::kv!(672 int),
         _ => 0,
     }
 }
 
 pub fn wheel_steer(flags: u32, angle: f32) -> f32 {
-    let a = if flags & 0x2000 != 0 {
+    let a = if flags & crate::kv!(52 int) != 0 {
         angle
-    } else if flags & 0x4000 != 0 {
+    } else if flags & crate::kv!(672 int) != 0 {
         -angle
     } else {
         return 0.0;
     };
-    if flags & 0x400 != 0 {
+    if flags & crate::kv!(183 int) != 0 {
         return a;
     }
-    let cut = if (flags & 0x800 != 0) == (flags & 0x1000 != 0) { a > 0.0 } else { a < 0.0 };
-    if cut { a * crate::kv!(13 f32) } else { a }
+    let cut = if (flags & crate::kv!(718 int) != 0) == (flags & crate::kv!(181 int) != 0) { a > 0.0 } else { a < 0.0 };
+    if cut { a * crate::kv!(18 f32) } else { a }
 }
 
 pub fn setup(ide_radius: f32, share: f32, flags: u32, part: Option<WheelPart>, first: Option<(f32, f32)>) -> WheelSetup {
@@ -167,17 +167,16 @@ pub fn setup(ide_radius: f32, share: f32, flags: u32, part: Option<WheelPart>, f
         Some(p) if p.bone > -1 => {
             let width = p.half_width * 2.0;
             if p.slot99 {
-                flags |= 0x40_0000;
-                if flags & 0x1000 != 0 && p.compare && first.is_some_and(|(r, w)| width != w || p.radius != r) {
-                    flags |= 0x80_0000;
+                flags |= crate::kv!(818 int);
+                if flags & crate::kv!(181 int) != 0 && p.compare && first.is_some_and(|(r, w)| width != w || p.radius != r) {
+                    flags |= crate::kv!(819 int);
                 }
             }
             (p.bone, p.radius, ide_radius, width)
         }
-        _ => (-1, ide_radius, ide_radius - crate::kv!(49), crate::kv!(12)),
+        _ => (-1, ide_radius, ide_radius - crate::kv!(78), crate::kv!(17)),
     };
     flags |= 2;
-    let sign = if flags & 0x1000 != 0 { -1.0 } else { 1.0 };
+    let sign = if flags & crate::kv!(181 int) != 0 { -1.0 } else { 1.0 };
     WheelSetup { bone, radius, rim, width, share, inv_share: 1.0 / share, sign, flags }
 }
-

@@ -2,7 +2,9 @@ use crate::msg::Value;
 use crate::shottask::Msg;
 use delirium_data::rng::Rand;
 
-pub const TYPE: u32 = 2105;
+#[allow(non_snake_case)]
+#[inline]
+pub fn TYPE() -> u32 { delirium_data::kv!(519 int) }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Pose {
@@ -30,7 +32,7 @@ impl Pose {
 
     fn start(&self, rand: &mut Rand) -> Msg {
         let k = rand.float_in_range(self.low, self.high);
-        ("setStiffness", vec![("start", Value::Bool(true)), ("bodyStiffness", Value::Float(if k >= 0.0 { k } else { delirium_data::kv!(58) }))])
+        ("setStiffness", vec![("start", Value::Bool(true)), ("bodyStiffness", Value::Float(if k >= 0.0 { k } else { delirium_data::kv!(84) }))])
     }
 }
 
@@ -50,4 +52,3 @@ impl Pose {
 pub fn control_msgs() -> Vec<Msg> {
     vec![("activePose", vec![("start", Value::Bool(true))])]
 }
-
