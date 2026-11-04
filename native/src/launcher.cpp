@@ -84,7 +84,7 @@ int wmain(int argc,wchar_t**argv) try {
     fs::create_directories(cache.parent_path());
     setupTool(root/L"runtime/delirium_worker.exe",
         L"--prepare-disc \""+game.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log");
-    puts("GTA IV tuning cache ready. You can remove the ISO.");
+    puts("GTA IV tuning and get-up cache ready. You can remove the ISO.");
     fflush(stdout);
     if(!SetEnvironmentVariableW(L"BO1_DELIRIUM_GTA_CACHE",tuning.c_str())||
        !SetEnvironmentVariableW(L"BO1_DELIRIUM_PLUTONIUM_LAN",L"1")) fail("set Plutonium Delirium environment");
@@ -117,8 +117,8 @@ int wmain(int argc,wchar_t**argv) try {
     SetEnvironmentVariableW(L"BO1_PHYSICS_BACKEND",L"delirium");
     SetEnvironmentVariableW(L"NM108_GETUP",L"1");
     SetEnvironmentVariableW(L"BO1_STEAM_DELIRIUM_TEST",diagnostics?L"1":nullptr);
-    for(auto pair: {std::pair{L"NM108_RECOVERY_CACHE",L"bo1-getup.motion"}})
-        SetEnvironmentVariableW(pair.first,(cache/pair.second).c_str());
+    if(!SetEnvironmentVariableW(L"NM108_RECOVERY_CACHE",(tuning.parent_path()/L"original-getup.motion").c_str()))
+        fail("set GTA IV recovery cache");
     STARTUPINFOW si{};si.cb=sizeof(si);si.dwFlags=STARTF_USESHOWWINDOW;si.wShowWindow=seconds?SW_SHOWMINNOACTIVE:SW_SHOWNORMAL;
     std::wstring args=L"\""+bootstrap.wstring()+L"\" t5sp \""+game.wstring()+L"\" -lan";
     args+=L" +set fs_homepath \""+home.wstring()+

@@ -166,8 +166,8 @@ impl Motions {
         }
         }
         println!(
-            "Delirium host recovery: {} local original clips, interruptible on impact",
-            clips.len()
+            "Delirium host recovery: {} original {} clips, interruptible on impact",
+            clips.len(), if bo1 { "BO1" } else { "GTA IV" }
         );
         Ok(Self { rest, clips })
     }

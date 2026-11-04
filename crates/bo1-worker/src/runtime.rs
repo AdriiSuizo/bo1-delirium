@@ -1060,6 +1060,9 @@ impl Runtime {
                         facing,
                         self.rand.next() as f32 / 32768.0,
                     );
+                    // Rebuilding the body restores the solver's default sleep
+                    // policy. This actor is still live and awaiting handoff.
+                    a.agent.doll.allow_sleep(false);
                     a.agent.set_rng(rng);
                     for k in 0..PARTS {
                         a.agent.doll.set_body(k, poses[k].translation, poses[k].rotation, velocities[k].0, velocities[k].1);

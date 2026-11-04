@@ -1,4 +1,5 @@
 use delirium_data::{disc::Disc, disc_kv as kv, xex};
+use crate::{disc_motion, recovery::Motions};
 use std::{
     fs::{self, File, OpenOptions},
     io::{Read, Write},
@@ -16,8 +17,16 @@ pub fn load(cache: &Path) -> Result<(), String> {
 }
 
 pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
-    if load(cache).is_ok() {
-        println!("Delirium tuning cache ready.");
+    let dir = cache.parent().ok_or("Missing cache directory")?;
+    let getup = dir.join("original-getup.motion");
+    let locomotion = dir.join("original-locomotion.motion");
+    let gta_header = File::open(&getup).and_then(|file| {
+        let mut header = [0; 8];
+        (&file).read_exact(&mut header)?;
+        Ok(header == *b"NMMOTN03")
+    }).unwrap_or(false);
+    if gta_header && Motions::load(&getup).is_ok() && load(cache).is_ok() {
+        println!("Delirium tuning and original GTA IV recovery cache ready.");
         return Ok(());
     }
 
@@ -33,9 +42,12 @@ pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
 
     for path in images {
         match import(&path) {
-            Ok(data) => {
-                write_cache(cache, &data)?;
-                println!("Delirium tuning prepared from {}. You can now remove the ISO.", path.display());
+            Ok((tuning, rise, idle)) => {
+                write_cache(&locomotion, &idle)?;
+                write_cache(&getup, &rise)?;
+                Motions::load(&getup)?;
+                write_cache(cache, &tuning)?;
+                println!("Delirium tuning and original GTA IV recovery prepared from {}. You can now remove the ISO.", path.display());
                 return Ok(());
             }
             Err(error) => eprintln!("{}: {error}", path.display()),
@@ -44,7 +56,7 @@ pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
     Err("No compatible GTA IV Xbox 360 disc found. Use the base game disc.".into())
 }
 
-fn import(path: &Path) -> Result<Vec<u8>, String> {
+fn import(path: &Path) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), String> {
     let disc = Disc::open(path)?;
     let length = disc.len("default.xex").filter(|&n| n > 4 && n <= 32 * 1024 * 1024)
         .ok_or("No valid default.xex in the disc root")?;
@@ -53,10 +65,14 @@ fn import(path: &Path) -> Result<Vec<u8>, String> {
         return Err("default.xex is not an Xbox 360 executable".into());
     }
     let image = xex::XexImage::parse_with_key(&xex, &xex::fetched_key()?)?.image;
+    // Unlock only after successful extraction. An earlier ISO with missing
+    // resources must not leave its tuning loaded for the next candidate.
+    let (rise, idle) = disc_motion::extract(&disc, &image)?;
     if !kv::unlock(&image) {
         return Err("Delirium 0.6.0 does not recognize this disc program".into());
     }
-    kv::snapshot().ok_or_else(|| "Tuning import produced no data".into())
+    let tuning = kv::snapshot().ok_or("Tuning import produced no data")?;
+    Ok((tuning, rise, idle))
 }
 
 fn write_cache(cache: &Path, data: &[u8]) -> Result<(), String> {

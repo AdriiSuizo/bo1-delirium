@@ -1,4 +1,4 @@
-Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 4
+Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 5
 Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
 Native game adapter and bridge:
   cmake -S native -B native-build -A Win32
@@ -20,7 +20,7 @@ Copy winmm.dll to BO1Delirium/runtime/. The launcher stages it temporarily besid
 Copy CaptureBO1.exe, BO1CharacterCapture.dll, and PrepareBO1.exe to tools/.
 Copy bo1delirium_controls.iwd to BO1Delirium/scripts/. The launcher installs this own script into its private profile.
 Keep the original native BO1 executable, assets and private generated cache out of redistribution.
-The launcher calls --prepare-disc with the BO1 directory and private cache path. The worker reads tuning values from a supported Xbox 360 GTA IV ISO in that directory. BO1 supplies the character and recovery motions.
+The launcher calls --prepare-disc with the BO1 directory and private cache path. The worker reads tuning values, the source skeleton and recovery motion references from a supported Xbox 360 GTA IV ISO in that directory. BO1 supplies the target character.
 Runtime base: the BO1-adapted Delirium core from Steam beta 5 (upstream revision 23ea7cfa2a1000d64870d2549834006d21b3e05c).
 The disc importer reads the existing 0.6.0 cache and supplies 384 matching legacy tuning slots. Three BO1 compatibility values remain local to the adapter.
 Custom character interface and public configuration references: SuperSloppers/large-steal-car-4
