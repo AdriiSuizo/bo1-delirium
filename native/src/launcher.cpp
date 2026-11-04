@@ -5,6 +5,9 @@
 #include <cstdio>
 #include <stdexcept>
 namespace fs=std::filesystem;
+#ifdef BO1_DELIRIUM_INSTALLER
+static bool quietSetup;
+#endif
 static void fail(const char* what){
     fprintf(stderr,"%s (Windows %lu)\n",what,GetLastError());
     throw std::runtime_error(what);
@@ -85,7 +88,7 @@ int wmain(int argc,wchar_t**argv) try {
         else if(!wcscmp(argv[i],L"--game-dir")&&i+1<argc)game=fs::absolute(argv[++i]);
         else if(!wcscmp(argv[i],L"--resource-cache")&&i+1<argc)cache=fs::absolute(argv[++i]);
 #ifdef BO1_DELIRIUM_INSTALLER
-        else if(!wcscmp(argv[i],L"--quiet"))quiet=true;
+        else if(!wcscmp(argv[i],L"--quiet"))quiet=quietSetup=true;
         else if(!wcscmp(argv[i],L"--uninstall"))uninstall=true;
         else if(!wcscmp(argv[i],L"--iso")&&i+1<argc)iso=fs::absolute(argv[++i]);
 #endif
@@ -226,7 +229,7 @@ int wmain(int argc,wchar_t**argv) try {
 } catch(const std::exception& error) {
     fprintf(stderr,"%s\n",error.what());
 #ifdef BO1_DELIRIUM_INSTALLER
-    MessageBoxA(nullptr,error.what(),"BO1 Delirium: installation failed",MB_OK|MB_ICONERROR);
+    if(!quietSetup)MessageBoxA(nullptr,error.what(),"BO1 Delirium: installation failed",MB_OK|MB_ICONERROR);
 #endif
     return 1;
 }
