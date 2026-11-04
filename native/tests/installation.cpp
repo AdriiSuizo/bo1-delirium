@@ -28,9 +28,20 @@ int wmain() try {
     require(backup,"upgrade did not preserve previous plugin");
     require(!installation::runtimeReady(root,installation::localData()/L"bo1-character-v1"),"incomplete cache accepted");
     write(installation::localData()/L"gta4-development-v1.ready","local disc cache");
+    write(plutonium/L"storage/t5/mods/bo1delirium/user-note.txt","user file");
+    bool refused=false;
+    try{installation::uninstall(home/L"OtherGame/BO1Delirium",plutonium);}catch(const std::exception&){refused=true;}
+    require(refused&&fs::exists(plutonium/L"plugins/BO1DeliriumPlugin.dll"),"uninstaller accepted a different installation owner");
+    // Simulate a partially removed portable package, not a recursive deletion.
+    const auto preserved=root.parent_path()/L"preserved-payload";
+    const auto prefix=fs::weakly_canonical(home).wstring()+L"\\";
+    require(fs::weakly_canonical(root).wstring().starts_with(prefix)&&fs::weakly_canonical(preserved).wstring().starts_with(prefix),"unsafe partial-removal test paths");
+    fs::rename(root,preserved);
     installation::uninstall(root,plutonium);
     require(!fs::exists(plutonium/L"plugins/BO1DeliriumPlugin.dll")&&installation::registeredRoot().empty(),"uninstall left native loader registered");
     require(fs::exists(plutonium/L"plugins/OtherMod.dll")&&fs::exists(installation::localData()/L"gta4-development-v1.ready"),"uninstall removed unrelated mod or local cache");
+    require(fs::exists(plutonium/L"storage/t5/mods/bo1delirium/user-note.txt"),"uninstall removed user files from the mod folder");
+    installation::uninstall(root,plutonium); // A second run is harmless.
     // Remove only this test's newly allocated directory after checking its root.
     require(fs::equivalent(home.parent_path(),fs::path(temporary))&&home.filename().wstring().find(L"DeliriumInstallTest-")==0,"unsafe test cleanup path");
     fs::remove_all(home);

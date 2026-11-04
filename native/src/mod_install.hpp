@@ -56,7 +56,11 @@ inline void install(const fs::path& root,const fs::path& plutonium){
 inline void uninstall(const fs::path& root,const fs::path& plutonium){
     const auto registered=registeredRoot();
     if(registered.empty())return;
-    if(!fs::equivalent(registered,root))throw std::runtime_error("A different BO1 folder owns this Delirium installation");
+    // Removal must still work if the user has already deleted the payload.
+    // Resolve the existing prefix, then compare Windows paths case-insensitively.
+    const auto owner=fs::weakly_canonical(registered).wstring(),requested=fs::weakly_canonical(root).wstring();
+    if(CompareStringOrdinal(owner.c_str(),-1,requested.c_str(),-1,TRUE)!=CSTR_EQUAL)
+        throw std::runtime_error("A different BO1 folder owns this Delirium installation");
     const auto storage=plutonium/L"storage/t5",mod=storage/L"mods/bo1delirium";
     fs::remove(plutonium/L"plugins/BO1DeliriumPlugin.dll");
     fs::remove(storage/L"main/bo1delirium_controls.iwd");
