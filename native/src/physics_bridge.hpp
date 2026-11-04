@@ -37,6 +37,7 @@ struct Api {
     int (__cdecl* actor_can_activate)(RdWorld*,unsigned){};
     int (__cdecl* actor_push)(RdWorld*,unsigned,unsigned,RdVec3,float,unsigned){};
     int (__cdecl* model_body_masses)(const RdWorld*,float*){};
+    int (__cdecl* actor_set_gravity)(RdWorld*,unsigned,float){};
 };
 static Api g_api;
 static RdWorld* g_world;
@@ -82,7 +83,7 @@ struct Actor {
     Vec3 velocity{},desired{},pelvisOffset{},previousOrigin{},rootVelocity{},linear[16]{},angular[16]{};uint64_t sampleStamp{};
     Vec3 incoming{},incomingLinear[16]{},incomingAngular[16]{},blast{};int incomingTime{};
     int deadSince{},settledSince{},contactTime{},pushTime{};bool pendingContact{},readyRelease{};float pushBudget{};
-    float nominalSpeed{},runScale{1.f};
+    float nominalSpeed{},runScale{1.f},gravityScale{1.f};
     // Recent supported COM velocities, sampled once per server tick.
     Vec3 supportedVelocity[4]{};
     unsigned supportSamples{};
@@ -181,7 +182,7 @@ static bool loadApi(const std::filesystem::path& root){
     GET(actor_get_joint_positions);GET(actor_get_state);GET(world_update);GET(actor_hit);
     GET(actor_get_render_bodies);GET(actor_get_body_velocities);GET(actor_hit_profile);GET(weapon_response);
     GET(world_set_async);GET(actor_get_bounds);GET(actor_get_box_vertices);GET(actor_set_detached_parts);GET(actor_can_activate);
-    GET(actor_push);GET(model_body_masses);
+    GET(actor_push);GET(model_body_masses);GET(actor_set_gravity);
 #undef GET
     return true;
 }
@@ -226,6 +227,7 @@ static bool activate(Actor& a,void* ent,int now){
     RdTransform root{pelvis.position,{0,0,0,1}};
     if(g_api.actor_spawn(g_world,model,&root,r(velocity),&handle))return false;
     a.handle=handle;
+    if(g_api.actor_set_gravity(g_world,handle,a.gravityScale)){g_api.actor_despawn(g_world,handle);return false;}
     if(g_api.actor_set_pose_rotations(g_world,handle,&pelvis,rotations,r(velocity))){g_api.actor_despawn(g_world,handle);return false;}
     RdVec3 joints[16];if(!g_api.actor_get_joint_positions(g_world,handle,joints)){
         Vec3 delta=(a.animation[a.bone[3]]+a.animation[a.bone[6]])*.5f-(v(joints[3])+v(joints[6]))*.5f;
@@ -530,6 +532,12 @@ static void afterThink(void* ent,Vec3 before){
     int index=native::at<int>(ent,0);if(index<0||index>=1024||!native::actor(ent))return;
     auto& a=actors[index];void* owner=native::at<void*>(ent,0x140);
     if(a.owner&&a.owner!=owner){release(a);a={};}a.owner=owner;
+    const float gravity=native::actorGravityScale(ent);
+    if(std::isfinite(gravity)&&gravity>=0.f&&gravity<=1.f&&gravity!=a.gravityScale){
+        if(!a.active||!g_api.actor_set_gravity(g_world,a.handle,gravity)){
+            a.gravityScale=gravity;
+        }
+    }
     Vec3 intended=(origin(ent)-before)*20.f;
     if(!a.active)crowd(ent,a,before,intended);
     if(!a.active){float speed=length(v3(intended.x,intended.y,0));if(speed>1.f&&!a.run.active)a.nominalSpeed=speed;return;}

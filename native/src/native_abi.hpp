@@ -47,6 +47,18 @@ inline bool actor(void* ent){return at<uint16_t>(ent,0xbe)==0x10&&at<void*>(ent,
 inline bool humanoidActor(void* ent){
     return actor(ent)&&rig::humanoid(at<int>(at<void*>(ent,0x140),8));
 }
+// BO1 SP Actor_DoMove 00575313..00575350 selects these gravity dvars.
+// Repeat that selection rather than reading actor+0xE30: new and scripted
+// actors can retain zero there until their first native movement update.
+inline float actorGravityScale(void* ent){
+    const auto* normal=*reinterpret_cast<void* const*>(0xBCAEFC);
+    const auto* zombies=*reinterpret_cast<void* const*>(0x243FDD4);
+    const auto* arcade=*reinterpret_cast<void* const*>(0x247FDE8);
+    const bool moon=at<bool>(zombies,0x18)&&!at<bool>(arcade,0x18)&&
+        at<uint16_t>(ent,0x160)==*reinterpret_cast<const uint16_t*>(0x23A5884);
+    const auto* selected=moon?*reinterpret_cast<void* const*>(0xBCD0B8):normal;
+    return at<float>(selected,0x18)/at<float>(normal,0x18);
+}
 inline int time(){return *reinterpret_cast<int*>(0x1c04890);}
 inline DObj* serverObject(int entity){return reinterpret_cast<DObj*(__cdecl*)(int)>(0x47e340)(entity);}
 inline DObj* clientObject(int entity){return reinterpret_cast<DObj*(__cdecl*)(int,int)>(0x501850)(entity,0);}
