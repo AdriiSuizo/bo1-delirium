@@ -5,6 +5,7 @@
 #include <vector>
 #include "plugin_policy.hpp"
 #include "mod_install.hpp"
+#include "user_interface.hpp"
 
 // Wire ABI of the public Plutonium plugin SDK v1, checked against
 // plutoniummod/plutonium-sdk revision 17e9a0a. Only the lifecycle interface is
@@ -50,10 +51,11 @@ public:
         if(GetEnvironmentVariableW(L"BO1_DELIRIUM_LOCAL_ADAPTER",inherited,32768))return;
         try {
             namespace fs=std::filesystem;
+            ui::loadLanguage(installation::configuration().wstring());
             const auto root=installation::registeredRoot();
             if(root.empty()||!fs::equivalent(fs::path(owned[2]),root.parent_path()))return;
             const auto data=installation::localData(),cache=data/L"bo1-character-v1",logs=data/L"logs";
-            if(!installation::runtimeReady(root,cache))throw std::runtime_error("Resources are incomplete. Run Instalar-BO1Delirium.exe once with your GTA IV Xbox 360 ISO beside BlackOps.exe.");
+            if(!installation::runtimeReady(root,cache))throw std::runtime_error("Local resources are incomplete. Run Instalar - Install BO1 Delirium.exe again.");
             fs::create_directories(logs);
             set(L"BO1_STEAM_DELIRIUM_ROOT",root);
             set(L"BO1_DELIRIUM_CACHE_DIR",cache);
@@ -72,7 +74,7 @@ public:
             // world through the existing script-load lifecycle.
             note("Loaded by the Plutonium plugin system; select BO1 Delirium in Mods.");
         }catch(const std::exception& error){
-            note(error.what());MessageBoxA(nullptr,error.what(),"BO1 Delirium installation",MB_OK|MB_ICONWARNING);
+            note(error.what());ui::error(error.what());
         }
     }
     void shutdown() override {}

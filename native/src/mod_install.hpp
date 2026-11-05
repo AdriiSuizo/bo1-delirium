@@ -70,7 +70,7 @@ inline void deployPayload(const fs::path& source,const fs::path& game){
             throw std::runtime_error("A mod destination points outside BO1Delirium");
         publishFile(entry.path(),destination,backup/relative.parent_path());
     }
-    for(auto name:{L"Instalar-BO1Delirium.exe",L"Desinstalar-BO1Delirium.exe",L"LEEME-INSTALACION.txt",L"manifest.json"}){
+    for(auto name:{L"Instalar - Install BO1 Delirium.exe",L"Desinstalar - Uninstall BO1 Delirium.exe",L"LEEME - Espanol.txt",L"README - English.txt",L"CREDITOS - CREDITS.txt",L"NOVEDADES - CHANGELOG.txt",L"VERSION.txt",L"Instalar-BO1Delirium.exe",L"Desinstalar-BO1Delirium.exe",L"LEEME-INSTALACION.txt",L"manifest.json"}){
         const auto original=source.parent_path()/name,destination=game/name;
         if(fs::is_regular_file(original)&&(!fs::exists(destination)||!fs::equivalent(original,destination)))publishFile(original,destination,backup);
     }

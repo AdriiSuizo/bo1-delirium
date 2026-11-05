@@ -4,10 +4,15 @@
 #include "mod_install.hpp"
 #include "steam_discovery.hpp"
 #include "lan_shortcut.hpp"
+#include "product_info.hpp"
+#include "user_interface.hpp"
 namespace fs=std::filesystem;
 static void require(bool ok,const char* reason){if(!ok){fprintf(stderr,"%s\n",reason);std::exit(1);}}
 static void write(const fs::path& file,const char* text){fs::create_directories(file.parent_path());std::ofstream output(file,std::ios::binary);output<<text;}
 int wmain() try {
+    require(ui::setLanguage(L"es")&&std::wstring(ui::text(L"Instalar",L"Install"))==L"Instalar","Spanish UI selection failed");
+    require(ui::setLanguage(L"en")&&std::wstring(ui::text(L"Instalar",L"Install"))==L"Install","English UI selection failed");
+    require(!ui::setLanguage(L"other"),"unsupported UI language accepted");
     wchar_t temporary[32768]{};require(GetTempPathW(32768,temporary)>0,"temporary path missing");
     const auto home=fs::path(temporary)/(L"DeliriumInstallTest-"+std::to_wstring(GetCurrentProcessId()));
     require(!fs::exists(home),"test directory must be new");
@@ -25,17 +30,23 @@ int wmain() try {
     const auto root=home/L"Steam \u6e2c\u8a66/Call of Duty Black Ops/BO1Delirium",plutonium=home/L"Plutonium";
     const auto package=home/L"Downloaded package/BO1Delirium";
     write(package/L"runtime/worker.exe","new payload");
+    write(package.parent_path()/product::installer,"installer");
+    write(package.parent_path()/L"README - English.txt","English guide");
     write(root/L"runtime/worker.exe","old payload");
     write(root/L"custom.txt","preserve user file");
     installation::deployPayload(package,root.parent_path());
     require(steamDiscovery::read(root/L"runtime/worker.exe")=="new payload"&&steamDiscovery::read(root/L"custom.txt")=="preserve user file","deployment lost payload or user files");
+    require(steamDiscovery::read(root.parent_path()/product::installer)=="installer"&&steamDiscovery::read(root.parent_path()/L"README - English.txt")=="English guide","bilingual root files were not deployed");
     write(plutonium/L"bin/plutonium-bootstrapper-win32.exe","test launcher");
     require(installation::registeredRoot().empty(),"uninstalled root unexpectedly exists");
     write(root/L"scripts/bo1delirium_controls.iwd","own scripts");
     write(root/L"runtime/BO1DeliriumPlugin.dll","own loader");
     write(plutonium/L"plugins/OtherMod.dll","unrelated");
     installation::install(root,plutonium);
-    const auto shortcut=home/L"Jugar-BO1-LAN.lnk";
+    require(WritePrivateProfileStringW(L"Delirium",L"language",L"es",installation::configuration().c_str()),"cannot store language");
+    ui::setLanguage(L"en");ui::loadLanguage(installation::configuration().wstring());
+    require(ui::language==ui::Language::Spanish,"stored language did not round trip");
+    const auto shortcut=home/product::shortcut;
     lanShortcut::create(shortcut,plutonium,root.parent_path());
     require(SUCCEEDED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)),"COM verification setup failed");
     IShellLinkW* link=nullptr;IPersistFile* persisted=nullptr;

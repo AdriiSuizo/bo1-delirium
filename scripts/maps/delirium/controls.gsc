@@ -2,9 +2,17 @@
 #include common_scripts\utility;
 #include maps\_zombiemode_utility;
 
+tr( spanish, english )
+{
+    language = GetDvar( "loc_language" );
+    if ( language == "spanish" || language == "6" )
+        return spanish;
+    return english;
+}
+
 hint()
 {
-    IPrintLnBold( "Cruceta / flechas: abajo Dios y ronda 20 | arriba pausa | izquierda +5 | derecha persecucion" );
+    IPrintLnBold( tr( "Cruceta / flechas: abajo Dios y ronda 20 | arriba pausa | izquierda +5 | derecha persecucion", "D-pad / arrows: Down God + round 20 | Up pause | Left +5 | Right pursuit" ) );
 }
 
 press()
@@ -18,7 +26,7 @@ press()
     player maps\_zombiemode_score::add_to_player_score( 100000 );
     state = "OFF";
     if ( IsGodMode( player ) ) state = "ON";
-    player IPrintLnBold( "God mode: " + state + " | +100000" );
+    player IPrintLnBold( tr( "Modo dios: ", "God mode: " ) + state + " | +100000" );
     SetDvar( "delirium_control_event", "god " + state + " points " + before + " -> " + player.score + " round " + level.round_number );
     if ( level.round_number < 20 && !is_true( level.delirium_round_jump ) )
     {
@@ -72,7 +80,7 @@ pause_round()
             level.zombie_total = 0;
         if ( is_true( level.delirium_restore_spawning ) )
             flag_set( "spawn_zombies" );
-        IPrintLnBold( "Ronda reanudada" );
+        IPrintLnBold( tr( "Ronda reanudada", "Round resumed" ) );
         SetDvar( "delirium_control_event", "round resumed " + level.round_number );
         return;
     }
@@ -85,7 +93,7 @@ pause_round()
     level.delirium_held_empty_round = level.zombie_total <= 0;
     if ( level.delirium_held_empty_round ) level.zombie_total = 1;
     killed = kill_live_zombies();
-    IPrintLnBold( "Ronda pausada | Eliminados: " + killed );
+    IPrintLnBold( tr( "Ronda pausada | Eliminados: ", "Round paused | Killed: " ) + killed );
     SetDvar( "delirium_control_event", "round paused " + level.round_number + " killed " + killed );
 }
 
@@ -125,7 +133,7 @@ spawn_five()
         wait 0.1;
     }
     level.delirium_spawning = false;
-    IPrintLnBold( "Zombis de prueba: " + spawned );
+    IPrintLnBold( tr( "Zombis de prueba: ", "Test zombies: " ) + spawned );
     SetDvar( "delirium_control_event", "manual spawned " + spawned + " round " + level.round_number + " paused " + is_true( level.delirium_round_paused ) );
 }
 
@@ -137,6 +145,6 @@ pursuit()
     state = "ON";
     if ( players[0] IsNoTarget() )
         state = "OFF";
-    players[0] IPrintLnBold( "Persecucion: " + state );
+    players[0] IPrintLnBold( tr( "Persecucion: ", "Pursuit: " ) + state );
     SetDvar( "delirium_control_event", "pursuit " + state );
 }

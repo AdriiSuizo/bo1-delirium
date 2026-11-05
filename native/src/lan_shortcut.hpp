@@ -21,7 +21,7 @@ inline void create(const std::filesystem::path& shortcut,const std::filesystem::
     const auto arguments=L"t5sp \""+game.wstring()+L"\" -lan";
     if(SUCCEEDED(result))result=link->SetArguments(arguments.c_str());
     if(SUCCEEDED(result))result=link->SetWorkingDirectory(plutonium.c_str());
-    if(SUCCEEDED(result))result=link->SetDescription(L"BO1 de Plutonium en modo LAN. Selecciona tu mod en Mods.");
+    if(SUCCEEDED(result))result=link->SetDescription(L"BO1 Plutonium LAN | Selecciona tu mod en Mods / Select your mod in Mods.");
     if(SUCCEEDED(result))result=link->SetIconLocation((game/L"BlackOps.exe").c_str(),0);
     if(SUCCEEDED(result))result=link->QueryInterface(IID_PPV_ARGS(&file));
     if(SUCCEEDED(result))result=file->Save(shortcut.c_str(),TRUE);

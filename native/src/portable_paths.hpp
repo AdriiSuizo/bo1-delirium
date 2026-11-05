@@ -32,14 +32,24 @@ static void setupTool(const fs::path& program,std::wstring args,const fs::path& 
  CloseHandle(process.hThread);
  unsigned seconds=0;
  while(WaitForSingleObject(process.hProcess,1000)==WAIT_TIMEOUT){
-  if(++seconds%10==0){printf("BO1 setup: working (%u s)...\n",seconds);fflush(stdout);}
+  if(++seconds%10==0){
+#ifdef BO1_DELIRIUM_INSTALLER
+   wchar_t status[160]{};swprintf_s(status,ui::text(L"Preparando recursos: %u segundos...",L"Preparing resources: %u seconds..."),seconds);ui::say(status);
+#else
+   printf("BO1 setup: working (%u s)...\n",seconds);fflush(stdout);
+#endif
+  }
  }
  DWORD code=1;GetExitCodeProcess(process.hProcess,&code);CloseHandle(process.hProcess);CloseHandle(output);
  if(code){fwprintf(stderr,L"BO1 preparation tool exited with code %lu. Details: %ls\n",code,log.c_str());throw std::runtime_error("BO1 preparation failed");}
 }
 static void prepareResources(const fs::path& root,const fs::path& game,const fs::path& cache,const fs::path& plutonium){
  if(cacheReady(cache))return;
+#ifdef BO1_DELIRIUM_INSTALLER
+ ui::say(ui::text(L"Preparando los recursos de BO1. Kino se abrirá en segundo plano y se cerrará al terminar (hasta 3 minutos).",L"Preparing BO1 resources. Kino will open in the background and close when finished (up to 3 minutes)."));
+#else
  fwprintf(stdout,L"Preparing physics from your BO1 installation. Waiting for Kino resources in the background (up to 3 minutes).\n");fflush(stdout);
+#endif
  fs::create_directories(cache);auto raw=cache/L"raw";
  auto log=cache/L"preparation.log";
  setupTool(root/L"tools/CaptureBO1.exe",L"--game-dir \""+game.wstring()+L"\" --resource-cache \""+raw.wstring()+L"\" --plutonium-dir \""+plutonium.wstring()+L"\" --prepare-seconds 180 --map zombie_theater",root,log);

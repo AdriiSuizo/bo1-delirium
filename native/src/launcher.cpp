@@ -5,6 +5,10 @@
 #include <cstdio>
 #include <stdexcept>
 namespace fs=std::filesystem;
+#include "product_info.hpp"
+#ifdef BO1_DELIRIUM_INSTALLER
+#include "user_interface.hpp"
+#endif
 #ifdef BO1_DELIRIUM_INSTALLER
 static bool quietSetup;
 #endif
@@ -80,7 +84,10 @@ int wmain(int argc,wchar_t**argv) try {
     fs::path game=root.parent_path(),adapter=root/L"DeliriumBO1.dll";
     fs::path cache=environment(L"BO1_DELIRIUM_CACHE_DIR");
     if(cache.empty())cache=fs::path(environment(L"LOCALAPPDATA"))/L"BO1PlutoniumDelirium/bo1-character-v1";
-    int seconds=0;bool diagnostics=false,quiet=false,uninstall=false;std::wstring map;fs::path iso;
+    int seconds=0;bool diagnostics=false,quiet=false,uninstall=false,languageSupplied=false;std::wstring map;fs::path iso;
+#ifdef BO1_DELIRIUM_INSTALLER
+    ui::loadLanguage(installation::configuration().wstring());
+#endif
     for(int i=1;i<argc;i++){
         if(!wcscmp(argv[i],L"--test-seconds")&&i+1<argc){seconds=_wtoi(argv[++i]);diagnostics=true;}
         else if(!wcscmp(argv[i],L"--smoke-seconds")&&i+1<argc){seconds=_wtoi(argv[++i]);diagnostics=false;}
@@ -91,10 +98,12 @@ int wmain(int argc,wchar_t**argv) try {
         else if(!wcscmp(argv[i],L"--quiet"))quiet=quietSetup=true;
         else if(!wcscmp(argv[i],L"--uninstall"))uninstall=true;
         else if(!wcscmp(argv[i],L"--iso")&&i+1<argc)iso=fs::absolute(argv[++i]);
+        else if(!wcscmp(argv[i],L"--language")&&i+1<argc){if(!ui::setLanguage(argv[++i]))throw std::runtime_error("Use --language es or --language en");languageSupplied=true;}
 #endif
         else fail("unknown launcher option");
     }
 #ifdef BO1_DELIRIUM_INSTALLER
+    if(!quiet&&!languageSupplied&&!ui::chooseLanguage())return 0;
     // Setup changes only mod files and Plutonium registration. Its read-only
     // resource capture has its own LAN profile, separate from stock Steam BO1.
     if(gameIsRunning(true))throw std::runtime_error("Close Plutonium before installing or removing Delirium");
@@ -108,14 +117,14 @@ int wmain(int argc,wchar_t**argv) try {
         game=findSteamGame();
         if(game.empty()){
             if(quiet)throw std::runtime_error("Steam BO1 was not found. Select BlackOps.exe in the interactive installer.");
-            game=selectFile(L"Selecciona BlackOps.exe de tu instalacion de Steam",L"BlackOps.exe\0BlackOps.exe\0\0").parent_path();
+            game=selectFile(ui::text(L"Selecciona BlackOps.exe de tu instalación de Steam",L"Select BlackOps.exe from your Steam installation"),L"BlackOps.exe\0BlackOps.exe\0\0").parent_path();
         }
     }
     root=game/L"BO1Delirium";adapter=root/L"DeliriumBO1.dll";
     if(uninstall){
         installation::uninstall(root,plutonium);
-        puts("Delirium plugin and Mods registration removed. Local resources and other mods preserved.");
-        if(!quiet)MessageBoxW(nullptr,L"Delirium desinstalado de Plutonium.\nLa cache local y los otros mods se conservan.",L"BO1 Delirium",MB_OK|MB_ICONINFORMATION);
+        ui::say(ui::text(L"Integración de Delirium retirada. Se conservan los recursos locales y los otros mods.",L"Delirium plugin and Mods registration removed. Local resources and other mods preserved."));
+        if(!quiet)MessageBoxW(nullptr,ui::text(L"Delirium desinstalado de Plutonium.\nLa caché local y los otros mods se conservan.",L"Delirium has been removed from Plutonium.\nYour local cache and other mods have been kept."),product::title,MB_OK|MB_ICONINFORMATION);
         return 0;
     }
 #endif
@@ -138,13 +147,17 @@ int wmain(int argc,wchar_t**argv) try {
 #ifdef BO1_DELIRIUM_INSTALLER
     if(iso.empty()&&!fs::is_regular_file(tuning.parent_path()/L"gta4-development-v1.ready")){
         bool hasImage=false;for(const auto& file:fs::directory_iterator(game))hasImage|=file.is_regular_file()&&!_wcsicmp(file.path().extension().c_str(),L".iso");
-        if(!hasImage&&!quiet)iso=selectFile(L"Selecciona tu ISO de GTA IV base de Xbox 360",L"Xbox 360 ISO\0*.iso\0\0");
+        if(!hasImage&&!quiet)iso=selectFile(ui::text(L"Selecciona tu ISO de GTA IV base de Xbox 360",L"Select your base GTA IV Xbox 360 ISO"),L"Xbox 360 ISO\0*.iso\0\0");
     }
 #endif
     const auto discSource=iso.empty()?game:iso;
     setupTool(root/L"runtime/delirium_worker.exe",
         L"--prepare-disc \""+discSource.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log");
+#ifdef BO1_DELIRIUM_INSTALLER
+    ui::say(ui::text(L"Recursos de GTA IV preparados. La ISO ya no hace falta para jugar.",L"GTA IV resources are ready. The ISO is no longer needed to play."));
+#else
     puts("GTA IV tuning and get-up cache ready. You can remove the ISO.");
+#endif
     fflush(stdout);
     if(!SetEnvironmentVariableW(L"BO1_DELIRIUM_GTA_CACHE",tuning.c_str())||
        !SetEnvironmentVariableW(L"BO1_DELIRIUM_PLUTONIUM_LAN",L"1")) fail("set Plutonium Delirium environment");
@@ -152,10 +165,13 @@ int wmain(int argc,wchar_t**argv) try {
 #ifdef BO1_DELIRIUM_INSTALLER
     if(cache!=installation::localData()/L"bo1-character-v1")throw std::runtime_error("The normal installation requires the default resource cache");
     installation::install(root,plutonium);
-    lanShortcut::create(game/L"Jugar-BO1-LAN.lnk",plutonium,game);
-    lanShortcut::create(lanShortcut::desktop()/L"BO1 - Plutonium LAN.lnk",plutonium,game);
-    puts("Installation complete. Start Plutonium normally, choose T5 Zombies LAN mode, then BO1 Delirium in Mods. The ISO can now be removed.");
-    if(!quiet)MessageBoxW(nullptr,L"Instalacion completada.\n\nAbre BO1 - Plutonium LAN en el escritorio y selecciona BO1 Delirium en Mods.\n\nYa no necesitas la ISO para jugar. El modo comprobado es un jugador.",L"BO1 Delirium",MB_OK|MB_ICONINFORMATION);
+    if(!WritePrivateProfileStringW(L"Delirium",L"language",ui::code(),installation::configuration().c_str()))throw std::runtime_error("Cannot save the installation language");
+    lanShortcut::create(game/product::shortcut,plutonium,game);
+    lanShortcut::create(lanShortcut::desktop()/product::shortcut,plutonium,game);
+    ui::say(ui::text(L"Instalación completada. Abre Jugar - Play BO1 (LAN) y selecciona BO1 Delirium en Mods.",L"Installation complete. Open Jugar - Play BO1 (LAN), then select BO1 Delirium in Mods."));
+    if(!quiet)MessageBoxW(nullptr,ui::text(
+        L"Instalación completada.\n\nAbre Jugar - Play BO1 (LAN) desde el escritorio. En Mods, selecciona BO1 Delirium.\n\nPuedes borrar la carpeta donde extrajiste el RAR. La ISO ya no hace falta para jugar.\n\nModo comprobado: un jugador.",
+        L"Installation complete.\n\nOpen Jugar - Play BO1 (LAN) from your Desktop. Select BO1 Delirium in Mods.\n\nYou can delete the extracted download folder. The ISO is no longer needed to play.\n\nVerified mode: single-player."),product::title,MB_OK|MB_ICONINFORMATION);
     return 0;
 #endif
     fs::path home=cache.parent_path()/L"profile",logs=cache.parent_path()/L"logs";
@@ -229,7 +245,7 @@ int wmain(int argc,wchar_t**argv) try {
 } catch(const std::exception& error) {
     fprintf(stderr,"%s\n",error.what());
 #ifdef BO1_DELIRIUM_INSTALLER
-    if(!quietSetup)MessageBoxA(nullptr,error.what(),"BO1 Delirium: installation failed",MB_OK|MB_ICONERROR);
+    if(!quietSetup)ui::error(error.what());
 #endif
     return 1;
 }

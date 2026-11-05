@@ -1,0 +1,9 @@
+#pragma once
+namespace product {
+inline constexpr char version[]="@BO1_VERSION@";
+inline constexpr wchar_t displayVersion[]=L"@BO1_DISPLAY_VERSION@";
+inline constexpr wchar_t title[]=L"BO1 Delirium - @BO1_DISPLAY_VERSION@";
+inline constexpr wchar_t installer[]=L"Instalar - Install BO1 Delirium.exe";
+inline constexpr wchar_t uninstaller[]=L"Desinstalar - Uninstall BO1 Delirium.exe";
+inline constexpr wchar_t shortcut[]=L"Jugar - Play BO1 (LAN).lnk";
+}
