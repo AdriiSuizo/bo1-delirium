@@ -1,47 +1,91 @@
-Corresponding source: BO1 Delirium Plutonium 0.3.0 beta 11
-Windows x64; MSVC Win32 build tools, CMake, Rust stable, Python 3.12 + PyInstaller.
-Native game adapter and bridge:
-  cmake -S native -B native-build -A Win32
-  cmake --build native-build --config Release
-Read-only BO1 resource capture:
-  cmake -S capture -B capture-build -A Win32
-  cmake --build capture-build --config Release
-Physics worker (x64; install the matching Rust MSVC target):
-  set RUSTFLAGS=-C target-feature=+crt-static
-  cargo build --locked --release -p bo1-delirium-worker
-Preparation tool (uses only Python standard library):
-  python -m PyInstaller --onefile --console --name PrepareBO1 tools/prepare_bo1.py
-Own control script archive (standard ZIP/IWD; no original game scripts):
-  python -c "import zipfile; z=zipfile.ZipFile('bo1delirium_controls.iwd','w',zipfile.ZIP_DEFLATED); z.write('scripts/maps/delirium/controls.gsc','maps/delirium/controls.gsc'); z.close()"
-Binary layout is described in manifest.json in the installation archive.
-Rename bo1-delirium-worker.exe to runtime/delirium_worker.exe.
-Copy BO1SteamDelirium.exe to BO1Delirium/BO1PlutoniumDelirium.exe.
-Copy winmm.dll to BO1Delirium/runtime/. The launcher stages it temporarily beside the Plutonium bootstrapper.
-Normal Mods-menu installation:
-Copy BO1DeliriumSetup.exe beside BlackOps.exe as Instalar-BO1Delirium.exe.
-Copy BO1DeliriumUninstall.exe beside BlackOps.exe as Desinstalar-BO1Delirium.exe.
-The uninstaller is a standalone GUI executable; --quiet exercises the same removal without dialogs.
-Copy BO1DeliriumPlugin.dll to BO1Delirium/runtime/.
-The complete package can be extracted outside the game. Setup reads Steam libraryfolders.vdf
-and appmanifest_42700.acf, then deploys its own files into the selected BO1 installation.
-The --iso option accepts an existing Xbox 360 ISO file without copying it into BO1.
-The normal installer offers a file dialog when a disc is needed and none is beside BlackOps.exe.
-Setup creates Jugar-BO1-LAN.lnk beside BlackOps.exe and BO1 - Plutonium LAN.lnk on the Desktop.
-Both target the official bootstrapper with -lan and its required Plutonium working directory.
-The setup registers the native plugin in Plutonium/plugins and our control IWD in storage/t5/main.
-The plugin implements the public Plutonium SDK v1 lifecycle ABI (plutoniummod/plutonium-sdk 17e9a0a).
-Reference: https://github.com/plutoniummod/plutonium-sdk
-Normal LAN sessions use that plugin loader, not the WinMM proxy or our developer launcher.
-Run the installer once before using the normal Plutonium launcher and Mods menu.
-Copy CaptureBO1.exe, BO1CharacterCapture.dll, and PrepareBO1.exe to tools/.
-Copy bo1delirium_controls.iwd to BO1Delirium/scripts/. The launcher installs this own script into its private profile.
-Keep the original native BO1 executable, assets and private generated cache out of redistribution.
-The launcher calls --prepare-disc with the BO1 directory and private cache path.
-The worker reads Fred.xrt, the pedestrian fragment, taskparams.txt, tuning slots
-and recovery motion references from the player's supported GTA IV Xbox 360 ISO.
-The exporter follows the existing development lsc4-support pipeline.
-The original articulation and task parameters drive the development recovery
-controller. BO1's skeleton is retargeted to that articulation for rendering.
+BO1 DELIRIUM | 0.3.0 Beta 12 | COMPILAR / BUILD
+
+ESPAÑOL
+Código correspondiente al paquete de instalación. No necesitas una IA para
+compilarlo. Requiere Windows x64, MSVC con herramientas Win32, CMake, Rust
+estable y Python 3.12 con PyInstaller para el preparador.
+VERSION.txt es la versión canónica del mod; CMake genera los recursos de versión.
+Ejecuta los comandos siguientes desde la raíz del código. Los ejecutables
+nativos son Win32; el worker Rust es x64. Se usa la biblioteca C estática.
+No mezcles el número del mod con el número de versión del motor upstream.
+
+ENGLISH
+Corresponding source for the installation package. No AI is needed to build.
+Requires Windows x64, MSVC Win32 tools, CMake, stable Rust and Python 3.12
+with PyInstaller for the preparation tool.
+VERSION.txt is the canonical mod version; CMake generates version resources.
+Run the following commands from the source root. Native executables are
+Win32; the Rust worker is x64. The C runtime is linked statically.
+The mod version is separate from the upstream engine version.
+
+COMANDOS / COMMANDS (PowerShell)
+cmake -S native -B native-build -A Win32
+cmake --build native-build --config Release
+ctest --test-dir native-build -C Release --output-on-failure
+cmake -S capture -B capture-build -A Win32
+cmake --build capture-build --config Release
+$env:RUSTFLAGS = '-C target-feature=+crt-static'
+cargo test --locked --release --workspace
+cargo build --locked --release -p bo1-delirium-worker
+python -m PyInstaller --onefile --console --name PrepareBO1 tools/prepare_bo1.py
+
+ARCHIVO DE CONTROLES / CONTROL ARCHIVE
+python -c "import zipfile; z=zipfile.ZipFile('bo1delirium_controls.iwd','w',zipfile.ZIP_DEFLATED); z.write('scripts/maps/delirium/controls.gsc','maps/delirium/controls.gsc'); z.close()"
+
+DISTRIBUCIÓN / PACKAGE
+BO1DeliriumSetup.exe -> Instalar - Install BO1 Delirium.exe
+BO1DeliriumUninstall.exe -> Desinstalar - Uninstall BO1 Delirium.exe
+BO1SteamDelirium.exe -> BO1Delirium/BO1PlutoniumDelirium.exe (desarrollo / development)
+DeliriumBO1.dll -> BO1Delirium/DeliriumBO1.dll
+bo1-delirium-worker.exe -> BO1Delirium/runtime/delirium_worker.exe
+BO1DeliriumPlugin.dll, nm108_native_bridge.dll, winmm.dll -> BO1Delirium/runtime/
+CaptureBO1.exe, BO1CharacterCapture.dll, PrepareBO1.exe -> BO1Delirium/tools/
+bo1delirium_controls.iwd -> BO1Delirium/scripts/
+
+ES: Incluye las dos guías, créditos, novedades, VERSION.txt, licencias,
+SOURCE.zip del commit exacto y manifest.json con tamaños y SHA-256.
+EN: Include both guides, credits, changelog, VERSION.txt, licenses,
+SOURCE.zip from the exact commit and manifest.json with sizes and SHA-256.
+
+INSTALACIÓN Y PRUEBAS / INSTALLATION AND TESTING
+ES: El instalador despliega desde cualquier carpeta, detecta Steam, permite
+seleccionar la ISO y registra el plugin nativo oficial de Plutonium. Crea
+Jugar - Play BO1 (LAN).lnk con el directorio de trabajo de Plutonium.
+La selección de idioma se guarda en installation.ini. Los avisos GSC siguen
+loc_language del juego. --quiet --language es/en permite pruebas sin diálogos.
+No cierres procesos del usuario. Prueba con el BO1 original y Plutonium LAN.
+Los fixtures privados de pruebas requieren recursos preparados por su dueño;
+no los publiques ni sustituyas una prueba omitida por un resultado aprobado.
+
+EN: Setup deploys from any folder, discovers Steam, accepts an ISO selection
+and registers the official Plutonium native plugin. It creates
+Jugar - Play BO1 (LAN).lnk with Plutonium's required working directory.
+Language is saved in installation.ini. GSC notices follow the game's
+loc_language. --quiet --language es/en supports tests without dialogs.
+Do not close user processes. Test with original BO1 and Plutonium LAN.
+Private regression fixtures require owner-prepared resources; never publish
+them or report a skipped resource-dependent check as passed.
+
+ES: ABI público Plutonium SDK v1, revisión 17e9a0a. Las partidas normales
+usan el cargador de plugins LAN, no el proxy WinMM ni el lanzador de desarrollo.
+Solo la preparación inicial usa el puente temporal. No se modifica BlackOps.exe.
+EN: Public Plutonium SDK v1 ABI, revision 17e9a0a. Normal LAN sessions use
+the plugin loader, not the WinMM proxy or development launcher. Only initial
+preparation uses the temporary bridge. BlackOps.exe remains unchanged.
+https://github.com/plutoniummod/plutonium-sdk
+
+PROCEDENCIA / PROVENANCE
+ES: Base adaptada a BO1: revisión 23ea7cfa2a1000d64870d2549834006d21b3e05c.
+El importador lee la caché 0.6.0 y proporciona 384 valores de ajuste de la
+base anterior; tres valores de compatibilidad siguen siendo locales al adaptador.
+Usa cuerpo, parámetros de tareas y referencias originales de recuperación
+preparados desde la ISO. No es una migración completa al SDK upstream actual.
+Referencia de integración: SuperSloppers/large-steal-car-4, revisión
+0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36.
+Corrección seleccionada de ciclo de equilibrio: Delirium 0.6.0,
+93eed4d6a0aafa2e84526730ea1f54dab48ac7d4.
+
+ENGLISH ORIGINAL PROVENANCE
 Runtime base: the BO1-adapted Delirium core from Steam beta 5 (upstream revision 23ea7cfa2a1000d64870d2549834006d21b3e05c).
 The disc importer reads the existing 0.6.0 cache and supplies 384 matching legacy tuning slots. Three BO1 compatibility values remain local to the adapter.
 Custom character interface and public configuration references: SuperSloppers/large-steal-car-4
@@ -50,3 +94,6 @@ revision 0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36.
 Selected upstream body-balance lifecycle correction: PVCPC/delirium-physics
 revision 93eed4d6a0aafa2e84526730ea1f54dab48ac7d4 (0.6.0).
 Native compatibility regression: ctest --test-dir native-build -C Release --output-on-failure
+
+ES: No publiques imágenes ejecutables, ISO, claves ni cachés originales.
+EN: Keep original game executable images, ISOs, keys and caches out of distribution.

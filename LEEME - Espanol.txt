@@ -1,0 +1,85 @@
+BO1 DELIRIUM | 0.3.0 Beta 12
+GUÍA EN ESPAÑOL
+English guide: README - English.txt
+
+QUÉ ES
+Físicas corporales activas para los zombis de BO1: impactos localizados,
+equilibrio, caídas y recuperación, integradas con la persecución de BO1.
+Esta beta mejora idiomas, nombres e instalación; mantiene las físicas de la
+beta 11. No es una migración completa al último SDK de Delirium.
+
+NECESITAS
+- Call of Duty: Black Ops de Steam: 7.0.152 CL 966072.
+- Plutonium T5 instalado y configurado para esa carpeta de BO1.
+  Instalador oficial: https://plutonium.pw/docs/install/
+- Tu volcado ISO del GTA IV BASE de Xbox 360. No sirve una copia de PC ni
+  Episodes from Liberty City. Perfiles comprobados: 4A53F9F6 y 6AC07221.
+- Windows 10/11 de 64 bits. Comprobado en Windows 10 con Plutonium r5369.
+
+INSTALAR
+1. Cierra BO1 y Plutonium. Extrae TODO el RAR en una carpeta cualquiera.
+2. Abre Instalar - Install BO1 Delirium.exe y elige Español o English.
+3. El instalador detecta BO1 en Steam. Si pregunta, selecciona BlackOps.exe.
+4. Selecciona tu ISO si se solicita. Puede quedarse donde la tienes; no es
+   necesario copiarla a BO1. La preparación inicial puede necesitar Internet.
+5. Espera al mensaje de instalación completada. La primera preparación abre
+   Kino brevemente para leer el esqueleto y ragdoll de tu BO1; puede tardar
+   unos tres minutos. Esa instancia se cierra al terminar.
+6. Abre Jugar - Play BO1 (LAN) desde el escritorio, selecciona BO1 Delirium
+   en Mods y entra en Zombies Solo. Empieza por Kino para comprobarlo.
+
+El acceso abre el cliente oficial de Plutonium en LAN. No hay un CMD del mod
+que debas mantener abierto. También puedes usar el lanzador oficial en LAN.
+El modo online no carga este plugin nativo.
+
+DESPUÉS DE INSTALAR
+Puedes borrar la carpeta donde extrajiste el RAR. La ISO tampoco se necesita
+para jugar una vez completada la preparación. Conserva BO1Delirium en la
+carpeta instalada de BO1 y la caché local: el mod sí los utiliza.
+No se modifica BlackOps.exe ni se incluyen recursos originales en el paquete.
+
+CONTROLES DE PRUEBA | CRUCETA DEL MANDO O FLECHAS DEL TECLADO
+Abajo: activa/desactiva modo dios y suma 100.000 puntos en cada pulsación.
+        Solicita ronda 20 cuando estás por debajo; no rebobina rondas superiores.
+Arriba: elimina los zombis vivos y pausa las apariciones. Otra pulsación reanuda.
+Izquierda: genera cinco zombis que te persiguen, sin reanudar la ronda pausada.
+Derecha: activa/desactiva la persecución.
+Los avisos del juego siguen el idioma de BO1: español o inglés.
+
+ACTUALIZAR
+Cierra BO1 y Plutonium, extrae el nuevo paquete y ejecuta su instalador.
+Se reutiliza la caché compatible y se conservan los archivos ajenos al mod.
+La versión está en VERSION.txt y en Propiedades de sus ejecutables.
+El número de BO1 Delirium es distinto del número del motor Delirium upstream.
+
+DESINSTALAR
+En la carpeta de BO1 de Steam, abre Desinstalar - Uninstall BO1 Delirium.exe
+con el juego cerrado. Retira el plugin, el script y la entrada de Mods.
+Conserva tus partidas, otros mods, la ISO y la caché local para reinstalar.
+Los archivos del paquete se conservan; puedes borrarlos después si no los usas.
+El acceso LAN es general de BO1 y sigue siendo útil sin este mod.
+
+COMPATIBILIDAD
+Modo verificado: Zombies de UN jugador en LAN. Los cuerpos físicos no tienen
+replicación de red propia: instalarlo en todos los equipos no establece
+compatibilidad cooperativa. El identificador sigue siendo mods/bo1delirium.
+Las pruebas de arranque anteriores cubren Kino, Five, Ascension, Call of the
+Dead, Shangri-La, Moon, Nacht, Verrückt, Shi No Numa y Der Riese instalados.
+Eso no equivale a probar partidas completas en todos los mapas. Esta beta
+recomprueba carga y controles en Kino. Los perros conservan su lógica nativa.
+
+SI ALGO FALLA
+- Falta el instalador: extrae el RAR entero antes de abrirlo.
+- Sale el mod pero no hay físicas: usa el acceso LAN y selecciona el mod.
+- Falta un recurso: repite la instalación. No descargues cachés de otros usuarios.
+- Una actualización de Plutonium puede cambiar las firmas compatibles.
+- Registros: %LOCALAPPDATA%\BO1PlutoniumDelirium
+  disc-setup.log: preparación de la ISO.
+  plugin-loader.log y logs\native-runtime.log: carga y adaptador.
+  installation.ini: ubicación e idioma de la instalación.
+Indica versión, mapa, pasos y registros pertinentes al informar de un fallo.
+Nunca adjuntes ISO, cachés, claves ni archivos originales del juego.
+
+Créditos: CREDITOS - CREDITS.txt
+Cambios por versión: NOVEDADES - CHANGELOG.txt
+Código y compilación: BO1Delirium\SOURCE.zip (BUILD.txt).

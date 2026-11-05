@@ -1,0 +1,52 @@
+BO1 DELIRIUM | CRÉDITOS / CREDITS
+
+ESPAÑOL
+AdriiSuizo: dirección del proyecto y pruebas de juego.
+bgetsios: pruebas y comentarios sobre controles, recuperación y jugabilidad.
+PVCPC y colaboradores de Delirium Physics: motor de referencia y base adaptada
+ para este port. https://github.com/PVCPC/delirium-physics
+Equipo SuperSloppers / large-steal-car-4: investigación y referencias de
+ integración. No se distribuye su cliente ni se requiere su repositorio privado.
+Plutonium Team: cliente T5 e interfaz pública de plugins.
+ https://github.com/plutoniummod/plutonium-sdk
+Tsuda Kageyu y colaboradores: MinHook; incluye componentes de Vyacheslav Patkov.
+Python Software Foundation y colaboradores de PyInstaller: preparación.
+Colaboradores de Rust y dependencias: avisos y licencias incluidos en el paquete.
+NVIDIA / NVlabs MotionBricks: referencia de investigación sobre movimiento;
+ no se distribuyen sus pesos ni se afirma utilizar un controlador entrenado suyo.
+ https://github.com/NVlabs/motionbricks
+OpenAI Codex y Claude: asistencia de desarrollo, análisis e integración.
+BO1: Treyarch / Activision. GTA IV y tecnología original: Rockstar / NaturalMotion.
+Las marcas y recursos originales pertenecen a sus respectivos titulares.
+
+ENGLISH
+AdriiSuizo: project direction and gameplay testing.
+bgetsios: testing and feedback on controls, recovery and gameplay.
+PVCPC and Delirium Physics contributors: reference engine and adapted base
+ used by this port. https://github.com/PVCPC/delirium-physics
+SuperSloppers / large-steal-car-4 team: research and integration references.
+ Their client is not distributed; their private repository is not a dependency.
+Plutonium Team: T5 client and public plugin interface.
+ https://github.com/plutoniummod/plutonium-sdk
+Tsuda Kageyu and contributors: MinHook, including components by Vyacheslav Patkov.
+Python Software Foundation and PyInstaller contributors: preparation tools.
+Rust and dependency contributors: notices and licenses included in the package.
+NVIDIA / NVlabs MotionBricks: movement research reference; its weights are not
+ distributed and this mod does not claim to run a MotionBricks-trained controller.
+ https://github.com/NVlabs/motionbricks
+OpenAI Codex and Claude: development, analysis and integration assistance.
+BO1: Treyarch / Activision. GTA IV and original technology: Rockstar / NaturalMotion.
+Original trademarks and resources belong to their respective owners.
+
+LICENCIA / LICENSE
+Código del proyecto / Project code: GPL-3.0-only; véase / see LICENSE.
+Licencias de dependencias / Dependency licenses: BO1Delirium\licenses.
+Código correspondiente / Corresponding source: BO1Delirium\SOURCE.zip.
+Procedencia del motor / Runtime provenance: BUILD.txt in SOURCE.zip.
+La adaptación BO1 no equivale a migrar todo al SDK upstream actual.
+The BO1 adaptation is not a full migration to the current upstream SDK.
+
+El paquete no incluye ISO, ejecutables originales, modelos, texturas, sonidos,
+animaciones ni cachés de juegos. Se preparan desde las copias del usuario.
+The package contains no game ISOs, original executables, models, textures,
+sounds, animations or caches. These are prepared from the player's copies.

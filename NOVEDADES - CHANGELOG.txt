@@ -1,0 +1,35 @@
+BO1 DELIRIUM | NOVEDADES / CHANGELOG
+Las versiones anteriores se conservan. / Earlier releases remain available.
+Versión del mod distinta de la del motor. / Mod and engine versions are separate.
+
+0.3.0 Beta 12 | 2026-11-05
+ES: Instalador y desinstalador con selector Español / English. Guías completas
+    en ambos idiomas. Avisos de controles según el idioma del juego. Nombres
+    bilingües, versión visible en ejecutables, créditos y esta lista de cambios.
+    Conserva las físicas de la beta 11; sin cambios del controlador corporal.
+EN: Spanish / English installer and uninstaller selection. Full guides in both
+    languages. Control notices follow game language. Bilingual filenames,
+    executable version information, credits and this version history.
+    Retains beta 11 physics; no changes to the body controller.
+
+0.3.0 Beta 11
+ES: Detecta bibliotecas de Steam, permite elegir la ISO desde cualquier carpeta,
+    instala desde fuera de BO1 y crea accesos al cliente oficial en LAN.
+EN: Discovers Steam libraries, accepts the ISO in any folder, deploys from
+    outside BO1 and creates shortcuts to the official client in LAN mode.
+
+0.3.0 Beta 10
+ES: Desinstalador gráfico que conserva caché, partidas y otros mods.
+EN: Graphical uninstaller preserving cache, saves and unrelated mods.
+
+0.3.0 Beta 9
+ES: Carga nativa mediante la interfaz pública de plugins de Plutonium en LAN.
+EN: Native loading through Plutonium's public plugin interface in LAN mode.
+
+0.3.0 Beta 8
+ES: Base física de desarrollo recuperada: cuerpo y parámetros originales desde
+    la ISO, referencias de levantamiento, transición a carrera y correcciones
+    de compatibilidad. Esta base sigue adaptada a BO1.
+EN: Restored development physics base: body and original parameters from the
+    ISO, get-up references, running transition and compatibility corrections.
+    This base remains adapted to BO1.

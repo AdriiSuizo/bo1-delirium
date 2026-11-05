@@ -1,0 +1,40 @@
+name: Error / Bug report
+description: Describe un fallo reproducible / Describe a reproducible bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Español o English. No adjuntes ISO, cachés, claves ni archivos originales.
+        Spanish or English. Do not upload ISOs, caches, keys or original game files.
+  - type: input
+    id: version
+    attributes:
+      label: Versión del mod / Mod version
+      description: Consulta VERSION.txt / See VERSION.txt
+      placeholder: 0.3.0-beta.12
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows, Plutonium y mapa / Windows, Plutonium and map
+    validations:
+      required: true
+  - type: checkboxes
+    id: launch
+    attributes:
+      label: Arranque / Launch
+      options:
+        - label: Uso LAN y BO1 Delirium seleccionado en Mods / Using LAN with BO1 Delirium selected in Mods
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Qué ocurre y cómo repetirlo / What happens and how to reproduce
+      description: Incluye el resultado esperado / Include expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Registros pertinentes / Relevant logs
+      description: Consulta la guía. Revisa datos personales antes de adjuntar / See the guide. Review personal information before attaching.
