@@ -39,6 +39,9 @@ carpeta instalada de BO1 y la caché local: el mod sí los utiliza.
 No se modifica BlackOps.exe ni se incluyen recursos originales en el paquete.
 
 CONTROLES DE PRUEBA | CRUCETA DEL MANDO O FLECHAS DEL TECLADO
+Vienen desactivados. Para activarlos, añade la línea test_controls=1 bajo
+[Delirium] en %LOCALAPPDATA%\BO1PlutoniumDelirium\installation.ini.
+Reinstalar o actualizar conserva esa elección.
 Abajo: activa/desactiva modo dios y suma 100.000 puntos en cada pulsación.
         Solicita ronda 20 cuando estás por debajo; no rebobina rondas superiores.
 Arriba: elimina los zombis vivos y pausa las apariciones. Otra pulsación reanuda.

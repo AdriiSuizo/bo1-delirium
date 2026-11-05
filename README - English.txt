@@ -39,6 +39,9 @@ folder inside BO1 and your local cache: the mod still uses those.
 BlackOps.exe remains unchanged. No original game resources ship in the package.
 
 TEST CONTROLS | CONTROLLER D-PAD OR KEYBOARD ARROWS
+They are off by default. To enable them, add the line test_controls=1 under
+[Delirium] in %LOCALAPPDATA%\BO1PlutoniumDelirium\installation.ini.
+Reinstalling or updating keeps that choice.
 Down: toggle god mode and add 100,000 points on every press. Requests round 20
       when below it; does not rewind higher rounds.
 Up: kill living zombies and pause round spawning. Press again to resume.
