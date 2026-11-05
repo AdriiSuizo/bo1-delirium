@@ -17,12 +17,22 @@ pub fn fetched_key() -> Result<[u8; 16], String> {
     if let Some(k) = std::fs::read(dir.join("xex.key")).ok().and_then(|b| <[u8; 16]>::try_from(b).ok()) {
         return Ok(k);
     }
-    let fail = "couldn't get the key that opens default.xex (it's fetched from the internet the first time: check the connection)";
-    let out = std::process::Command::new("curl").args(["-sSfL", KEY_SRC]).output().map_err(|_| fail)?;
+    let manual = format!("Alternatively, place the 16-byte xex.key file in {}", dir.display());
+    let out = std::process::Command::new("curl").args(["-sSfL", KEY_SRC]).output().map_err(|e| {
+        format!("curl was not found ({e}). It is needed once to download the key that opens default.xex. {manual}")
+    })?;
+    let fail = || {
+        let detail = String::from_utf8_lossy(&out.stderr).trim().to_string();
+        format!("couldn't download the key that opens default.xex from {KEY_SRC} (Internet is needed the first time){}. {manual}",
+            if detail.is_empty() { String::new() } else { format!(": {detail}") })
+    };
+    if !out.status.success() {
+        return Err(fail());
+    }
     let src = String::from_utf8_lossy(&out.stdout);
-    let list = src.split("xe_xex2_retail_key[16] = {").nth(1).and_then(|s| s.split('}').next()).ok_or(fail)?;
+    let list = src.split("xe_xex2_retail_key[16] = {").nth(1).and_then(|s| s.split('}').next()).ok_or_else(fail)?;
     let k: [u8; 16] = list.split(',').filter_map(|h| u8::from_str_radix(h.trim().trim_start_matches("0x").trim_start_matches("0X"), 16).ok())
-        .collect::<Vec<_>>().try_into().map_err(|_| fail)?;
+        .collect::<Vec<_>>().try_into().map_err(|_| fail())?;
     let _ = std::fs::create_dir_all(&dir).and_then(|_| std::fs::write(dir.join("xex.key"), k));
     Ok(k)
 }

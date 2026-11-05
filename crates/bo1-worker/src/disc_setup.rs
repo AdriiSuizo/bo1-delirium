@@ -6,6 +6,30 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// Exit codes of `--prepare-disc`, read by the installer to explain the cause.
+pub const EXIT_NO_IMAGE: i32 = 31;
+pub const EXIT_KEY_UNAVAILABLE: i32 = 32;
+pub const EXIT_UNSUPPORTED_DISC: i32 = 33;
+pub const EXIT_OTHER: i32 = 30;
+
+#[derive(Debug)]
+pub struct SetupError {
+    pub code: i32,
+    pub message: String,
+}
+
+impl From<String> for SetupError {
+    fn from(message: String) -> Self {
+        Self { code: EXIT_OTHER, message }
+    }
+}
+
+impl From<&str> for SetupError {
+    fn from(message: &str) -> Self {
+        message.to_string().into()
+    }
+}
+
 pub fn load(cache: &Path) -> Result<(), String> {
     let file = File::open(cache).map_err(|e| format!("{}: {e}", cache.display()))?;
     let mut data = Vec::with_capacity(kv::CACHE_BYTES);
@@ -35,7 +59,7 @@ fn images(source: &Path) -> Result<Vec<PathBuf>, String> {
     Ok(result)
 }
 
-pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
+pub fn prepare(game: &Path, cache: &Path) -> Result<(), SetupError> {
     let dir = cache.parent().ok_or("Missing cache directory")?;
     let getup = dir.join("original-getup.motion");
     let locomotion = dir.join("original-locomotion.motion");
@@ -60,19 +84,21 @@ pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
 
     let images = images(game)?;
     if images.is_empty() {
-        return Err(format!(
-            "Place your GTA IV Xbox 360 ISO beside BlackOps.exe in {}",
-            game.display()
-        ));
+        return Err(SetupError {
+            code: EXIT_NO_IMAGE,
+            message: format!("Place your GTA IV Xbox 360 ISO beside BlackOps.exe in {}", game.display()),
+        });
     }
+    xex::fetched_key().map_err(|message| SetupError { code: EXIT_KEY_UNAVAILABLE, message })?;
 
+    let mut last = String::new();
     for path in images {
         match import(&path) {
             Ok((tuning, resources)) => {
                 match fs::remove_file(&marker) {
                     Ok(()) => {}
                     Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-                    Err(error) => return Err(error.to_string()),
+                    Err(error) => return Err(error.to_string().into()),
                 }
                 write_cache(&locomotion, &resources.locomotion)?;
                 write_cache(&getup, &resources.recovery)?;
@@ -88,10 +114,16 @@ pub fn prepare(game: &Path, cache: &Path) -> Result<(), String> {
                 );
                 return Ok(());
             }
-            Err(error) => eprintln!("{}: {error}", path.display()),
+            Err(error) => {
+                eprintln!("{}: {error}", path.display());
+                last = format!("{}: {error}", path.display());
+            }
         }
     }
-    Err("No compatible GTA IV Xbox 360 disc found. Use the base game disc.".into())
+    Err(SetupError {
+        code: EXIT_UNSUPPORTED_DISC,
+        message: format!("No compatible GTA IV Xbox 360 disc found. Use the base game disc. Last result: {last}"),
+    })
 }
 
 fn import(path: &Path) -> Result<(Vec<u8>, disc_motion::DiscResources), String> {
@@ -173,6 +205,18 @@ mod tests {
         assert_eq!(images(&root).unwrap(), vec![selected.clone()]);
         assert!(images(&root.join("missing")).is_err());
         fs::remove_file(selected).unwrap();
+        fs::remove_file(root.join("notes.txt")).unwrap();
+        fs::remove_dir(root).unwrap();
+    }
+
+    #[test]
+    fn missing_iso_reports_its_own_installer_exit_code() {
+        let root = std::env::temp_dir().join(format!("bo1-no-disc-{}", std::process::id()));
+        fs::create_dir_all(&root).unwrap();
+        fs::write(root.join("notes.txt"), b"not a disc").unwrap();
+        let error = prepare(&root, &root.join("cache").join("gta4-xbox360-v060.kv")).unwrap_err();
+        assert_eq!(error.code, EXIT_NO_IMAGE);
+        assert_eq!(SetupError::from("other").code, EXIT_OTHER);
         fs::remove_file(root.join("notes.txt")).unwrap();
         fs::remove_dir(root).unwrap();
     }

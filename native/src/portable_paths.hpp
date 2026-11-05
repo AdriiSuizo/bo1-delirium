@@ -19,7 +19,7 @@ static bool cacheReady(const fs::path& cache){
   if(!fs::is_regular_file(cache/name)||fs::file_size(cache/name)==0)return false;
  return true;
 }
-static void setupTool(const fs::path& program,std::wstring args,const fs::path& root,const fs::path& log){
+static DWORD runTool(const fs::path& program,std::wstring args,const fs::path& root,const fs::path& log){
  SECURITY_ATTRIBUTES security{sizeof(security),nullptr,TRUE};
  HANDLE output=CreateFileW(log.c_str(),FILE_APPEND_DATA,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,nullptr);
  if(output==INVALID_HANDLE_VALUE)fail("preparation log");
@@ -41,7 +41,11 @@ static void setupTool(const fs::path& program,std::wstring args,const fs::path& 
   }
  }
  DWORD code=1;GetExitCodeProcess(process.hProcess,&code);CloseHandle(process.hProcess);CloseHandle(output);
- if(code){fwprintf(stderr,L"BO1 preparation tool exited with code %lu. Details: %ls\n",code,log.c_str());throw std::runtime_error("BO1 preparation failed");}
+ if(code)fwprintf(stderr,L"BO1 preparation tool exited with code %lu. Details: %ls\n",code,log.c_str());
+ return code;
+}
+static void setupTool(const fs::path& program,std::wstring args,const fs::path& root,const fs::path& log){
+ if(runTool(program,std::move(args),root,log))throw std::runtime_error("BO1 preparation failed");
 }
 static void prepareResources(const fs::path& root,const fs::path& game,const fs::path& cache,const fs::path& plutonium){
  if(cacheReady(cache))return;

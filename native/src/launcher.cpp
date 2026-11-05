@@ -151,8 +151,14 @@ int wmain(int argc,wchar_t**argv) try {
     }
 #endif
     const auto discSource=iso.empty()?game:iso;
-    setupTool(root/L"runtime/delirium_worker.exe",
-        L"--prepare-disc \""+discSource.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log");
+    switch(runTool(root/L"runtime/delirium_worker.exe",
+        L"--prepare-disc \""+discSource.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log")){
+    case 0:break;
+    case 31:throw std::runtime_error("No GTA IV Xbox 360 ISO was found. Run the installer again and select your ISO.");
+    case 32:throw std::runtime_error("The key that opens the GTA IV disc program could not be downloaded. Connect to the Internet and run the installer again. disc-setup.log explains the offline alternative.");
+    case 33:throw std::runtime_error("The ISO is not a supported base GTA IV Xbox 360 disc. Verified profiles: 4A53F9F6 and 6AC07221. Details: disc-setup.log.");
+    default:throw std::runtime_error("BO1 preparation failed");
+    }
 #ifdef BO1_DELIRIUM_INSTALLER
     ui::say(ui::text(L"Recursos de GTA IV preparados. La ISO ya no hace falta para jugar.",L"GTA IV resources are ready. The ISO is no longer needed to play."));
 #else

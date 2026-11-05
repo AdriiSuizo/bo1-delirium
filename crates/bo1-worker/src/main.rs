@@ -31,7 +31,11 @@ fn run() -> Result<(), String> {
     if args.get(1).is_some_and(|value| value == "--prepare-disc") {
         let game = args.get(2).ok_or("Missing GTA IV Xbox 360 ISO or BO1 installation path")?;
         let cache = args.get(3).ok_or("Missing Delirium tuning cache path")?;
-        return disc_setup::prepare(std::path::Path::new(game), std::path::Path::new(cache));
+        if let Err(error) = disc_setup::prepare(std::path::Path::new(game), std::path::Path::new(cache)) {
+            eprintln!("Delirium disc setup failed: {}", error.message);
+            std::process::exit(error.code);
+        }
+        return Ok(());
     }
     let cache = std::env::var_os("BO1_DELIRIUM_GTA_CACHE")
         .ok_or("Missing BO1_DELIRIUM_GTA_CACHE. Run the Plutonium Delirium launcher first.")?;
