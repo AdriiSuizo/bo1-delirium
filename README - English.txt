@@ -72,6 +72,11 @@ TROUBLESHOOTING
 - Missing installer: fully extract the RAR before opening it.
 - Mod appears but physics are absent: use LAN and select the mod.
 - Missing resources: rerun setup. Do not download another player's cache.
+- "The key ... could not be downloaded": the first preparation needs Internet
+  and curl.exe (included in Windows 10 and 11). disc-setup.log explains the
+  offline alternative.
+- "The ISO is not a supported base disc": use a dump of base GTA IV for
+  Xbox 360 (profiles 4A53F9F6 or 6AC07221). disc-setup.log shows the reason.
 - Plutonium updates can change supported runtime signatures.
 - Logs: %LOCALAPPDATA%\BO1PlutoniumDelirium
   disc-setup.log: ISO preparation.

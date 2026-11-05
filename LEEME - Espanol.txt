@@ -72,6 +72,11 @@ SI ALGO FALLA
 - Falta el instalador: extrae el RAR entero antes de abrirlo.
 - Sale el mod pero no hay físicas: usa el acceso LAN y selecciona el mod.
 - Falta un recurso: repite la instalación. No descargues cachés de otros usuarios.
+- "No se pudo descargar la clave": la primera preparación necesita Internet y
+  curl.exe (incluido en Windows 10 y 11). disc-setup.log indica la alternativa
+  sin conexión.
+- "La ISO no es un disco base compatible": usa un volcado del GTA IV base de
+  Xbox 360 (perfiles 4A53F9F6 o 6AC07221). disc-setup.log muestra el motivo.
 - Una actualización de Plutonium puede cambiar las firmas compatibles.
 - Registros: %LOCALAPPDATA%\BO1PlutoniumDelirium
   disc-setup.log: preparación de la ISO.
