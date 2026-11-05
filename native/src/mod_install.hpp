@@ -18,12 +18,20 @@ inline fs::path registeredRoot(){
     GetPrivateProfileStringW(L"Delirium",L"root",L"",path,32768,configuration().c_str());
     return path;
 }
+// Test controls (God mode, round 20, test zombies, pursuit) stay off unless
+// the player sets test_controls=1 in installation.ini.
+inline bool testControls(){
+    return GetPrivateProfileIntW(L"Delirium",L"test_controls",0,configuration().c_str())==1;
+}
 inline void registerRoot(const fs::path& root){
     fs::create_directories(localData());
+    const bool tests=testControls();
     const auto config=configuration(),temporary=fs::path(config.wstring()+L".new");
     // A Unicode INI preserves Steam library paths outside the ANSI code page.
     {std::ofstream output(temporary,std::ios::binary|std::ios::trunc);const unsigned char bom[]={0xff,0xfe};output.write(reinterpret_cast<const char*>(bom),2);if(!output)throw std::runtime_error("Cannot create installation configuration");}
     if(!WritePrivateProfileStringW(L"Delirium",L"root",root.c_str(),temporary.c_str()))
+        throw std::runtime_error("Cannot write Delirium installation path");
+    if(tests&&!WritePrivateProfileStringW(L"Delirium",L"test_controls",L"1",temporary.c_str()))
         throw std::runtime_error("Cannot write Delirium installation path");
     WritePrivateProfileStringW(nullptr,nullptr,nullptr,temporary.c_str());
     if(!MoveFileExW(temporary.c_str(),config.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))

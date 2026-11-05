@@ -1,5 +1,6 @@
 #pragma once
 #include <Xinput.h>
+#include "mod_install.hpp"
 
 namespace controls {
 enum Action { God, Pause, Spawn, Pursuit, ActionCount };
@@ -59,6 +60,10 @@ static void __cdecl loadScripts(int instance){
     }
     if(!selected){
         log("Delirium inactive: select BO1 Delirium in Mods");
+        return;
+    }
+    if(!regression&&!installation::testControls()){
+        log("Steam test controls off (installation.ini test_controls=0)");
         return;
     }
     // The frontend also compiles server scripts, but only Zombies maps load

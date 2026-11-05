@@ -43,6 +43,10 @@ int wmain() try {
     write(root/L"runtime/BO1DeliriumPlugin.dll","own loader");
     write(plutonium/L"plugins/OtherMod.dll","unrelated");
     installation::install(root,plutonium);
+    require(!installation::testControls(),"test controls must be off in a new installation");
+    require(WritePrivateProfileStringW(L"Delirium",L"test_controls",L"1",installation::configuration().c_str()),"cannot enable test controls");
+    installation::registerRoot(root);
+    require(installation::testControls(),"reinstalling lost the test controls choice");
     require(WritePrivateProfileStringW(L"Delirium",L"language",L"es",installation::configuration().c_str()),"cannot store language");
     ui::setLanguage(L"en");ui::loadLanguage(installation::configuration().wstring());
     require(ui::language==ui::Language::Spanish,"stored language did not round trip");
