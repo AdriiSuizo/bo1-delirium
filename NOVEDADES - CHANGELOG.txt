@@ -3,14 +3,18 @@ Las versiones anteriores se conservan. / Earlier releases remain available.
 Versión del mod distinta de la del motor. / Mod and engine versions are separate.
 
 0.3.0 Beta 13 | 2026-11-05
-ES: Los controles de prueba (modo dios, ronda 20, zombis de prueba y
+ES: Corrige la primera instalación: ya no falla al terminar de preparar los
+    recursos de Kino ni deja el puente temporal winmm.dll en Plutonium.
+    Los controles de prueba (modo dios, ronda 20, zombis de prueba y
     persecución) vienen desactivados; se activan con test_controls=1 en
     installation.ini y reinstalar conserva la elección. El instalador explica
     por separado si falta la ISO, si no es un disco base compatible o si no
     se pudo descargar la clave del disco (necesita Internet la primera vez).
     Física con zombis vivos comprobada en juego con el binario de Beta 12;
     sin cambios del controlador corporal.
-EN: Test controls (God mode, round 20, test zombies and pursuit) are off by
+EN: Fixes first-time setup: it no longer fails after preparing the Kino
+    resources or leaves the temporary winmm.dll bridge in Plutonium.
+    Test controls (God mode, round 20, test zombies and pursuit) are off by
     default; enable them with test_controls=1 in installation.ini and
     reinstalling keeps that choice. Setup explains separately a missing ISO,
     an unsupported disc and a failed disc key download (Internet is needed
