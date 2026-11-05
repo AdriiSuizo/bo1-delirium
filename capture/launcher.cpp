@@ -4,6 +4,17 @@
 #include <cstdio>
 namespace fs=std::filesystem;
 static void fail(const char* what){fprintf(stderr,"%s (Windows %lu)\n",what,GetLastError());ExitProcess(1);}
+// The bootstrapper starts the game as a child in the same job. Waiting for the
+// bootstrapper alone lets the game keep the plugin and WinMM bridge open while
+// setup continues, so wait until every owned process has closed.
+static void waitForJob(HANDLE job){
+    for(int i=0;i<150;++i){
+        JOBOBJECT_BASIC_ACCOUNTING_INFORMATION info{};
+        if(!QueryInformationJobObject(job,JobObjectBasicAccountingInformation,&info,sizeof(info),nullptr)||!info.ActiveProcesses)return;
+        Sleep(100);
+    }
+    fprintf(stderr,"Owned BO1 processes were still closing after 15 seconds\n");
+}
 #include "portable_paths.hpp"
 int wmain(int argc,wchar_t**argv){
     wchar_t exe[MAX_PATH];GetModuleFileNameW(nullptr,exe,MAX_PATH);
@@ -60,7 +71,7 @@ int wmain(int argc,wchar_t**argv){
     }else wait=WaitForSingleObject(pi.hProcess,seconds?static_cast<DWORD>(seconds)*1000:INFINITE);
     if(wait==WAIT_TIMEOUT){
         if(!captured)printf("Owned preparation/test deadline reached\n");
-        TerminateJobObject(job,0);WaitForSingleObject(pi.hProcess,5000);
+        TerminateJobObject(job,0);WaitForSingleObject(pi.hProcess,5000);waitForJob(job);
     }
     DWORD code=0;GetExitCodeProcess(pi.hProcess,&code);printf("Plutonium T5 capture exit 0x%08lX\n",code);
     CloseHandle(pi.hProcess);CloseHandle(job);return preparing?(captured?0:3):(code?2:0);

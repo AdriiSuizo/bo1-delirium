@@ -59,8 +59,13 @@ public:
     ~TemporaryWinmm(){
         if(!installed)return;
         std::error_code error;
-        fs::remove(destination,error);
-        if(error)fwprintf(stderr,L"Could not remove temporary WinMM bridge: %ls\n",destination.c_str());
+        // A closing game can hold the bridge for a moment after its process ends.
+        for(int attempt=0;attempt<40;++attempt){
+            error.clear();fs::remove(destination,error);
+            if(!error)return;
+            Sleep(250);
+        }
+        fwprintf(stderr,L"Could not remove temporary WinMM bridge: %ls\n",destination.c_str());
     }
 };
 #include "portable_paths.hpp"
