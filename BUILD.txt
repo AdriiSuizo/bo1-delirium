@@ -42,6 +42,10 @@ BO1DeliriumPlugin.dll, nm108_native_bridge.dll, winmm.dll -> BO1Delirium/runtime
 CaptureBO1.exe, BO1CharacterCapture.dll, PrepareBO1.exe -> BO1Delirium/tools/
 bo1delirium_controls.iwd -> BO1Delirium/scripts/
 
+ES/EN: python tools/package_release.py --out <dist> --licenses <licencias / licenses>
+       --rust-tests <N> genera el paquete, manifest.json, el RAR y su SHA-256.
+       / builds the package, manifest.json, the RAR and its SHA-256.
+
 ES: Incluye las dos guías, créditos, novedades, VERSION.txt, licencias,
 SOURCE.zip del commit exacto y manifest.json con tamaños y SHA-256.
 EN: Include both guides, credits, changelog, VERSION.txt, licenses,
