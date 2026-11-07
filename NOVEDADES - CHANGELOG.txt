@@ -2,6 +2,14 @@ BO1 DELIRIUM | NOVEDADES / CHANGELOG
 Las versiones anteriores se conservan. / Earlier releases remain available.
 Versión del mod distinta de la del motor. / Mod and engine versions are separate.
 
+0.3.0 Beta 14 | 2026-11-07
+ES: Escopeta: los perdigones que abren un disparo cuentan como un solo impacto
+    para la reacción del zombi, como en Delirium 0.7.0. Cada perdigón conserva
+    su empuje. Sin otros cambios del controlador corporal.
+EN: Shotgun: the pellets that open a shot count as one hit for the zombie's
+    reaction, as in Delirium 0.7.0. Each pellet keeps its push. No other
+    changes to the body controller.
+
 0.3.0 Beta 13 | 2026-11-05
 ES: Corrige la primera instalación: ya no falla al terminar de preparar los
     recursos de Kino ni deja el puente temporal winmm.dll en Plutonium.

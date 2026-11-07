@@ -56,6 +56,7 @@ def main():
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--licenses", required=True, type=Path)
     ap.add_argument("--rust-tests", type=int, required=True, help="number of passing Rust release tests")
+    ap.add_argument("--physics-changed", action="store_true", help="this release changes body behaviour")
     args = ap.parse_args()
 
     if run("git", "status", "--porcelain").strip():
@@ -104,7 +105,7 @@ def main():
             "setup_languages": ["es", "en"],
             "uninstall_languages": ["es", "en"],
             "game_mode": "Kino single-player LAN",
-            "physics_changed": False,
+            "physics_changed": args.physics_changed,
         },
         "files": files,
     }

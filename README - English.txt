@@ -1,4 +1,4 @@
-BO1 DELIRIUM | 0.3.0 Beta 13
+BO1 DELIRIUM | 0.3.0 Beta 14
 ENGLISH GUIDE
 Guía en español: LEEME - Espanol.txt
 
