@@ -88,6 +88,8 @@ Referencia de integración: SuperSloppers/large-steal-car-4, revisión
 0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36.
 Corrección seleccionada de ciclo de equilibrio: Delirium 0.6.0,
 93eed4d6a0aafa2e84526730ea1f54dab48ac7d4.
+Perdigones que abren un disparo como un solo impacto: Delirium 0.7.0,
+f4ff84d (nm_agent_task_shotgun).
 
 ENGLISH ORIGINAL PROVENANCE
 Runtime base: the BO1-adapted Delirium core from Steam beta 5 (upstream revision 23ea7cfa2a1000d64870d2549834006d21b3e05c).
@@ -97,6 +99,8 @@ revision 0b0aef3a031dd4d23aa0f99d99e82c2d4063bb36.
 
 Selected upstream body-balance lifecycle correction: PVCPC/delirium-physics
 revision 93eed4d6a0aafa2e84526730ea1f54dab48ac7d4 (0.6.0).
+Selected shotgun hit handling: pellets opening a shot are one task hit, from
+PVCPC/delirium-physics revision f4ff84d (0.7.0, nm_agent_task_shotgun).
 Native compatibility regression: ctest --test-dir native-build -C Release --output-on-failure
 
 ES: No publiques imágenes ejecutables, ISO, claves ni cachés originales.

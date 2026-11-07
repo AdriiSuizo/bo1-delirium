@@ -28,9 +28,20 @@ fn body_carries_weight(part: usize, s: &ActorState) -> bool {
     let foot_z = s.poses[3][14].min(s.poses[6][14]);
     s.recovery_active != 0 || missing_legs || s.com[2] - foot_z < 0.55
 }
+// Delirium 0.7.0 nm_agent_task_shotgun: the pellets that open a shot are one hit
+// for the task. Each keeps its own push; a body already reacting takes them all.
+fn pellet_joins_volley(kind: u32, volley: u32, frame: u32) -> bool {
+    matches!(kind, 6 | 7) && volley == frame
+}
 #[cfg(test)]
 mod support_tests {
     use super::*;
+    #[test]
+    fn pellets_opening_a_shot_are_one_hit() {
+        assert!(pellet_joins_volley(6, 40, 40) && pellet_joins_volley(7, 40, 40));
+        assert!(!pellet_joins_volley(6, 40, 41), "a later blast is a new hit");
+        assert!(!pellet_joins_volley(1, 40, 40), "only shotguns fire pellets");
+    }
     #[test]
     fn hand_contact_is_not_a_passenger_but_feet_and_recovery_support_are() {
         let mut s: ActorState = unsafe { std::mem::zeroed() };
@@ -219,6 +230,7 @@ pub struct Actor {
     blast: Option<nm::Explosion>,
     born: u32,
     last_hit: u32,
+    volley: u32,
     blast_start: u32,
     detached: u32,
     feedback: [u32; 6],
@@ -474,6 +486,7 @@ impl Runtime {
             blast: None,
             born: self.frame,
             last_hit: 0,
+            volley: u32::MAX,
             blast_start: 0,
             detached: 0,
             feedback: [0; 6],
@@ -732,6 +745,7 @@ impl Runtime {
             blast: None,
             born: self.frame,
             last_hit: 0,
+            volley: u32::MAX,
             blast_start: 0,
             detached: 0,
             feedback: [0; 6],
@@ -865,6 +879,10 @@ impl Runtime {
                 6 | 7 => "SHOTGUN",
                 _ => "*",
             };
+            if pellet_joins_volley(kind, a.volley, self.frame) {
+                a.last_hit = self.frame;
+                return Ok(());
+            }
             let messages = match &mut a.shot {
                 Some(task) => task.next_hit(
                     &mut self.rand,
@@ -881,6 +899,9 @@ impl Runtime {
                     let mut t = ShotTask::new(&context, set, p, at, dir, normal);
                     let out = t.update(&mut self.rand, &self.tp, &context, now).msgs;
                     a.shot = Some(t);
+                    if matches!(kind, 6 | 7) {
+                        a.volley = self.frame;
+                    }
                     out
                 }
             };
