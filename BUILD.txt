@@ -1,4 +1,4 @@
-BO1 DELIRIUM | 0.3.0 Beta 14 | COMPILAR / BUILD
+BO1 DELIRIUM | 0.3.0 Beta 15 | COMPILAR / BUILD
 
 ESPAÑOL
 Código correspondiente al paquete de instalación. No necesitas una IA para
@@ -24,7 +24,7 @@ cmake --build native-build --config Release
 ctest --test-dir native-build -C Release --output-on-failure
 cmake -S capture -B capture-build -A Win32
 cmake --build capture-build --config Release
-$env:RUSTFLAGS = '-C target-feature=+crt-static'
+$env:RUSTFLAGS = "-C target-feature=+crt-static --remap-path-prefix=$env:USERPROFILE=~"
 cargo test --locked --release --workspace
 cargo build --locked --release -p bo1-delirium-worker
 python -m PyInstaller --onefile --console --name PrepareBO1 tools/prepare_bo1.py

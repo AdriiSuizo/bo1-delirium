@@ -9,9 +9,11 @@ licenses); reuse the previous package's folder while Cargo.lock is unchanged.
 The script never adds game resources, ISOs, caches or keys.
 """
 import argparse
+import getpass
 import hashlib
 import json
 import shutil
+import socket
 import subprocess
 import sys
 import zipfile
@@ -51,6 +53,27 @@ def sha256(path):
     return h.hexdigest()
 
 
+def personal_data(stage):
+    """Files naming the build machine's user or host, inside archives too."""
+    words = [getpass.getuser(), socket.gethostname()]
+    needles = [w.encode(e) for w in words for e in ("utf-8", "utf-16-le")]
+    found = []
+
+    def check(name, data):
+        if any(n in data for n in needles):
+            found.append(name)
+
+    for path in stage.rglob("*"):
+        if path.is_file():
+            data = path.read_bytes()
+            check(str(path.relative_to(stage)), data)
+            if path.suffix.lower() in (".zip", ".iwd"):
+                with zipfile.ZipFile(path) as z:
+                    for member in z.namelist():
+                        check(f"{path.name}!{member}", z.read(member))
+    return found
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True, type=Path)
@@ -86,6 +109,10 @@ def main():
         z.write(ROOT / "scripts/maps/delirium/controls.gsc", "maps/delirium/controls.gsc")
     (stage / "BO1Delirium/SOURCE.zip").write_bytes(run("git", "archive", "--format=zip", commit))
     shutil.copytree(args.licenses, stage / "BO1Delirium/licenses")
+
+    leaks = personal_data(stage)
+    if leaks:
+        sys.exit("Personal data in the package, build with the BUILD.txt RUSTFLAGS: " + ", ".join(leaks))
 
     files = {}
     for path in sorted(p for p in stage.rglob("*") if p.is_file()):
