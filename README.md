@@ -1,3 +1,5 @@
+![Físicas de BO1 Delirium en Zombies / BO1 Delirium physics in Zombies](media/bo1-delirium-gameplay.gif)
+
 # BO1 Delirium
 
 **0.3.0 · Beta 15** | Español / English
