@@ -3,6 +3,7 @@ mod disc_motion;
 mod protocol;
 mod recovery;
 mod runtime;
+mod support_polygon;
 use protocol::*;
 use std::{
     ffi::{CString, c_void},

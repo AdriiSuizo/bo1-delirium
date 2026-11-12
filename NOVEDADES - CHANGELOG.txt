@@ -1,6 +1,13 @@
 BO1 DELIRIUM | NOVEDADES / CHANGELOG
 Versión del mod distinta de la del motor. / Mod and engine versions are separate.
 
+En desarrollo / Unreleased
+ES · Para devolver el control a la animación tras un impacto, el mod proyecta
+     el centro de masa sobre la superficie que sostienen las plantas de los pies.
+     El pie que está en el aire no altera la altura usada para medir el apoyo.
+EN · The animation handoff after an impact checks the projected centre of mass
+     against loaded sole contacts. A raised foot is excluded from support height.
+
 0.3.0 Beta 15 | 2026-11-07
 ES: Los ejecutables ya no contienen rutas del equipo donde se compilan.
     Sin cambios de juego ni de físicas respecto a Beta 14.

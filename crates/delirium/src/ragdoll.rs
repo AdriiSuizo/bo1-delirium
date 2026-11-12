@@ -1138,6 +1138,15 @@ impl Ragdoll {
         self.held[i].iter().map(|r| (b.x - self.bound_off + self.o + m * r.local, r.ground, r.gap, r.age)).collect()
     }
 
+    /// Points on a supporting world surface for a limb that carries load.
+    pub fn world_support_points(&self, part: usize) -> impl Iterator<Item = Vec3> + '_ {
+        let contacts = &self.held[part];
+        let supports = |contact: &Held| !contact.off && contact.n.z > 0.55 && contact.gap <= 0.02;
+        let loaded = contacts.iter().any(|contact| supports(contact) && contact.imp.x > 0.0);
+        contacts.iter().filter(move |contact| loaded && supports(contact))
+            .map(|contact| contact.ground + contact.n * WORLD_MARGIN())
+    }
+
     fn inst(&self) -> [Vec3; 3] {
         let r = &self.bodies[self.order[0]].r;
         let c = crate::rigid::nrm(crate::rigid::col(r, 2));

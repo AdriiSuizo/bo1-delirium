@@ -103,5 +103,13 @@ Selected shotgun hit handling: pellets opening a shot are one task hit, from
 PVCPC/delirium-physics revision f4ff84d (0.7.0, nm_agent_task_shotgun).
 Native compatibility regression: ctest --test-dir native-build -C Release --output-on-failure
 
+ES · El polígono de apoyo de BO1 es una implementación propia inspirada por el
+     concepto SupportPolygon de Morpheme. Usa los contactos de planta del solver
+     de Delirium. El apoyo sobre cuerpos y los contactos sin área siguen la
+     comprobación de distancia entre los pies.
+EN · BO1's support polygon is an independent implementation inspired by
+     Morpheme's SupportPolygon concept. It uses Delirium's sole contacts.
+     Body support and contacts without area use the foot-distance check.
+
 ES: No publiques imágenes ejecutables, ISO, claves ni cachés originales.
 EN: Keep original game executable images, ISOs, keys and caches out of distribution.

@@ -6,6 +6,10 @@
 #include <cstddef>
 namespace nm108 {
 constexpr uint32_t Magic=0x4e4d3138,Version=18,PartCount=21,MaxActors=32,MaxHits=32,MaxVertices=128,MaxTriangles=256,MaxFragments=128;
+// Optional footprint evidence in the existing support mask.
+constexpr uint32_t SolePolygon=1u<<24;
+constexpr uint32_t SoleCapture=1u<<25;
+constexpr uint32_t SoleCaptureBlend=1u<<26;
 constexpr uint32_t BodySupport=1u<<30;
 constexpr uint32_t LoadedBody=1u<<29;
 constexpr uint32_t BodyContact=1u<<28;

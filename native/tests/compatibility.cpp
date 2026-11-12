@@ -1,4 +1,5 @@
 #include "rig_hierarchy.hpp"
+#include "../../bridge/nm108_balance_state.h"
 #include "damage_routing.hpp"
 #include "plugin_policy.hpp"
 #include "core/brush_faces.h"
@@ -66,5 +67,25 @@ int main() {
     models[1].bones = 3;
     require(!rig::hierarchy(models, duplicate, parents), "oversized bone palette accepted");
     require(rig::humanoid(0) && rig::humanoid(2) && !rig::humanoid(1) && !rig::humanoid(3) && !rig::humanoid(-1), "species classification changed");
+    nm108::ActorState standing{};
+    standing.supportMask = (1u << 3) | nm108::SolePolygon | nm108::SoleCapture | nm108::SoleCaptureBlend;
+    standing.poses[0][14] = .9f;
+    standing.poses[10][14] = 1.3f;
+    standing.poses[12][14] = 1.5f;
+    standing.poses[6][14] = .9f;
+    standing.centerOfMass[0] = .15f;
+    standing.centerOfMass[2] = .9f;
+    require(nm108::SafeLocomotion(standing) && nm108::MaintainLocomotion(standing), "planted toe rejected during BO1 handoff");
+    standing.supportMask &= ~nm108::SoleCapture;
+    require(!nm108::SafeLocomotion(standing) && nm108::MaintainLocomotion(standing), "handoff lost its support hysteresis");
+    standing.supportMask &= ~nm108::SoleCaptureBlend;
+    require(!nm108::MaintainLocomotion(standing), "left the footprint but still returned to animation");
+    standing.supportMask |= nm108::BodySupport | nm108::SoleCapture | nm108::SoleCaptureBlend;
+    require(!nm108::SafeLocomotion(standing), "static footprint used when supported by a body");
+    standing.supportMask = 1u << 3;
+    standing.centerOfMass[0] = 0;
+    require(nm108::SafeLocomotion(standing), "older worker's foot-centre handoff regressed");
+    standing.recoveryActive = 1;
+    require(!nm108::SafeLocomotion(standing) && !nm108::MaintainLocomotion(standing), "ongoing get-up returned to animation");
     std::puts("BO1 compatibility: hierarchy, attachments, aliases, palette bounds and species passed");
 }

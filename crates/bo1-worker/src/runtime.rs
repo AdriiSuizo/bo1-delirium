@@ -43,6 +43,30 @@ mod support_tests {
         assert!(!pellet_joins_volley(1, 40, 40), "only shotguns fire pellets");
     }
     #[test]
+    fn loaded_soles_export_support_evidence() {
+        let Some(cache) = std::env::var_os("BO1_DELIRIUM_GTA_CACHE") else { return };
+        if root().is_err() || std::env::var_os("NM108_RECOVERY_CACHE").is_none() {
+            return;
+        }
+        crate::disc_setup::load(std::path::Path::new(&cache)).unwrap();
+        let mut runtime = Runtime::load(true).unwrap();
+        let actor = runtime.actors[0].as_mut().unwrap();
+        actor.active = true;
+        actor.balance(&runtime.world, &runtime.tp);
+
+        let mut exchange: Box<Exchange> = Box::new(unsafe { std::mem::zeroed() });
+        let mut supported = 0;
+        for _ in 0..180 {
+            runtime.step().unwrap();
+            runtime.export(&mut exchange, 0).unwrap();
+            if exchange.actors[0].support_mask & SOLE_CAPTURE != 0 {
+                supported += 1;
+            }
+        }
+        assert!(supported > 30, "only {supported} supported frames reached the bridge");
+    }
+
+    #[test]
     fn hand_contact_is_not_a_passenger_but_feet_and_recovery_support_are() {
         let mut s: ActorState = unsafe { std::mem::zeroed() };
         s.com[2] = 1.0;
@@ -1365,6 +1389,21 @@ impl Runtime {
                 }
             }
             s.support_mask &= !a.detached;
+            if a.active && s.recovery_active == 0 {
+                let [left, right] = [3, 6].map(|foot| {
+                    if s.support_mask & (1 << foot) == 0 {
+                        return Vec::new();
+                    }
+                    a.agent.doll.world_support_points(foot).collect::<Vec<_>>()
+                });
+                if let Some(distance) = crate::support_polygon::capture_distance([&left, &right], p, vel) {
+                    s.support_mask |= SOLE_POLYGON;
+                    // Allow a few centimetres for small pose corrections and
+                    // a wider margin after the animation blend has started.
+                    if distance <= 0.03 { s.support_mask |= SOLE_CAPTURE; }
+                    if distance <= 0.07 { s.support_mask |= SOLE_CAPTURE_BLEND; }
+                }
+            }
             s.foot_speed = [3, 6]
                 .iter()
                 .map(|&k| a.agent.doll.vel(k).0.length())

@@ -3,6 +3,17 @@
 #include <cmath>
 #include <algorithm>
 namespace nm108 {
+// Dynamic body contacts and sparse world contacts retain the existing
+// foot-centre test. A world footprint can decide both entry and retention.
+inline bool HasSolePolygon(const ActorState& s) {
+    return (s.supportMask & (SolePolygon | BodySupport)) == SolePolygon;
+}
+inline float SupportedFeetHeight(const ActorState& s) {
+    const bool left = (s.supportMask & (1u << 3)) != 0;
+    const bool right = (s.supportMask & (1u << 6)) != 0;
+    if (left && right) return (s.poses[3][14] + s.poses[6][14]) * .5f;
+    return s.poses[left ? 3 : 6][14];
+}
 // First stop asking the physical balancer to chase. It must still balance
 // itself; no body transform, contact or velocity is overridden here.
 inline bool CanSettleLocomotion(const ActorState& s){
@@ -11,7 +22,7 @@ inline bool CanSettleLocomotion(const ActorState& s){
     if(!(s.supportMask&((1u<<3)|(1u<<6))))return false;
     const auto* p=s.poses[0];const auto* c=s.poses[10];
     float x=c[12]-p[12],y=c[13]-p[13],z=c[14]-p[14],length=std::sqrt(x*x+y*y+z*z);
-    float feet=(s.poses[3][14]+s.poses[6][14])*.5f;
+    float feet=SupportedFeetHeight(s);
     return length>.01f&&z/length>.78f&&((s.detachedMask&(1u<<12))||s.poses[12][14]-feet>1.1f)&&
         std::fabs(s.velocity[2])<.7f&&s.trunkAngularSpeed<3.f;
 }
@@ -22,6 +33,7 @@ inline bool MaintainLocomotion(const ActorState& s){
     if(s.detachedMask&((1u<<2)|(1u<<3)|(1u<<5)|(1u<<6)))return false;
     if(!CanSettleLocomotion(s)||
        std::fabs(s.velocity[2])>.45f||s.footSpeed>2.f||s.trunkAngularSpeed>1.8f)return false;
+    if (HasSolePolygon(s)) return (s.supportMask & SoleCaptureBlend) != 0;
     const bool both=(s.supportMask&((1u<<3)|(1u<<6)))==((1u<<3)|(1u<<6));
     unsigned first=(s.supportMask&(1u<<3))?3:6,second=both?6:first;
     float feet=(s.poses[first][14]+s.poses[second][14])*.5f,height=s.centerOfMass[2]-feet;
@@ -56,6 +68,7 @@ inline bool SafeLocomotion(const ActorState& s) {
     // leans about 25 degrees). Support/capture point and motion decide safety.
     if(length<.01f || z/length<.85f || (!(s.detachedMask&(1u<<12))&&s.poses[12][14]-feet<1.25f) ||
        std::fabs(s.velocity[2])>.24f || s.footSpeed>1.1f || s.trunkAngularSpeed>1.25f)return false;
+    if (HasSolePolygon(s)) return (s.supportMask & SoleCapture) != 0;
     float height=s.centerOfMass[2]-feet;if(height<.2f)return false;
     float time=std::sqrt(height/9.81f);
     float captureX=s.centerOfMass[0]+s.velocity[0]*time;

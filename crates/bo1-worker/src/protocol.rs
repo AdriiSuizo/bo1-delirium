@@ -4,6 +4,10 @@ pub const ACTORS: usize = 32;
 pub const FRAGMENTS: usize = 128;
 pub const BODY_SUPPORT: u32 = 1 << 30;
 pub const BODY_CONTACT: u32 = 1 << 28;
+// Optional footprint evidence. Older hosts and workers can use the same wire layout.
+pub const SOLE_POLYGON: u32 = 1 << 24;
+pub const SOLE_CAPTURE: u32 = 1 << 25;
+pub const SOLE_CAPTURE_BLEND: u32 = 1 << 26;
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct Hit {
