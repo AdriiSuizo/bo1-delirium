@@ -18,6 +18,30 @@ int wmain() try {
     require(!fs::exists(home),"test directory must be new");
     fs::create_directories(home);
     require(SetEnvironmentVariableW(L"LOCALAPPDATA",home.c_str()),"test environment setup failed");
+    const auto game=home/L"Game",iso=home/L"External Disc.iso";
+    std::vector<fs::path> attempted;
+    DWORD gameResult=installation::DiscImageMissing;
+    auto prepare=[&](const fs::path& source){
+        attempted.push_back(source);
+        return source==game?gameResult:0;
+    };
+    unsigned prompts=0;
+    auto select=[&]{++prompts;return iso;};
+    require(installation::prepareDisc(game,{},true,prepare,select)==0
+        && attempted==std::vector<fs::path>{game,iso} && prompts==1,
+        "missing disc after cache validation did not prompt and retry");
+    attempted.clear();
+    require(installation::prepareDisc(game,{},false,prepare,select)==installation::DiscImageMissing
+        && attempted==std::vector<fs::path>{game} && prompts==1,"quiet setup opened the disc picker");
+    attempted.clear();
+    require(installation::prepareDisc(game,iso,true,prepare,select)==0
+        && attempted==std::vector<fs::path>{iso} && prompts==1,"explicit ISO was not used directly");
+    for(DWORD status:{0u,32u,33u}){
+        attempted.clear();
+        gameResult=status;
+        require(installation::prepareDisc(game,{},true,prepare,select)==status
+            && attempted==std::vector<fs::path>{game} && prompts==1,"disc picker hid a distinct setup result");
+    }
     const auto steam=home/L"Steam",library=home/L"Other Library";
     const auto utf8=library.generic_u8string();
     write(steam/L"steamapps/libraryfolders.vdf",("// library list\n\"libraryfolders\" { \"1\" { \"path\" \""+std::string(utf8.begin(),utf8.end())+"\" } }").c_str());

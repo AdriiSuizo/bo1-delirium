@@ -13,6 +13,13 @@ inline fs::path localData(){
     return fs::path(path)/L"BO1PlutoniumDelirium";
 }
 inline fs::path configuration(){return localData()/L"installation.ini";}
+inline constexpr DWORD DiscImageMissing=31;
+template<class Prepare, class Select>
+DWORD prepareDisc(const fs::path& game,const fs::path& iso,bool interactive,Prepare prepare,Select select){
+    const DWORD status=prepare(iso.empty()?game:iso);
+    if(status==DiscImageMissing&&iso.empty()&&interactive)return prepare(select());
+    return status;
+}
 inline fs::path registeredRoot(){
     wchar_t path[32768]{};
     GetPrivateProfileStringW(L"Delirium",L"root",L"",path,32768,configuration().c_str());
