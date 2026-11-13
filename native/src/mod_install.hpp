@@ -68,7 +68,17 @@ inline void install(const fs::path& root,const fs::path& plutonium){
     registerRoot(root);
     publishFile(root/L"runtime/BO1DeliriumPlugin.dll",plutonium/L"plugins/BO1DeliriumPlugin.dll",backup);
 }
+inline constexpr const wchar_t* RequiredPayload[]{
+    L"DeliriumBO1.dll", L"runtime/BO1DeliriumPlugin.dll", L"runtime/nm108_native_bridge.dll",
+    L"runtime/delirium_worker.exe", L"runtime/winmm.dll", L"scripts/bo1delirium_controls.iwd",
+    L"tools/CaptureBO1.exe", L"tools/BO1CharacterCapture.dll", L"tools/PrepareBO1.exe"
+};
 inline void deployPayload(const fs::path& source,const fs::path& game){
+    for(const auto* name:RequiredPayload){
+        const auto file=source/name;
+        if(!fs::is_regular_file(file)||fs::file_size(file)==0)
+            throw std::runtime_error("Extract the complete mod package before installing");
+    }
     const auto target=game/L"BO1Delirium";
     if(fs::exists(target)&&fs::equivalent(source,target))return;
     const auto base=fs::weakly_canonical(target).wstring()+L"\\";

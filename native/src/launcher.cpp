@@ -134,18 +134,16 @@ int wmain(int argc,wchar_t**argv) try {
     }
 #endif
     if(!fs::exists(game/L"BlackOps.exe"))fail("The selected folder does not contain BlackOps.exe");
-#ifdef BO1_DELIRIUM_INSTALLER
-    if(!fs::is_regular_file(source/L"DeliriumBO1.dll"))fail("Extract the complete mod package before installing");
-#else
+#ifndef BO1_DELIRIUM_INSTALLER
     if(!fs::exists(adapter))fail("Copy BO1Delirium into the original Steam BO1 folder first");
 #endif
     if(!supportedGame(game/L"BlackOps.exe"))fail("Unsupported BlackOps.exe: requires original Steam Build 7.0.152 CL 966072");
-#ifdef BO1_DELIRIUM_INSTALLER
-    installation::deployPayload(source,game);
-#endif
     const auto bootstrap=plutonium/L"bin/plutonium-bootstrapper-win32.exe";
     if(!fs::is_regular_file(bootstrap)||!supportedGame(plutonium/L"games/t5sp.exe"))
         throw std::runtime_error("Install a compatible Plutonium T5 Zombies client first");
+#ifdef BO1_DELIRIUM_INSTALLER
+    installation::deployPayload(source,game);
+#endif
     TemporaryWinmm winmm(bootstrap.parent_path(),root);
     const auto tuning=cache.parent_path()/L"gta4-xbox360-v060.kv";
     fs::create_directories(cache.parent_path());

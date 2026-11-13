@@ -53,13 +53,22 @@ int wmain() try {
     require(steamDiscovery::values("\"path\" \"C:\\\\Games\\\\Steam\"","path")==std::vector<std::string>{"C:\\Games\\Steam"},"VDF path escapes changed");
     const auto root=home/L"Steam \u6e2c\u8a66/Call of Duty Black Ops/BO1Delirium",plutonium=home/L"Plutonium";
     const auto package=home/L"Downloaded package/BO1Delirium";
-    write(package/L"runtime/worker.exe","new payload");
+    for(const auto* name:installation::RequiredPayload)write(package/name,"new payload");
+    write(package/L"runtime/delirium_worker.exe","new worker");
     write(package.parent_path()/product::installer,"installer");
     write(package.parent_path()/L"README - English.txt","English guide");
-    write(root/L"runtime/worker.exe","old payload");
+    write(root/L"runtime/delirium_worker.exe","old worker");
     write(root/L"custom.txt","preserve user file");
+    const auto preparer=package/L"tools/PrepareBO1.exe";
+    fs::remove(preparer);
+    bool incomplete=false;
+    try{installation::deployPayload(package,root.parent_path());}
+    catch(const std::runtime_error&){incomplete=true;}
+    require(incomplete&&steamDiscovery::read(root/L"runtime/delirium_worker.exe")=="old worker"
+        &&!fs::exists(root.parent_path()/product::installer),"incomplete update changed the existing installation");
+    write(preparer,"preparer");
     installation::deployPayload(package,root.parent_path());
-    require(steamDiscovery::read(root/L"runtime/worker.exe")=="new payload"&&steamDiscovery::read(root/L"custom.txt")=="preserve user file","deployment lost payload or user files");
+    require(steamDiscovery::read(root/L"runtime/delirium_worker.exe")=="new worker"&&steamDiscovery::read(root/L"custom.txt")=="preserve user file","deployment lost payload or user files");
     require(steamDiscovery::read(root.parent_path()/product::installer)=="installer"&&steamDiscovery::read(root.parent_path()/L"README - English.txt")=="English guide","bilingual root files were not deployed");
     write(plutonium/L"bin/plutonium-bootstrapper-win32.exe","test launcher");
     require(installation::registeredRoot().empty(),"uninstalled root unexpectedly exists");
