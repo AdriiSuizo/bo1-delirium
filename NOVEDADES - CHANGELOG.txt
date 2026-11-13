@@ -1,6 +1,14 @@
 BO1 DELIRIUM | NOVEDADES / CHANGELOG
 Versión del mod distinta de la del motor. / Mod and engine versions are separate.
 
+En desarrollo / Unreleased
+ES · El worker admite rutas Unicode. El instalador permite elegir la ISO
+     tras detectar una caché inválida y comprueba los archivos del paquete
+     antes de actualizar. La captura de BO1 espera una marca nueva.
+EN · The worker supports Unicode paths. Setup offers disc selection after
+     detecting an invalid cache and checks package files before updating.
+     BO1 capture waits for a fresh completion marker.
+
 0.3.0 Beta 16 | 2026-11-12
 ES · Para devolver el control a la animación tras un impacto, el mod proyecta
      el centro de masa sobre la superficie que sostienen las plantas de los pies.

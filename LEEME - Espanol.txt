@@ -5,8 +5,8 @@ English guide: README - English.txt
 QUÉ ES
 Físicas corporales activas para los zombis de BO1: impactos localizados,
 equilibrio, caídas y recuperación, integradas con la persecución de BO1.
-Esta beta mejora idiomas, nombres e instalación; mantiene las físicas de la
-beta 11. No es una migración completa al último SDK de Delirium.
+Beta 16 usa los contactos de las plantas de los pies y el movimiento del
+centro de masa para decidir cuándo retomar la locomoción tras un impacto.
 
 NECESITAS
 - Call of Duty: Black Ops de Steam: 7.0.152 CL 966072.

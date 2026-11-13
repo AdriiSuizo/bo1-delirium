@@ -4,9 +4,9 @@ Guía en español: LEEME - Espanol.txt
 
 WHAT IT DOES
 Active body physics for BO1 zombies: localized impacts, balance, falls and
-recovery, integrated with BO1 pursuit. This beta improves languages, naming
-and installation; it retains beta 11 physics. It is not a full migration
-to the newest upstream Delirium SDK.
+recovery, integrated with BO1 pursuit. Beta 16 uses sole contacts and the
+motion of the centre of mass to decide when to resume locomotion after an
+impact.
 
 REQUIREMENTS
 - Steam Call of Duty: Black Ops, build 7.0.152 CL 966072.
