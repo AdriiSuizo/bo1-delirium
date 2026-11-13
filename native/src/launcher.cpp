@@ -142,14 +142,18 @@ int wmain(int argc,wchar_t**argv) try {
     if(!fs::is_regular_file(bootstrap)||!supportedGame(plutonium/L"games/t5sp.exe"))
         throw std::runtime_error("Install a compatible Plutonium T5 Zombies client first");
 #ifdef BO1_DELIRIUM_INSTALLER
-    installation::deployPayload(source,game);
+    installation::validatePayload(source);
+    if(cache!=installation::localData()/L"bo1-character-v1")throw std::runtime_error("The normal installation requires the default resource cache");
+    const auto& setupRoot=source;
+#else
+    const auto& setupRoot=root;
 #endif
-    TemporaryWinmm winmm(bootstrap.parent_path(),root);
+    TemporaryWinmm winmm(bootstrap.parent_path(),setupRoot);
     const auto tuning=cache.parent_path()/L"gta4-xbox360-v060.kv";
     fs::create_directories(cache.parent_path());
     const auto prepareDisc=[&](const fs::path& source){
-        return runTool(root/L"runtime/delirium_worker.exe",
-            L"--prepare-disc \""+source.wstring()+L"\" \""+tuning.wstring()+L"\"",root,cache.parent_path()/L"disc-setup.log");
+        return runTool(setupRoot/L"runtime/delirium_worker.exe",
+            L"--prepare-disc \""+source.wstring()+L"\" \""+tuning.wstring()+L"\"",setupRoot,cache.parent_path()/L"disc-setup.log");
     };
 #ifdef BO1_DELIRIUM_INSTALLER
     // The worker validates the cached data before asking for a disc.
@@ -174,9 +178,9 @@ int wmain(int argc,wchar_t**argv) try {
     fflush(stdout);
     if(!SetEnvironmentVariableW(L"BO1_DELIRIUM_GTA_CACHE",tuning.c_str())||
        !SetEnvironmentVariableW(L"BO1_DELIRIUM_PLUTONIUM_LAN",L"1")) fail("set Plutonium Delirium environment");
-    prepareResources(root,game,cache,plutonium);
+    prepareResources(setupRoot,game,cache,plutonium);
 #ifdef BO1_DELIRIUM_INSTALLER
-    if(cache!=installation::localData()/L"bo1-character-v1")throw std::runtime_error("The normal installation requires the default resource cache");
+    installation::deployPayload(source,game);
     installation::install(root,plutonium);
     if(!WritePrivateProfileStringW(L"Delirium",L"language",ui::code(),installation::configuration().c_str()))throw std::runtime_error("Cannot save the installation language");
     lanShortcut::create(game/product::shortcut,plutonium,game);

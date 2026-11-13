@@ -73,12 +73,15 @@ inline constexpr const wchar_t* RequiredPayload[]{
     L"runtime/delirium_worker.exe", L"runtime/winmm.dll", L"scripts/bo1delirium_controls.iwd",
     L"tools/CaptureBO1.exe", L"tools/BO1CharacterCapture.dll", L"tools/PrepareBO1.exe"
 };
-inline void deployPayload(const fs::path& source,const fs::path& game){
+inline void validatePayload(const fs::path& source){
     for(const auto* name:RequiredPayload){
         const auto file=source/name;
         if(!fs::is_regular_file(file)||fs::file_size(file)==0)
             throw std::runtime_error("Extract the complete mod package before installing");
     }
+}
+inline void deployPayload(const fs::path& source,const fs::path& game){
+    validatePayload(source);
     const auto target=game/L"BO1Delirium";
     if(fs::exists(target)&&fs::equivalent(source,target))return;
     const auto base=fs::weakly_canonical(target).wstring()+L"\\";
