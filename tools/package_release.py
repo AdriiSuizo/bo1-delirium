@@ -79,6 +79,7 @@ def main():
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--licenses", required=True, type=Path)
     ap.add_argument("--rust-tests", type=int, required=True, help="number of passing Rust release tests")
+    ap.add_argument("--native-tests", type=int, default=2, help="number of passing native regression suites")
     ap.add_argument("--physics-changed", action="store_true", help="this release changes body behaviour")
     args = ap.parse_args()
 
@@ -128,7 +129,7 @@ def main():
         "gta_iv_xbox360_media_ids": ["4A53F9F6", "6AC07221"],
         "checks": {
             "rust_release_tests": args.rust_tests,
-            "native_regression_suites": 2,
+            "native_regression_suites": args.native_tests,
             "setup_languages": ["es", "en"],
             "uninstall_languages": ["es", "en"],
             "game_mode": "Kino single-player LAN",

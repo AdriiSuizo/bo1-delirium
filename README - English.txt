@@ -1,10 +1,10 @@
-BO1 DELIRIUM | 0.3.0 Beta 16
+BO1 DELIRIUM | 0.3.0 Beta 17
 ENGLISH GUIDE
 Guía en español: LEEME - Espanol.txt
 
 WHAT IT DOES
 Active body physics for BO1 zombies: localized impacts, balance, falls and
-recovery, integrated with BO1 pursuit. Beta 16 uses sole contacts and the
+recovery, integrated with BO1 pursuit. The mod uses sole contacts and the
 motion of the centre of mass to decide when to resume locomotion after an
 impact.
 
@@ -68,8 +68,8 @@ network replication: installing the mod on every PC does not establish co-op
 compatibility. The Mods identifier remains mods/bo1delirium.
 Previous startup checks cover installed Kino, Five, Ascension, Call of the
 Dead, Shangri-La, Moon, Nacht, Verrückt, Shi No Numa and Der Riese.
-Startup checks do not establish full-match stability on every map. This beta
-rechecks loading and controls in Kino. Dogs retain their native behavior.
+Startup checks do not establish full-match stability on every map. Beta 17 was tested
+with blast recovery in Kino. Dogs retain their native behavior.
 
 TROUBLESHOOTING
 - Missing installer: fully extract the RAR before opening it.

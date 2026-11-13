@@ -1,11 +1,11 @@
-BO1 DELIRIUM | 0.3.0 Beta 16
+BO1 DELIRIUM | 0.3.0 Beta 17
 GUÍA EN ESPAÑOL
 English guide: README - English.txt
 
 QUÉ ES
 Físicas corporales activas para los zombis de BO1: impactos localizados,
 equilibrio, caídas y recuperación, integradas con la persecución de BO1.
-Beta 16 usa los contactos de las plantas de los pies y el movimiento del
+El mod usa los contactos de las plantas de los pies y el movimiento del
 centro de masa para decidir cuándo retomar la locomoción tras un impacto.
 
 NECESITAS
@@ -68,8 +68,8 @@ replicación de red propia: instalarlo en todos los equipos no establece
 compatibilidad cooperativa. El identificador sigue siendo mods/bo1delirium.
 Las pruebas de arranque anteriores cubren Kino, Five, Ascension, Call of the
 Dead, Shangri-La, Moon, Nacht, Verrückt, Shi No Numa y Der Riese instalados.
-Eso no equivale a probar partidas completas en todos los mapas. Esta beta
-recomprueba carga y controles en Kino. Los perros conservan su lógica nativa.
+Eso no equivale a probar partidas completas en todos los mapas. Beta 17 se probó
+con recuperación tras explosiones en Kino. Los perros conservan su lógica nativa.
 
 SI ALGO FALLA
 - Falta el instalador: extrae el RAR entero antes de abrirlo.

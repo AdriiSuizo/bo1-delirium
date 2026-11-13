@@ -2,19 +2,19 @@
 
 # BO1 Delirium
 
-**0.3.0 · Beta 16** | Español / English
+**0.3.0 · Beta 17** | Español / English
 
 Físicas corporales activas para Zombies de BO1 en Plutonium T5 LAN: impactos, equilibrio, caídas y recuperación con persecución de BO1.
 
 Active body physics for BO1 Zombies in Plutonium T5 LAN: impacts, balance, falls and recovery integrated with BO1 pursuit.
 
-[Descargar / Download](https://github.com/AdriiSuizo/bo1-delirium/releases/tag/v0.3.0-beta.16) · [Todas las versiones / All releases](https://github.com/AdriiSuizo/bo1-delirium/releases) · [Créditos / Credits](CREDITOS%20-%20CREDITS.txt) · [Novedades / Changelog](NOVEDADES%20-%20CHANGELOG.txt)
+[Descargar / Download](https://github.com/AdriiSuizo/bo1-delirium/releases/tag/v0.3.0-beta.17) · [Todas las versiones / All releases](https://github.com/AdriiSuizo/bo1-delirium/releases) · [Créditos / Credits](CREDITOS%20-%20CREDITS.txt) · [Novedades / Changelog](NOVEDADES%20-%20CHANGELOG.txt)
 
 ## Español
 
 Necesitas **BO1 de Steam**, **Plutonium T5** y **tu ISO de GTA IV base de Xbox 360** para la preparación inicial, que además necesita Internet una vez.
 
-1. En Releases, descarga **BO1-Delirium-0.3.0-Beta-16.rar**. El ZIP de «Code» contiene código fuente, no el instalador.
+1. En Releases, descarga **BO1-Delirium-0.3.0-Beta-17.rar**. El ZIP de «Code» contiene código fuente, no el instalador.
 2. Cierra BO1 y Plutonium. Extrae el RAR completo en una carpeta cualquiera.
 3. Abre **Instalar - Install BO1 Delirium.exe**, elige idioma y sigue las indicaciones. Detecta Steam y permite elegir la ISO sin moverla.
 4. Abre **Jugar - Play BO1 (LAN)** desde el escritorio y selecciona **BO1 Delirium** en **Mods**, después Zombies Solo.
@@ -27,7 +27,7 @@ Tras completar la preparación puedes borrar la carpeta extraída y retirar la I
 
 You need **Steam BO1**, **Plutonium T5**, and **your base GTA IV Xbox 360 ISO** for initial preparation, which also needs Internet once.
 
-1. Download **BO1-Delirium-0.3.0-Beta-16.rar** from Releases. The «Code» ZIP contains source, not the installer.
+1. Download **BO1-Delirium-0.3.0-Beta-17.rar** from Releases. The «Code» ZIP contains source, not the installer.
 2. Close BO1 and Plutonium. Extract the entire RAR into any folder.
 3. Open **Instalar - Install BO1 Delirium.exe**, select a language and follow setup. It discovers Steam and lets you select the ISO without moving it.
 4. Open **Jugar - Play BO1 (LAN)** from your Desktop, select **BO1 Delirium** in **Mods**, then Zombies Solo.
