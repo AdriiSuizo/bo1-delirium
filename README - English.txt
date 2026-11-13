@@ -1,4 +1,4 @@
-BO1 DELIRIUM | 0.3.0 Beta 17
+BO1 DELIRIUM | 0.3.1
 ENGLISH GUIDE
 Guía en español: LEEME - Espanol.txt
 
@@ -68,7 +68,7 @@ network replication: installing the mod on every PC does not establish co-op
 compatibility. The Mods identifier remains mods/bo1delirium.
 Previous startup checks cover installed Kino, Five, Ascension, Call of the
 Dead, Shangri-La, Moon, Nacht, Verrückt, Shi No Numa and Der Riese.
-Startup checks do not establish full-match stability on every map. Beta 17 was tested
+Startup checks do not establish full-match stability on every map. Version 0.3.1 was tested
 with blast recovery in Kino. Dogs retain their native behavior.
 
 TROUBLESHOOTING

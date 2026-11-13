@@ -1,6 +1,12 @@
 BO1 DELIRIUM | NOVEDADES / CHANGELOG
 Versión del mod distinta de la del motor. / Mod and engine versions are separate.
 
+0.3.1 | 2026-11-13
+ES · Versión estable con las correcciones de instalación y rutas Unicode de
+     Beta 17 y las mejoras de equilibrio de Beta 16.
+EN · Stable release with the installation and Unicode path fixes from Beta 17
+     and the balance improvements from Beta 16.
+
 0.3.0 Beta 17 | 2026-11-13
 ES · El worker admite rutas Unicode. El instalador permite elegir la ISO
      tras detectar una caché inválida. Comprueba el paquete y prepara los

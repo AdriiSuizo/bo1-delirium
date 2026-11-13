@@ -1,4 +1,4 @@
-BO1 DELIRIUM | 0.3.0 Beta 17
+BO1 DELIRIUM | 0.3.1
 GUÍA EN ESPAÑOL
 English guide: README - English.txt
 
@@ -68,7 +68,7 @@ replicación de red propia: instalarlo en todos los equipos no establece
 compatibilidad cooperativa. El identificador sigue siendo mods/bo1delirium.
 Las pruebas de arranque anteriores cubren Kino, Five, Ascension, Call of the
 Dead, Shangri-La, Moon, Nacht, Verrückt, Shi No Numa y Der Riese instalados.
-Eso no equivale a probar partidas completas en todos los mapas. Beta 17 se probó
+Eso no equivale a probar partidas completas en todos los mapas. La versión 0.3.1 se probó
 con recuperación tras explosiones en Kino. Los perros conservan su lógica nativa.
 
 SI ALGO FALLA

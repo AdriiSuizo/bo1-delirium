@@ -1,4 +1,4 @@
-BO1 DELIRIUM | 0.3.0 Beta 17 | COMPILAR / BUILD
+BO1 DELIRIUM | 0.3.1 | COMPILAR / BUILD
 
 ESPAÑOL
 Código correspondiente al paquete de instalación. No necesitas una IA para
