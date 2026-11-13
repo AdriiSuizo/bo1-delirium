@@ -11,6 +11,7 @@
 #include <array>
 #include <map>
 #include <io.h>
+#include <filesystem>
 #include "nm108_runtime_client.h"
 #include "nm108_balance_state.h"
 #include "../native/src/core/euphoria_weapon_response.h"
@@ -71,7 +72,7 @@ struct RdWorld {
     bool birthPause=false;
     bool fragmentPending[nm108::MaxFragments]={};
     nm108::Client client;float units=39.37f,accumulator=0;bool failed=false,asynchronous=false;unsigned pendingSteps=0,lastBirthFrame=UINT32_MAX;
-    std::string workerPath,workerLog;
+    std::wstring workerPath,workerLog;
     unsigned mapRestarts=0;
     FILE* mapCache=nullptr;FILE* initialCache=nullptr;
     ~RdWorld(){if(mapCache)fclose(mapCache);if(initialCache)fclose(initialCache);}
@@ -111,7 +112,7 @@ struct RdWorld {
     bool geometryReady=false;
     bool OpenEmptyRuntime(){
         for(;;){
-            std::string log=mapRestarts?workerLog.substr(0,workerLog.size()-4)+".retry-"+std::to_string(mapRestarts)+".log":workerLog;
+            std::wstring log=mapRestarts?workerLog.substr(0,workerLog.size()-4)+L".retry-"+std::to_wstring(mapRestarts)+L".log":workerLog;
             if(client.Open(workerPath.c_str(),log.c_str())){
                 memcpy(rest,client.State()->poses,sizeof(rest));rig=*client.Skeleton();
                 for(unsigned p=1;p<21;++p){V anchor={rig.anchor[p][0],rig.anchor[p][1],rig.anchor[p][2]};
@@ -295,24 +296,33 @@ V Anchor(const RdWorld* w,unsigned slot,unsigned part){if(!part)return Position(
 }
 API RdWorld* rd_world_create_ex(const RdWorldDesc* desc){
     if(!desc || desc->axes!=RD_AXES_Z_UP || !std::isfinite(desc->units_per_meter) || desc->units_per_meter<=0) return nullptr;
-    char directory[MAX_PATH]={};HMODULE module=nullptr;
-    if(!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCSTR>(&rd_world_create_ex),&module))return nullptr;
-    if(!GetModuleFileNameA(module,directory,MAX_PATH))return nullptr;char* slash=strrchr(directory,'\\');if(!slash)return nullptr;*slash=0;
+    namespace fs=std::filesystem;
+    wchar_t modulePath[32768]{};HMODULE module=nullptr;
+    if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCWSTR>(&rd_world_create_ex),&module))return nullptr;
+    const DWORD length=GetModuleFileNameW(module,modulePath,_countof(modulePath));
+    if(!length||length>=_countof(modulePath))return nullptr;
+    const auto directory=fs::path(modulePath).parent_path();
+    auto worker=directory/L"nm108_worker.exe";
+    const auto logSuffix=std::to_wstring(GetCurrentProcessId())+L".log";
+    auto log=directory/(L"nm108-native-worker-"+logSuffix);
+    wchar_t backend[32]{};GetEnvironmentVariableW(L"BO1_PHYSICS_BACKEND",backend,_countof(backend));
+    const auto delirium=directory/L"delirium_worker.exe";
+    if(_wcsicmp(backend,L"native")&&GetFileAttributesW(delirium.c_str())!=INVALID_FILE_ATTRIBUTES){
+        worker=delirium;log=directory/(L"delirium-worker-"+logSuffix);}
+    wchar_t logDirectory[32768]{};
+    const DWORD logLength=GetEnvironmentVariableW(L"BO1_DELIRIUM_LOG_DIR",logDirectory,_countof(logDirectory));
+    if(logLength&&logLength<_countof(logDirectory))
+        log=fs::path(logDirectory)/(L"delirium-worker-"+logSuffix);
     auto* w=new RdWorld;w->units=desc->units_per_meter;
-    std::string worker=std::string(directory)+"\\nm108_worker.exe";std::string log=std::string(directory)+"\\nm108-native-worker-"+std::to_string(GetCurrentProcessId())+".log";
-    char backend[32]={};GetEnvironmentVariableA("BO1_PHYSICS_BACKEND",backend,sizeof(backend));
-    const std::string delirium=std::string(directory)+"\\delirium_worker.exe";
-    if(_stricmp(backend,"native")&&GetFileAttributesA(delirium.c_str())!=INVALID_FILE_ATTRIBUTES){
-        worker=delirium;log=std::string(directory)+"\\delirium-worker-"+std::to_string(GetCurrentProcessId())+".log";}
-    char logDirectory[32768]{};
-    if(GetEnvironmentVariableA("BO1_DELIRIUM_LOG_DIR",logDirectory,sizeof(logDirectory)))
-        log=std::string(logDirectory)+"\\delirium-worker-"+std::to_string(GetCurrentProcessId())+".log";
-    w->workerPath=worker;w->workerLog=log;
+    w->workerPath=worker.native();w->workerLog=log.native();
     if(!w->OpenEmptyRuntime()){delete w;return nullptr;}
     // Explicit local diagnostic cache: numeric map geometry only, never
     // enabled by normal play, never stored in a public source directory.
-    char cache[MAX_PATH]={};if(GetEnvironmentVariableA("NM108_PRIVATE_MAP_CACHE",cache,sizeof(cache)))fopen_s(&w->mapCache,cache,"wb");
-    if(GetEnvironmentVariableA("NM108_PRIVATE_INITIAL_CACHE",cache,sizeof(cache)))fopen_s(&w->initialCache,cache,"wb");
+    wchar_t cache[32768]{};
+    const DWORD mapLength=GetEnvironmentVariableW(L"NM108_PRIVATE_MAP_CACHE",cache,_countof(cache));
+    if(mapLength&&mapLength<_countof(cache))_wfopen_s(&w->mapCache,cache,L"wb");
+    const DWORD initialLength=GetEnvironmentVariableW(L"NM108_PRIVATE_INITIAL_CACHE",cache,_countof(cache));
+    if(initialLength&&initialLength<_countof(cache))_wfopen_s(&w->initialCache,cache,L"wb");
     return w;
 }
 API void rd_world_destroy(RdWorld* w){delete w;}

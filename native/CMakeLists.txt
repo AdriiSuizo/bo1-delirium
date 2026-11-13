@@ -60,6 +60,13 @@ add_executable(BO1CompatibilityTests tests/compatibility.cpp)
 target_include_directories(BO1CompatibilityTests PRIVATE src)
 set_property(TARGET BO1CompatibilityTests PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_test(NAME BO1Compatibility COMMAND BO1CompatibilityTests)
+# Opt in with the same owner-prepared fixtures used by the Rust runtime tests.
+if(DEFINED ENV{BO1_DELIRIUM_GTA_CACHE} AND DEFINED ENV{BO1_DELIRIUM_CACHE_DIR}
+   AND DEFINED ENV{NM108_RECOVERY_CACHE} AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/../target/release/bo1-delirium-worker.exe")
+ add_test(NAME BO1UnicodeWorker COMMAND BO1CompatibilityTests
+   "$<TARGET_FILE:nm108_native_bridge>" "${CMAKE_CURRENT_LIST_DIR}/../target/release/bo1-delirium-worker.exe")
+endif()
+
 add_executable(BO1InstallationTests tests/installation.cpp)
 target_link_libraries(BO1InstallationTests PRIVATE ole32 shell32 uuid)
 target_include_directories(BO1InstallationTests PRIVATE src)

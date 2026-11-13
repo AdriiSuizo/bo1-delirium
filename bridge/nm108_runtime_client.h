@@ -9,7 +9,7 @@ namespace nm108 {
 // importing original code, sharing TLS slots, or embedding proprietary files.
 class Client {
     HANDLE mapping_=nullptr,request_=nullptr,response_=nullptr,process_=nullptr;
-    std::string logPath_;
+    std::wstring logPath_;
     Exchange* exchange_=nullptr;
     uint64_t revision_=0;
     int32_t sequence_=0;
@@ -20,8 +20,8 @@ class Client {
         HANDLE waits[2]={response_,process_};
         return WaitForMultipleObjects(2,waits,FALSE,timeout)==WAIT_OBJECT_0;
     }
-    static void StartupFailure(const char* path,const char* stage,DWORD error,DWORD exit,unsigned status){
-        HANDLE log=CreateFileA(path,FILE_APPEND_DATA,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);
+    static void StartupFailure(const wchar_t* path,const char* stage,DWORD error,DWORD exit,unsigned status){
+        HANDLE log=CreateFileW(path,FILE_APPEND_DATA,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);
         if(log==INVALID_HANDLE_VALUE)return;
         char line[192];int length=sprintf_s(line,"runtime startup failed: stage=%s win32=%lu exit=0x%08lx status=%u\r\n",stage,error,exit,status);
         if(length>0){DWORD written;WriteFile(log,line,length,&written,nullptr);}CloseHandle(log);
@@ -29,13 +29,13 @@ class Client {
 public:
     void ReportFailure(const char* stage){
         if(logPath_.empty())return;DWORD exit=0;if(process_)GetExitCodeProcess(process_,&exit);
-        FILE*f=nullptr;std::string path=logPath_+".host-errors.log";if(!fopen_s(&f,path.c_str(),"ab")&&f){
+        FILE*f=nullptr;std::wstring path=logPath_+L".host-errors.log";if(!_wfopen_s(&f,path.c_str(),L"ab")&&f){
             fprintf(f,"IPC failure stage=%s exit=%08lx pending=%u sequence=%i completed=%i command=%u status=%u\n",stage,exit,pending_,sequence_,exchange_?exchange_->completed:0,exchange_?exchange_->request.command:0,exchange_?exchange_->response.status:0);fclose(f);}
     }
     Client()=default;
     Client(const Client&)=delete;Client& operator=(const Client&)=delete;
     ~Client(){Close();}
-    bool Open(const char* executable,const char* logPath,bool fixtureFloor=false) {
+    bool Open(const wchar_t* executable,const wchar_t* logPath,bool fixtureFloor=false) {
         if(process_) return false;
         logPath_=logPath;
         char suffix[64];sprintf_s(suffix,"Local\\BO1-NM108-%lu-%llu",GetCurrentProcessId(),GetTickCount64());
@@ -51,20 +51,20 @@ public:
         exchange_->ownerPid=GetCurrentProcessId();
         exchange_->flags=fixtureFloor?FixtureFloor:0;
         SECURITY_ATTRIBUTES attributes={sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};
-        HANDLE log=CreateFileA(logPath,GENERIC_WRITE,FILE_SHARE_READ,&attributes,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,nullptr);
+        HANDLE log=CreateFileW(logPath,GENERIC_WRITE,FILE_SHARE_READ,&attributes,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,nullptr);
         if(log==INVALID_HANDLE_VALUE) {Close();return false;}
-        STARTUPINFOA startup={};startup.cb=sizeof(startup);
+        STARTUPINFOW startup={};startup.cb=sizeof(startup);
         startup.dwFlags=STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
         startup.wShowWindow=SW_HIDE;startup.hStdOutput=log;startup.hStdError=log;
         // An inheritable input handle is required by STARTF_USESTDHANDLES.
         HANDLE input=CreateFileA("NUL",GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&attributes,OPEN_EXISTING,0,nullptr);
         startup.hStdInput=input;
         PROCESS_INFORMATION info={};
-        std::string command="\""+std::string(executable)+"\" \""+name+"\"";
+        std::wstring command=L"\""+std::wstring(executable)+L"\" \""+std::wstring(name.begin(),name.end())+L"\"";
         // One simulation thread must finish its short solver exchanges even
         // when a background reconstruction occupies all CPU cores. This is
         // AboveNormal, never High/Realtime, and changes only our own child.
-        bool started=CreateProcessA(executable,&command[0],nullptr,nullptr,TRUE,CREATE_NO_WINDOW|ABOVE_NORMAL_PRIORITY_CLASS,nullptr,nullptr,&startup,&info)!=FALSE;
+        bool started=CreateProcessW(executable,command.data(),nullptr,nullptr,TRUE,CREATE_NO_WINDOW|ABOVE_NORMAL_PRIORITY_CLASS,nullptr,nullptr,&startup,&info)!=FALSE;
         DWORD startError=started?0:GetLastError();
         CloseHandle(log);if(input!=INVALID_HANDLE_VALUE) CloseHandle(input);
         if(!started) {StartupFailure(logPath,"create-process",startError,0,0);Close();return false;}

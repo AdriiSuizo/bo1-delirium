@@ -3,14 +3,50 @@
 #include "damage_routing.hpp"
 #include "plugin_policy.hpp"
 #include "core/brush_faces.h"
+#include "core/ragdoll.h"
+#include <windows.h>
 #include <array>
+#include <filesystem>
 #include <cstdio>
 #include <cstdlib>
 
 static void require(bool value, const char* message) {
     if (!value) { std::fprintf(stderr, "%s\n", message); std::exit(1); }
 }
-int main() {
+static void checkWorkerPaths(const wchar_t* bridge, const wchar_t* worker) {
+    namespace fs = std::filesystem;
+    wchar_t temp[32768]{};
+    require(GetTempPathW(32768, temp) > 0, "temporary path unavailable");
+    const auto directory = fs::path(temp) / (L"BO1-worker-" + std::to_wstring(GetCurrentProcessId()) + L"-\u6e2c\u8a66");
+    require(fs::create_directory(directory), "worker test directory must be new");
+    const auto bridgeCopy = directory / L"nm108_native_bridge.dll";
+    const auto workerCopy = directory / L"delirium_worker.exe";
+    fs::copy_file(bridge, bridgeCopy);
+    fs::copy_file(worker, workerCopy);
+    require(SetEnvironmentVariableW(L"BO1_DELIRIUM_LOG_DIR", directory.c_str()), "cannot set worker log directory");
+    require(SetEnvironmentVariableW(L"BO1_PHYSICS_BACKEND", L"delirium"), "cannot select worker");
+    const auto library = LoadLibraryW(bridgeCopy.c_str());
+    require(library != nullptr, "bridge could not be loaded from a Unicode directory");
+    const auto create = reinterpret_cast<decltype(&rd_world_create_ex)>(GetProcAddress(library, "rd_world_create_ex"));
+    const auto destroy = reinterpret_cast<decltype(&rd_world_destroy)>(GetProcAddress(library, "rd_world_destroy"));
+    require(create && destroy, "bridge exports missing");
+    const RdWorldDesc desc{39.37007874f, RD_AXES_Z_UP};
+    auto* world = create(&desc);
+    if (world) destroy(world);
+    FreeLibrary(library);
+    const auto log = directory / (L"delirium-worker-" + std::to_wstring(GetCurrentProcessId()) + L".log");
+    const bool logged = fs::is_regular_file(log) && fs::file_size(log) > 0;
+    // Every file is contained in this test's newly created directory.
+    for (const auto& entry : fs::directory_iterator(directory)) fs::remove(entry.path());
+    fs::remove(directory);
+    require(world != nullptr && logged, "runtime failed to start or write its log in a Unicode directory");
+    std::puts("BO1 worker started and logged through the bridge from a Unicode directory");
+}
+int wmain(int argc, wchar_t** argv) {
+    if (argc == 3) {
+        checkWorkerPaths(argv[1], argv[2]);
+        return 0;
+    }
     const std::array<std::wstring_view,4> lan{L"plutonium-bootstrapper-win32.exe",L"t5sp",L"C:\\Steam\\BO1",L"-lan"};
     require(pluginPolicy::permitted(lan), "normal Plutonium T5 LAN launch refused");
     auto online=lan;online[3]=L"-token";
