@@ -36,6 +36,14 @@ int wmain(int argc,wchar_t**argv){
     if(!fs::exists(game/L"BlackOps.exe")||!fs::exists(adapter))fail("Copy BO1Delirium into the original Steam BO1 folder first");
     if(!supportedGame(game/L"BlackOps.exe"))fail("Unsupported BlackOps.exe: requires original Steam Build 7.0.152 CL 966072");
     fs::create_directories(cache);
+    const auto ready=cache/L"capture.ready";
+    // Require a completion marker from this process, even when retrying an
+    // earlier preparation in the same capture directory.
+    if(preparing){
+        std::error_code error;
+        fs::remove(ready,error);
+        if(error)fail("clear previous BO1 capture marker");
+    }
     SetEnvironmentVariableW(L"BO1_DELIRIUM_CAPTURE_DIR",cache.c_str());
     if(plutonium.empty())fail("Plutonium directory required");
     const auto host=plutonium/L"bin/plutonium-bootstrapper-win32.exe";
@@ -63,7 +71,7 @@ int wmain(int argc,wchar_t**argv){
         auto deadline=GetTickCount64()+static_cast<ULONGLONG>(seconds)*1000;
         for(;;){
             wait=WaitForSingleObject(pi.hProcess,500);if(wait!=WAIT_TIMEOUT)break;
-            if(fs::is_regular_file(cache/L"capture.ready")){captured=true;break;}
+            if(fs::is_regular_file(ready)){captured=true;break;}
             if(GetTickCount64()>=deadline)break;
         }
         if(captured)printf("BO1 resource capture complete; closing the owned preparation instance\n");
